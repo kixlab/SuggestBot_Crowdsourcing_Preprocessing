@@ -2,13 +2,17 @@
 
 {% block content %}
 
-<form class="col s12">
+<form class="col s12" method="post">{% csrf_token %}
   <div class="row">
 
     <p class="col s12"> Input keywords to search and accumulate video urls in the database </p>
     <div class="input-field col s8">
-      <input id="video_keyword" type="text" class="validate"></input>
+      <input id="video_keyword" name="video_keyword" type="text" class="validate"></input>
       <label for="video_keyword">Video Keyword</label>
+    </div>
+    <div class="input-field col s8">
+      <input id="video_num" name="video_num" type="number" class="validate"></input>
+      <label for="video_num">Number of videos</label>
     </div>
     <div class="input-field col s4">
       <input id="submit" type="submit" class="btn"></input>

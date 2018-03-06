@@ -10,6 +10,8 @@ class Video(models.Model):
     fully_inspected = models.BooleanField(default = False)
     # whether this video can be further utilized for emotion and intention labeling or not
     passed = models.BooleanField(default = False)
+    def __str__(self):
+        return self.video_title
 
 class Video_inspection_vote(models.Model):
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
