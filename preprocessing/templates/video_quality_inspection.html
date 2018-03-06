@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/video_quality_inspection.css'%}" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+<div id='vueapp'>
+<div class="row">
+  <div class="col s12">
+    <h4>Briefly skim through the video and answer the following questions.</h4>
+    <div class="col s5">
+      <iframe width="480" height="270" src="https://www.youtube.com/embed/3VM8teZXQq4">
+      </iframe>
+    </div>
+    <div class="col s7">
+      <div id="video_quality">
+        <p>1. Video Quality
+          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+        </p>
+        <p>Is the video quality good enough to observe character's emotions and actions?</p>
+        <p>Is the video quality good enough to capture facial expressions or subtle actions?</p>
+        <p>
+          <input name="video_quality" type="radio" id="video_quality_yes"/>
+          <label for="video_quality_yes">Yes</label>
+          <input name="video_quality" type="radio" id="video_quality_no"/>
+          <label for="video_quality_no">No</label>
+        </p>
+      </div>
+      <div id="sound_quality">
+        <p>2. Sound Quality
+          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+        </p>
+        <p>Is audio clear (not much background noise)?</p>
+        <p>Can you clearly understand the conversation</p>
+        <p>
+          <input name="sound_quality" type="radio" id="sound_quality_yes"/>
+          <label for="sound_quality_yes">Yes</label>
+          <input name="sound_quality" type="radio" id="sound_quality_no"/>
+          <label for="sound_quality_no">No</label>
+        </p>
+      </div>
+      <div id="language">
+        <p>3. Language
+          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+        </p>
+        <p>Does the video mainly involve English as language?</p>
+        <p>
+          <input name="language" type="radio" id="language_yes"/>
+          <label for="language_yes">Yes</label>
+          <input name="language" type="radio" id="language_no"/>
+          <label for="language_no">No</label>
+        </p>
+      </div>
+      <div id="conversation">
+        <p>4. Conversation
+          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+        </p>
+        <p>Is the video mainly composed of conversational scene between customers and employees?</p>
+        <p>
+          <input name="conversation" type="radio" id="conversation_yes"/>
+          <label for="conversation_yes">Yes</label>
+          <input name="conversation" type="radio" id="conversation_no"/>
+          <label for="conversation_no">No</label>
+        </p>
+      </div>
+      <div id="scene">
+        <p>5. Scene
+          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+        </p>
+        <p>Does the video contain multiple scenarios with multiple characters?</p>
+        <p>
+          <input name="scene" type="radio" id="scene_yes"/>
+          <label for="scene_yes">Yes</label>
+          <input name="scene" type="radio" id="scene_no"/>
+          <label for="scene_no">No</label>
+        </p>
+      </div>
+      <div id="submit_button">
+        <input name="submit" type="submit" class="btn col s12" id="submit"/>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!--below is a modal for examples...!-->
+  <div id="example" class="modal">
+    <div class="modal-content">
+      <h5>Example for [[example]]</h5>
+      <div class="row">
+        <div class="col s6">
+          <h6>Example of good video</h6>
+          <iframe id='good_ex' width="320" height="180" src="">
+          </iframe>
+        </div>
+        <div class="col s6">
+          <h6>Example of bad video</h6>
+          <iframe id='bad_ex' width="320" height="180" src="">
+          </iframe>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a v-on:click="off_example_video" href="#!" class="modal-action modal-close btn">Close</a>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/video_quality_inspection.js' %}"></script>
+{% endblock %}
