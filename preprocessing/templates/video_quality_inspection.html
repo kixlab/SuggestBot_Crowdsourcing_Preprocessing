@@ -4,22 +4,26 @@
 
 {% block header %}
 <link href="{%static 'css/video_quality_inspection.css'%}" rel="stylesheet">
-
+<script>
+var criteria = "{{criteria}}"
+</script>
 {% endblock %}
 
 {% block content %}
+
 <div id='vueapp'>
+
 <div class="row">
   <div class="col s12">
-    <h4>Briefly skim through the video and answer the following questions.</h4>
+    <h4>Briefly skim through the video and answer the following question.</h4>
     <div class="col s5">
       <iframe width="480" height="270" src="https://www.youtube.com/embed/3VM8teZXQq4">
       </iframe>
     </div>
     <div class="col s7">
-      <div id="video_quality">
-        <p>1. Video Quality
-          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+      <div v-if="example === 'video_quality'" id="video_quality">
+        <p>Video Quality
+          <a class="chip modal-trigger" href="#example">Example</a>
         </p>
         <p>Is the video quality good enough to observe character's emotions and actions?</p>
         <p>Is the video quality good enough to capture facial expressions or subtle actions?</p>
@@ -30,9 +34,9 @@
           <label for="video_quality_no">No</label>
         </p>
       </div>
-      <div id="sound_quality">
-        <p>2. Sound Quality
-          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+      <div v-else-if="example === 'sound_quality'" id="sound_quality">
+        <p>Sound Quality
+          <a class="chip modal-trigger" href="#example">Example</a>
         </p>
         <p>Is audio clear (not much background noise)?</p>
         <p>Can you clearly understand the conversation</p>
@@ -43,9 +47,9 @@
           <label for="sound_quality_no">No</label>
         </p>
       </div>
-      <div id="language">
-        <p>3. Language
-          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+      <div v-else-if="example === 'language'" id="language">
+        <p>Language
+          <a class="chip modal-trigger" href="#example">Example</a>
         </p>
         <p>Does the video mainly involve English as language?</p>
         <p>
@@ -55,9 +59,9 @@
           <label for="language_no">No</label>
         </p>
       </div>
-      <div id="conversation">
-        <p>4. Conversation
-          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+      <div v-else-if="example === 'conversation'" id="conversation">
+        <p>Conversation
+          <a class="chip modal-trigger" href="#example">Example</a>
         </p>
         <p>Is the video mainly composed of conversational scene between customers and employees?</p>
         <p>
@@ -67,9 +71,9 @@
           <label for="conversation_no">No</label>
         </p>
       </div>
-      <div id="scene">
-        <p>5. Scene
-          <a v-on:click="example_modal_show" class="chip modal-trigger" href="#example">Example</a>
+      <div v-else-if="example === 'scene'" id="scene">
+        <p>Scene
+          <a class="chip modal-trigger" href="#example">Example</a>
         </p>
         <p>Does the video contain multiple scenarios with multiple characters?</p>
         <p>
@@ -88,23 +92,55 @@
 
   <!--below is a modal for examples...!-->
   <div id="example" class="modal">
-    <div class="modal-content">
+    <div v-if="tuto_exp===false" class="modal-content">
+      <h5>Video quality inspection task</h5>
+      <p>Now you are going to ~~ blahblah<p>
+    </div>
+    <div v-else-if="tuto_first===false" class="modal-content">
+      <div class="row">
+        <div class="col s12">
+          <h6>Example of good video</h6>
+          <video id="good_ex" class="video-js" v-bind:src="good_url" type="video/mp4" autoplay style="height:180px; width:320px">
+            <source src="movie.ogg" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="tuto_second===false" class="modal-content">
+      <div class="row">
+        <div class="col s12">
+          <h6>Example of bad video</h6>
+          <video id="bad_ex" v-bind:src="bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
+            <source src="movie.ogg" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+    <div v-else class="modal-content">
       <h5>Example for [[example]]</h5>
       <div class="row">
         <div class="col s6">
           <h6>Example of good video</h6>
-          <iframe id='good_ex' width="320" height="180" src="">
-          </iframe>
+          <video v-bind:src="good_url" type="video/mp4" controls style="height:180px; width:320px">
+            <source src="movie.ogg" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
         </div>
         <div class="col s6">
           <h6>Example of bad video</h6>
-          <iframe id='bad_ex' width="320" height="180" src="">
-          </iframe>
+          <video v-bind:src="bad_url" type="video/mp4" controls style="height:180px; width:320px">
+            <source src="movie.ogg" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
         </div>
       </div>
     </div>
+
     <div class="modal-footer">
-      <a v-on:click="off_example_video" href="#!" class="modal-action modal-close btn">Close</a>
+      <a id="modal_next" v-if="tuto_second===false" v-on:click="tutorial_next" href="#" class="modal-action btn">Next</a>
+      <a v-else href="#!" class="modal-action modal-close btn">Close</a>
     </div>
   </div>
 </div>

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 # Create your views here.
 from .forms import *
 from .video_url_accumulate import *
-
+from .task_management import *
 def search_and_accumulate_url(request):
     if request.method=="POST":
         print("!")
@@ -16,5 +16,6 @@ def search_and_accumulate_url(request):
             return HttpResponse("Successfully accumulated "+str(accumulated_num)+" video ids")
     return render(request, "search_and_accumulate_url.html", {})
 
-def video_quality_inspection(request):
-    return render(request, "video_quality_inspection.html", {})
+def video_quality_inspection(request, criteria):
+    select_field()
+    return render(request, "video_quality_inspection.html", {'criteria': criteria})
