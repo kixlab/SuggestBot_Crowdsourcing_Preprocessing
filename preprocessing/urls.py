@@ -4,6 +4,6 @@ from . import views
 
 urlpatterns = [
     url(r'^search_and_accumulate_url/$', views.search_and_accumulate_url),
-    url(r'^video_quality_inspection/(?P<criteria>\w+)/$', views.video_quality_inspection),
+    url(r'^video_quality_inspection/$', views.video_quality_inspection),
 
 ]

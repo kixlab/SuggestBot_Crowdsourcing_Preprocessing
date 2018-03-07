@@ -6,6 +6,10 @@
 <link href="{%static 'css/video_quality_inspection.css'%}" rel="stylesheet">
 <script>
 var criteria = "{{criteria}}"
+var task_series = "{{task_series}}"
+task_series = JSON.parse(task_series.replace(/&quot;/g,'"'));
+var batch_id = "{{batch_id}}"
+var batch_number = {{batch_number}}
 </script>
 {% endblock %}
 
@@ -17,7 +21,7 @@ var criteria = "{{criteria}}"
   <div class="col s12">
     <h4>Briefly skim through the video and answer the following question.</h4>
     <div class="col s5">
-      <iframe width="480" height="270" src="https://www.youtube.com/embed/3VM8teZXQq4">
+      <iframe width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+task_series[cur_task]">
       </iframe>
     </div>
     <div class="col s7">
@@ -83,8 +87,14 @@ var criteria = "{{criteria}}"
           <label for="scene_no">No</label>
         </p>
       </div>
-      <div id="submit_button">
-        <input name="submit" type="submit" class="btn col s12" id="submit"/>
+      <div id="buttons">
+        <form method="POST">
+          {% csrf_token %}
+          <a v-on:click="prev_task" class="pink darken-1 btn col s6 disabled" id="prev_task">Previous</a>
+          <a v-if="cur_task<batch_number-1" v-on:click="next_task" class="btn col s6" v-bind:class="{disabled: item_not_clicked}" id="next_task">Next</a>
+          <input v-else v-on:click="return_result" name="submit" type="submit" class="btn col s6" v-bind:class="{disabled: item_not_clicked}" id="submit"/>
+          <input name='to_return' type='text' style='display:none' id="to_return"/>
+        </form>
       </div>
       </div>
     </div>
@@ -101,8 +111,6 @@ var criteria = "{{criteria}}"
         <div class="col s12">
           <h6>Example of good video</h6>
           <video id="good_ex" class="video-js" v-bind:src="good_url" type="video/mp4" autoplay style="height:180px; width:320px">
-            <source src="movie.ogg" type="video/ogg">
-            Your browser does not support the video tag.
           </video>
         </div>
       </div>
@@ -112,8 +120,6 @@ var criteria = "{{criteria}}"
         <div class="col s12">
           <h6>Example of bad video</h6>
           <video id="bad_ex" v-bind:src="bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
-            <source src="movie.ogg" type="video/ogg">
-            Your browser does not support the video tag.
           </video>
         </div>
       </div>
@@ -124,15 +130,11 @@ var criteria = "{{criteria}}"
         <div class="col s6">
           <h6>Example of good video</h6>
           <video v-bind:src="good_url" type="video/mp4" controls style="height:180px; width:320px">
-            <source src="movie.ogg" type="video/ogg">
-            Your browser does not support the video tag.
           </video>
         </div>
         <div class="col s6">
           <h6>Example of bad video</h6>
           <video v-bind:src="bad_url" type="video/mp4" controls style="height:180px; width:320px">
-            <source src="movie.ogg" type="video/ogg">
-            Your browser does not support the video tag.
           </video>
         </div>
       </div>

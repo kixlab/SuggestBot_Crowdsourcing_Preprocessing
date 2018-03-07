@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from .forms import *
 from .video_url_accumulate import *
 from .task_management import *
+import json
+
 def search_and_accumulate_url(request):
     if request.method=="POST":
         print("!")
@@ -16,6 +18,15 @@ def search_and_accumulate_url(request):
             return HttpResponse("Successfully accumulated "+str(accumulated_num)+" video ids")
     return render(request, "search_and_accumulate_url.html", {})
 
-def video_quality_inspection(request, criteria):
-    select_field()
-    return render(request, "video_quality_inspection.html", {'criteria': criteria})
+def video_quality_inspection(request):
+    if request.method=="POST":
+        print("heyheyhey")
+        form = InspectionResult(request.POST)
+        if form.is_valid():
+            to_return = json.loads(form.cleaned_data['to_return'])
+            isp_store_result(to_return)
+
+    isp_remove_outdated_tasks()
+    task_to_throw = isp_select_field()
+
+    return render(request, "video_quality_inspection.html", task_to_throw)
