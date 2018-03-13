@@ -124,7 +124,7 @@ def isp_store_result(result):
 
 
 # this function select the field to deploy the tasks
-def isp_select_field():
+def isp_select_field(wid, aid):
     # first get videos not fully inspected yet
     not_inspected = Video.objects.filter(fully_inspected = False)
 
@@ -135,10 +135,11 @@ def isp_select_field():
         # among scene to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     scene_task_deployable = scene_to_check.annotate(number_of_deployed_tasks = Count('scene_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    scene_task_deployable = scene_task_deployable.exclude(scene_inspection_vote__w_id=wid)
     if scene_task_deployable.count() >= batch_number:
         # deploy task
         tasks_to_deploy = scene_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
-        return isp_generate_votes_and_throw_tasks(tasks_to_deploy, 'scene')
+        return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'scene')
 
 
     # filter videos whose sound quality is not checked
@@ -148,10 +149,11 @@ def isp_select_field():
         # among sound to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     sound_task_deployable = sound_to_check.annotate(number_of_deployed_tasks = Count('sound_quality_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    sound_task_deployable = sound_task_deployable.exclude(sound_quality_inspection_vote__w_id=wid)
     if sound_task_deployable.count() >= batch_number:
         # deploy task
         tasks_to_deploy = sound_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
-        return isp_generate_votes_and_throw_tasks(tasks_to_deploy, 'sound_quality')
+        return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'sound_quality')
 
 
     # filter videos whose video quality is not checked
@@ -161,10 +163,11 @@ def isp_select_field():
         # among video to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     video_task_deployable = video_to_check.annotate(number_of_deployed_tasks = Count('video_quality_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    video_task_deployable = video_task_deployable.exclude(video_quality_inspection_vote__w_id=wid)
     if video_task_deployable.count() >= batch_number:
         # deploy task
         tasks_to_deploy = video_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
-        return isp_generate_votes_and_throw_tasks(tasks_to_deploy, 'video_quality')
+        return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'video_quality')
 
 
     # filter videos whose language is not checked
@@ -173,10 +176,11 @@ def isp_select_field():
         # among language to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     language_task_deployable = language_to_check.annotate(number_of_deployed_tasks = Count('language_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    language_task_deployable = language_task_deployable.exclude(language_inspection_vote__w_id=wid)
     if language_task_deployable.count() >= batch_number:
         # deploy task
         tasks_to_deploy = language_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
-        return isp_generate_votes_and_throw_tasks(tasks_to_deploy, 'language')
+        return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'language')
 
     # for the rest, conversation can be checked
     conversation_to_check = video_not_to_check.exclude(conversation_passed = True)
@@ -184,31 +188,31 @@ def isp_select_field():
         # among language to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     conversation_task_deployable = conversation_to_check.annotate(number_of_deployed_tasks = Count('conversation_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    conversation_task_deployable = conversation_task_deployable.exclude(conversation_inspection_vote__w_id=wid)
     if conversation_task_deployable.count() >= batch_number:
         # deploy task
-        tasks_to_deploy = conversation_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
-        return isp_generate_votes_and_throw_tasks(tasks_to_deploy, 'conversation')
+        tasks_to_deploy = conversation_task_deployable[:batch_number]
+        return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'conversation')
 
 # this function generates vote entities and throw tasks as lists of urls
-def isp_generate_votes_and_throw_tasks(tasks_to_deploy, vote_type):
-    batch_id = str(uuid.uuid4().hex.upper()[0:6])
+def isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, vote_type):
     task_series = []
     for task in tasks_to_deploy:
         if vote_type=='conversation':
-            vote = Conversation_inspection_vote(video = task, batch_id = batch_id)
+            vote = Conversation_inspection_vote(video = task, batch_id = aid, w_id = wid)
         elif vote_type=='language':
-            vote = Language_inspection_vote(video = task, batch_id = batch_id)
+            vote = Language_inspection_vote(video = task, batch_id = aid, w_id = wid)
         elif vote_type=='video_quality':
-            vote = Video_quality_inspection_vote(video = task, batch_id = batch_id)
+            vote = Video_quality_inspection_vote(video = task, batch_id = aid, w_id = wid)
         elif vote_type=='sound_quality':
-            vote = Sound_quality_inspection_vote(video = task, batch_id = batch_id)
+            vote = Sound_quality_inspection_vote(video = task, batch_id = aid, w_id = wid)
         elif vote_type=='scene':
-            vote = Scene_quality_inspection_vote(video = task, batch_id = batch_id)
+            vote = Scene_quality_inspection_vote(video = task, batch_id = aid, w_id = wid)
         vote.save()
         task_series.append(task.video_url)
     return_dict = {
         'batch_number': batch_number,
-        'batch_id' : batch_id,
+        'batch_id' : aid,
         'criteria' : vote_type,
         'task_series' : json.dumps(task_series),
     }

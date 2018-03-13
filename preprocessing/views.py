@@ -18,7 +18,7 @@ def search_and_accumulate_url(request):
             return HttpResponse("Successfully accumulated "+str(accumulated_num)+" video ids")
     return render(request, "search_and_accumulate_url.html", {})
 
-def video_quality_inspection(request):
+def video_quality_inspection(request, wid, aid):
     if request.method=="POST":
         print("heyheyhey")
         form = InspectionResult(request.POST)
@@ -27,6 +27,6 @@ def video_quality_inspection(request):
             isp_store_result(to_return)
 
     isp_remove_outdated_tasks()
-    task_to_throw = isp_select_field()
+    task_to_throw = isp_select_field(wid, aid)
 
     return render(request, "video_quality_inspection.html", task_to_throw)

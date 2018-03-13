@@ -23,7 +23,7 @@ class Inspection_vote(models.Model):
     end_time = models.DateTimeField(default = datetime.datetime.now)
     start_time = models.DateTimeField(default = datetime.datetime.now)
     batch_id = models.CharField(max_length = 200, default = "")
-
+    w_id = models.CharField(max_length=200, default = "")
     class Meta:
         abstract = True
 
