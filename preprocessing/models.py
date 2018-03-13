@@ -47,3 +47,10 @@ class Conversation_inspection_vote(Inspection_vote):
 class Scene_inspection_vote(Inspection_vote):
     def __str__(self):
         return self.video.video_title
+#to store tokens given to workers
+class TokenInfo(models.Model):
+    token = models.CharField(max_length = 200, default = "")
+    wid = models.CharField(max_length = 200, default = "")
+    aid = models.CharField(max_length = 200, default = "")
+    def __str__(self):
+        return self.token + self.wid + self.aid

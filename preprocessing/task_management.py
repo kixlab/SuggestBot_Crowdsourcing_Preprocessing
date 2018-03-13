@@ -35,24 +35,29 @@ def isp_remove_outdated_tasks():
     return
 
 # TODO function to receive results and update as 'done' (change time)
-def isp_store_result(result):
+def isp_store_result(result, wid, aid):
     criteria = result['criteria']
     batch_id = result['batch_id']
     task_results = result['task_result']
+
+    token = str(uuid.uuid4().hex.upper()[0:6])
+    tokeninfo = TokenInfo(token = token, wid = wid, aid = aid)
+    tokeninfo.save()
     #get items with same batch id
     if criteria == "video_quality":
-        vote_batch = Video_quality_inspection_vote.objects.filter(batch_id = batch_id)
+        vote_batch = Video_quality_inspection_vote.objects.filter(batch_id = batch_id, w_id = wid)
     elif criteria == "sound_quality":
-        vote_batch = Sound_quality_inspection_vote.objects.filter(batch_id = batch_id)
+        vote_batch = Sound_quality_inspection_vote.objects.filter(batch_id = batch_id, w_id = wid)
     elif criteria == "language":
-        vote_batch = Language_inspection_vote.objects.filter(batch_id = batch_id)
+        vote_batch = Language_inspection_vote.objects.filter(batch_id = batch_id, w_id = wid)
     elif criteria == "conversation":
-        vote_batch = Conversation_inspection_vote.objects.filter(batch_id = batch_id)
+        vote_batch = Conversation_inspection_vote.objects.filter(batch_id = batch_id, w_id = wid)
     elif criteria == "scene":
-        vote_batch = Scene_inspection_vote.objects.filter(batch_id = batch_id)
+        vote_batch = Scene_inspection_vote.objects.filter(batch_id = batch_id, w_id = wid)
 
     for task_result in task_results:
         subject_video = Video.objects.filter(video_url = task_result)
+        print(subject_video)
         if subject_video.count()>0:
             #store batch data
             subject_video = subject_video[0]
@@ -62,15 +67,15 @@ def isp_store_result(result):
                 single_vote.end_time = datetime.datetime.now()
             else:
                 if criteria == "video_quality":
-                    single_vote = Video_quality_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id)
+                    single_vote = Video_quality_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id, w_id = wid)
                 elif criteria == "sound_quality":
-                    single_vote = Sound_quality_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id)
+                    single_vote = Sound_quality_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id, w_id = wid)
                 elif criteria == "language":
-                    single_vote = Language_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id)
+                    single_vote = Language_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id, w_id = wid)
                 elif criteria == "conversation":
-                    single_vote = Conversation_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id)
+                    single_vote = Conversation_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id, w_id = wid)
                 elif criteria == "scene":
-                    single_vote = Scene_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id)
+                    single_vote = Scene_inspection_vote(video = subject_video, end_time = datetime.datetime.now()+datetime.timedelta(minutes = 10), batch_id = batch_id, w_id = wid)
             single_vote.qualified = task_results[task_result]
             single_vote.save()
             #if stored batch data, then see if vote_number of votes are collected
@@ -120,14 +125,14 @@ def isp_store_result(result):
                     else:
                         subject_video.fully_inspected = True
                 subject_video.save()
-
+    return token
 
 
 # this function select the field to deploy the tasks
 def isp_select_field(wid, aid):
     # first get videos not fully inspected yet
     not_inspected = Video.objects.filter(fully_inspected = False)
-
+    print(not_inspected)
     # filter videos whose scene is not checked
     scene_to_check = not_inspected.filter(sound_quality_passed = True, video_quality_passed = True, language_passed = True, conversation_passed = True)
     scene_not_to_check = not_inspected.exclude(sound_quality_passed = True, video_quality_passed = True, language_passed = True, conversation_passed = True)
@@ -138,7 +143,7 @@ def isp_select_field(wid, aid):
     scene_task_deployable = scene_task_deployable.exclude(scene_inspection_vote__w_id=wid)
     if scene_task_deployable.count() >= batch_number:
         # deploy task
-        tasks_to_deploy = scene_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
+        tasks_to_deploy = scene_task_deployable[:batch_number]
         return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'scene')
 
 
@@ -152,7 +157,7 @@ def isp_select_field(wid, aid):
     sound_task_deployable = sound_task_deployable.exclude(sound_quality_inspection_vote__w_id=wid)
     if sound_task_deployable.count() >= batch_number:
         # deploy task
-        tasks_to_deploy = sound_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
+        tasks_to_deploy = sound_task_deployable[:batch_number]
         return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'sound_quality')
 
 
@@ -166,7 +171,7 @@ def isp_select_field(wid, aid):
     video_task_deployable = video_task_deployable.exclude(video_quality_inspection_vote__w_id=wid)
     if video_task_deployable.count() >= batch_number:
         # deploy task
-        tasks_to_deploy = video_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
+        tasks_to_deploy = video_task_deployable[:batch_number]
         return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'video_quality')
 
 
@@ -176,10 +181,12 @@ def isp_select_field(wid, aid):
         # among language to check see if there are more than batch_number of tasks to do
         # (= deployed number of tasks should be less than vote number)
     language_task_deployable = language_to_check.annotate(number_of_deployed_tasks = Count('language_inspection_vote')).filter(number_of_deployed_tasks__lt = vote_number)
+    print(language_task_deployable)
     language_task_deployable = language_task_deployable.exclude(language_inspection_vote__w_id=wid)
+    print(language_task_deployable)
     if language_task_deployable.count() >= batch_number:
         # deploy task
-        tasks_to_deploy = language_task_deployable.order_by('number_of_deployed_tasks')[:batch_number]
+        tasks_to_deploy = language_task_deployable[:batch_number]
         return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'language')
 
     # for the rest, conversation can be checked
@@ -207,7 +214,7 @@ def isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, vote_type):
         elif vote_type=='sound_quality':
             vote = Sound_quality_inspection_vote(video = task, batch_id = aid, w_id = wid)
         elif vote_type=='scene':
-            vote = Scene_quality_inspection_vote(video = task, batch_id = aid, w_id = wid)
+            vote = Scene_inspection_vote(video = task, batch_id = aid, w_id = wid)
         vote.save()
         task_series.append(task.video_url)
     return_dict = {

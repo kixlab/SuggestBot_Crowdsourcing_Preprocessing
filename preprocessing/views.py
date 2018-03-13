@@ -24,7 +24,9 @@ def video_quality_inspection(request, wid, aid):
         form = InspectionResult(request.POST)
         if form.is_valid():
             to_return = json.loads(form.cleaned_data['to_return'])
-            isp_store_result(to_return)
+            token = isp_store_result(to_return, wid, aid)
+            token = {'token': token}
+            return render(request, "token_return.html", token)
 
     isp_remove_outdated_tasks()
     task_to_throw = isp_select_field(wid, aid)
