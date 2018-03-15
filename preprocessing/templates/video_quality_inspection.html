@@ -5,6 +5,7 @@
 {% block header %}
 <link href="{%static 'css/video_quality_inspection.css'%}" rel="stylesheet">
 <script>
+var example_video_route = "{%static 'example_video'%}"
 var criteria = "{{criteria}}"
 var task_series = "{{task_series}}"
 task_series = JSON.parse(task_series.replace(/&quot;/g,'"'));
@@ -21,72 +22,70 @@ var batch_number = {{batch_number}}
   <div class="col s12">
     <h4>Briefly skim through the video and answer the following question.</h4>
     <div class="col s5">
-      <iframe width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+task_series[cur_task]">
-      </iframe>
+      <div id='player'></div>
+      <!--<iframe id='player' width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+task_series[cur_task]">
+      </iframe>-->
     </div>
     <div class="col s7">
       <div v-if="example === 'video_quality'" id="video_quality">
-        <p>Video Quality
+        <p>Is the <font size="5">visual quality</font> good enough to observe character's emotions and actions?</p>
+        <p>Is the <font size="5">video quality</font> good enough to capture facial expressions or subtle actions?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>Is the video quality good enough to observe character's emotions and actions?</p>
-        <p>Is the video quality good enough to capture facial expressions or subtle actions?</p>
         <p>
-          <input name="video_quality" type="radio" id="video_quality_yes"/>
+          <input name="video_quality" type="radio" id="video_quality_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="video_quality_yes">Yes</label>
-          <input name="video_quality" type="radio" id="video_quality_no"/>
+          <input name="video_quality" type="radio" id="video_quality_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="video_quality_no">No</label>
         </p>
       </div>
       <div v-else-if="example === 'sound_quality'" id="sound_quality">
-        <p>Sound Quality
+        <p>Is <font size="5">audio</font> clear (not much background noise)?</p>
+        <p>Can you clearly understand the conversation from the <font size="5">audio</font>?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>Is audio clear (not much background noise)?</p>
-        <p>Can you clearly understand the conversation</p>
         <p>
-          <input name="sound_quality" type="radio" id="sound_quality_yes"/>
+          <input name="sound_quality" type="radio" id="sound_quality_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="sound_quality_yes">Yes</label>
-          <input name="sound_quality" type="radio" id="sound_quality_no"/>
+          <input name="sound_quality" type="radio" id="sound_quality_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="sound_quality_no">No</label>
         </p>
       </div>
       <div v-else-if="example === 'language'" id="language">
-        <p>Language
+
+        <p>Does the video mainly involve <font size="5">English</font> as language?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>Does the video mainly involve English as language?</p>
         <p>
-          <input name="language" type="radio" id="language_yes"/>
+          <input name="language" type="radio" id="language_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="language_yes">Yes</label>
-          <input name="language" type="radio" id="language_no"/>
+          <input name="language" type="radio" id="language_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="language_no">No</label>
         </p>
       </div>
       <div v-else-if="example === 'conversation'" id="conversation">
-        <p>Conversation
+        <p>Is the video mainly composed of <font size="5">conversational scene</font> between customers and employees?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>Is the video mainly composed of conversational scene between customers and employees?</p>
         <p>
-          <input name="conversation" type="radio" id="conversation_yes"/>
+          <input name="conversation" type="radio" id="conversation_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="conversation_yes">Yes</label>
-          <input name="conversation" type="radio" id="conversation_no"/>
+          <input name="conversation" type="radio" id="conversation_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="conversation_no">No</label>
         </p>
       </div>
       <div v-else-if="example === 'scene'" id="scene">
-        <p>Scene
+        <p>Does the video contain <font size="5">single scenario</font>, not multiple scenarios?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>Does the video contain multiple scenarios with multiple characters?</p>
         <p>
-          <input name="scene" type="radio" id="scene_yes"/>
+          <input name="scene" type="radio" id="scene_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="scene_yes">Yes</label>
-          <input name="scene" type="radio" id="scene_no"/>
+          <input name="scene" type="radio" id="scene_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="scene_no">No</label>
         </p>
       </div>
+      <p><i>You can select answer once you see certain amount of the video</i></p>
       <div id="buttons">
         <form method="POST">
           {% csrf_token %}
@@ -104,14 +103,18 @@ var batch_number = {{batch_number}}
   <div id="example" class="modal">
     <div v-if="tuto_exp===false" class="modal-content">
       <h5>Video quality inspection task</h5>
-      <p>Now you are going to ~~ blahblah<p>
+      <p>You will watch {{batch_number}} videos, and decide whether [[instruction]]<p>
+      <p>Before doing the task, you will be watching one good example video and one bad example video.</p>
+      <p>Hit next to watch a good example. </p>
     </div>
     <div v-else-if="tuto_first===false" class="modal-content">
       <div class="row">
         <div class="col s12">
           <h6>Example of good video</h6>
-          <video id="good_ex" class="video-js" v-bind:src="good_url" type="video/mp4" autoplay style="height:180px; width:320px">
+          <p>[[good_example_text]]</p>
+          <video id="good_ex" class="video-js" v-bind:src="example_video_route+good_url" type="video/mp4" autoplay style="height:180px; width:320px">
           </video>
+          <p><i>You can proceed to the bad example once you watch the whole video.</i></p>
         </div>
       </div>
     </div>
@@ -119,8 +122,10 @@ var batch_number = {{batch_number}}
       <div class="row">
         <div class="col s12">
           <h6>Example of bad video</h6>
-          <video id="bad_ex" v-bind:src="bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
+          <p>[[bad_example_text]]</p>
+          <video id="bad_ex" v-bind:src="example_video_route+bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
           </video>
+          <p><i>You can proceed to the task once you watch the whole video.</i></p>
         </div>
       </div>
     </div>
@@ -129,12 +134,12 @@ var batch_number = {{batch_number}}
       <div class="row">
         <div class="col s6">
           <h6>Example of good video</h6>
-          <video v-bind:src="good_url" type="video/mp4" controls style="height:180px; width:320px">
+          <video v-bind:src="example_video_route+good_url" type="video/mp4" controls style="height:180px; width:320px">
           </video>
         </div>
         <div class="col s6">
           <h6>Example of bad video</h6>
-          <video v-bind:src="bad_url" type="video/mp4" controls style="height:180px; width:320px">
+          <video v-bind:src="example_video_route+bad_url" type="video/mp4" controls style="height:180px; width:320px">
           </video>
         </div>
       </div>

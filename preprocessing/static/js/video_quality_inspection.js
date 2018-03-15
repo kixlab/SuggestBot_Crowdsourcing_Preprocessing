@@ -1,3 +1,11 @@
+//  This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+
 
 var good_url, bad_url, instruction, good_example_text, bad_example_text;
 
@@ -8,20 +16,36 @@ var to_return = {
 }
 
 if(criteria == "video_quality"){
-  good_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/good_video.mp4?raw=true"
-  bad_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/bad_picture_quality.mp4?raw=true"
+  instruction = "that you can recognize the behavior of characters with the visual of the video."
+  good_example_text = "You can grasp character’s behavior, facial expression, and emotion from the visual of the video."
+  bad_example_text = "It is hard to understand what is going on visually, and hard to capture facial expressions."
+  good_url = "/good_example.mp4"
+  bad_url = "/bad_visual.mp4"
 }else if(criteria == "sound_quality"){
-  good_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/good_video.mp4?raw=true"
-  bad_url = "https://www.youtube.com/embed/qNYfM0ovwug"
+  instruction = "that you can recognize utterances of characters with the audio of the video."
+  good_example_text = "You can grasp character’s utterance from the audio of the video."
+  bad_example_text = "It is hard to understand what is being said in the video."
+  good_url = "/good_example.mp4"
+  bad_url = "/bad_audio.mp4"
 }else if(criteria == "language"){
-  good_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/good_video.mp4?raw=true"
-  bad_url = "https://www.youtube.com/embed/per9Wz0N-QA"
+  instruction = "that are majorly composed of conversation in English."
+  good_example_text = "Conversation is in English."
+  bad_example_text = "Conversation is not in English."
+  good_url = "/good_example.mp4"
+  bad_url = "/bad_language.mp4"
 }else if(criteria == "conversation"){
-  good_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/good_video.mp4?raw=true"
-  bad_url = "https://www.youtube.com/embed/JQcp3UWQOmM"
+  instruction = "that are majorly composed of conversational scenes."
+  good_example_text = "A video is not monologue or lecture but majorly composed of conversation."
+  bad_example_text = "A video is not in conversation, but in other forms like monologue or lecture."
+  bad_url = "/bad_conversation.mp4"
+  good_url = "/good_example.mp4"
+
 }else if(criteria == "scene"){
-  good_url = "https://github.com/athakur36/SuggestbotVideoRepo/blob/master/videos/good_video.mp4?raw=true"
-  bad_url = "https://www.youtube.com/embed/yAfAxmhWmcQ"
+  instruction = "that are composed of a single scenario, not with a compilation of multiple videos."
+  good_example_text = "One scenario sustains until the end of the video, rather than having multiple scenarios or compilations."
+  bad_example_text = "It is composed of multiple scenarios or is a compilation."
+  good_url = "/good_example.mp4"
+  bad_url = "/bad_scene.mp4"
 }
 
 
@@ -31,18 +55,26 @@ var vue_app = new Vue({
   data: {
     //whether the worker saw the tutorial
     //whether the worker is seeing the first page or the second page
-    tuto_exp: true,//false, // change below three later. They are for debugging purpose
-    tuto_first:true,//false,
-    tuto_second: true,//false,
+    tuto_exp: false, // change below three later. They are for debugging purpose
+    tuto_first:false,
+    tuto_second: false,
     //to render name of category
     example: criteria,
     //good and bad video example url
     good_url: good_url,
     bad_url: bad_url,
+    instruction: instruction,
+    good_example_text: good_example_text,
+    bad_example_text: bad_example_text,
     task_series: task_series,
     cur_task: 0,
+    video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
+    cur_video_seen_second: 0,
+    required_seeing_second: 6000,
+    was_playing:false,
     batch_number: batch_number,
     item_not_clicked: true,
+    example_video_route: example_video_route,
   },
   methods:{
     tutorial_next: function(event){
@@ -58,12 +90,18 @@ var vue_app = new Vue({
       }
     },
     next_task: function(event){
+      this.was_playing=false;
+      this.video_seen_second[this.cur_task]=this.cur_video_seen_second
+
       //store data
       proceed = store_data(this.task_series, this.cur_task)
       if(!proceed){
         return
       }
       this.cur_task++;
+      this.cur_video_seen_second = this.video_seen_second[this.cur_task]
+      //show different video
+      player.cueVideoById({'videoId': task_series[this.cur_task], 'startSeconds':0, 'suggestedQuality':'large'})
       //enable prev task button
       $("#prev_task").removeClass("disabled")
       //recast data if previously added data exist
@@ -71,7 +109,11 @@ var vue_app = new Vue({
     },
     prev_task: function(event){
       store_data(this.task_series, this.cur_task)
+      this.video_seen_second[this.cur_task]=this.cur_video_seen_second
       this.cur_task--;
+      this.cur_video_seen_second = this.video_seen_second[this.cur_task]
+      //show different video
+      player.cueVideoById({'videoId': task_series[this.cur_task], 'startSeconds':0, 'suggestedQuality':'large'})
       //when it is beginning task
       if(this.cur_task == 0){
         $("#prev_task").addClass("disabled")
@@ -99,6 +141,38 @@ var vue_app = new Vue({
   }
 
 })
+
+var player;
+
+function onYouTubeIframeAPIReady(){
+  player = new YT.Player('player', {
+    height: '270',
+    width: '480',
+    videoId: task_series[vue_app.cur_task],
+    events:{
+    }
+  });
+}
+
+setInterval(timecount,10);
+
+function timecount(){
+  if(player){
+    if(player.getPlayerState){
+      if(player.getPlayerState()==1){
+        if(vue_app.was_playing){
+          vue_app.cur_video_seen_second += 10
+        }else{
+          vue_app.was_playing = true;
+        }
+      }else if(player.getPlayerState()==2 ||player.getPlayerState()==0){
+        vue_app.was_playing = false;
+      }
+    }
+  }
+
+}
+
 
 $(document).ready(function(){
   $(".modal").modal({
