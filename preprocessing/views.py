@@ -32,3 +32,11 @@ def video_quality_inspection(request, wid, aid):
     task_to_throw = isp_select_field(wid, aid)
 
     return render(request, "video_quality_inspection.html", task_to_throw)
+
+def inspection_test(request):
+    if request.method=="POST":
+        return render(request, "token_return.html", {'token':"Thank you! Please go to Coffee time doc and write feedback!"})
+
+    task_to_throw = test_deployer()
+
+    return render(request, "video_quality_inspection.html", task_to_throw)

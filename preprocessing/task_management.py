@@ -3,6 +3,7 @@ from django.db.models import Count, F, ExpressionWrapper, DateTimeField
 import uuid
 import datetime
 import json
+import random
 # task will be assigned based on current status of whole available works
 # in the order of
 # conversation -> language -> visual quality -> audio quality -> scene
@@ -200,6 +201,33 @@ def isp_select_field(wid, aid):
         # deploy task
         tasks_to_deploy = conversation_task_deployable[:batch_number]
         return isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, 'conversation')
+
+def test_deployer():
+    randomnum = random.uniform(0,1)
+    print(randomnum)
+    batch_number = 5
+    batch_id = "test"
+    if randomnum >=0 and randomnum <0.2:
+        criteria = "conversation"
+    elif randomnum >=0.2 and randomnum <0.4:
+        criteria = "language"
+    elif randomnum >=0.4 and randomnum <0.6:
+        criteria = "video_quality"
+    elif randomnum >=0.6 and randomnum <0.8:
+        criteria = "sound_quality"
+    elif randomnum >=0.8 and randomnum <=1:
+        criteria = "scene"
+    videos = Video.objects.all()[:batch_number]
+    task_series = []
+    for video in videos:
+        task_series.append(video.video_url)
+    return_dict = {
+        'batch_number': batch_number,
+        'batch_id': batch_id,
+        'criteria': criteria,
+        'task_series': json.dumps(task_series),
+    }
+    return return_dict
 
 # this function generates vote entities and throw tasks as lists of urls
 def isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, vote_type):
