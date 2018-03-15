@@ -7,7 +7,7 @@
 
 
 
-var good_url, bad_url, instruction, good_example_text, bad_example_text;
+var good_url, bad_url, instruction, good_example_text, bad_example_text, good_example_title, bad_example_title;
 
 var to_return = {
   'batch_id' : batch_id,
@@ -19,31 +19,41 @@ if(criteria == "video_quality"){
   instruction = "that you can recognize the behavior of characters with the visual of the video."
   good_example_text = "You can grasp character’s behavior, facial expression, and emotion from the visual of the video."
   bad_example_text = "It is hard to understand what is going on visually, and hard to capture facial expressions."
+  good_example_title = "video with fine visual quality"
+  bad_example_title = "video with bad visual quality"
   good_url = "/good_example.mp4"
   bad_url = "/bad_visual.mp4"
 }else if(criteria == "sound_quality"){
   instruction = "that you can recognize utterances of characters with the audio of the video."
   good_example_text = "You can grasp character’s utterance from the audio of the video."
   bad_example_text = "It is hard to understand what is being said in the video."
+  good_example_title = "video with fine audio quality"
+  bad_example_title = "video with bad audio quality"
   good_url = "/good_example.mp4"
   bad_url = "/bad_audio.mp4"
 }else if(criteria == "language"){
   instruction = "that are majorly composed of conversation in English."
   good_example_text = "Conversation is in English."
   bad_example_text = "Conversation is not in English."
+  good_example_title = "video in English"
+  bad_example_title = "video not in English"
   good_url = "/good_example.mp4"
   bad_url = "/bad_language.mp4"
 }else if(criteria == "conversation"){
   instruction = "that are majorly composed of conversational scenes."
   good_example_text = "A video is not monologue or lecture but majorly composed of conversation."
   bad_example_text = "A video is not in conversation, but in other forms like monologue or lecture."
+  good_example_title = "conversation video"
+  bad_example_title = "video without conversation"
   bad_url = "/bad_conversation.mp4"
   good_url = "/good_example.mp4"
 
 }else if(criteria == "scene"){
   instruction = "that are composed of a single scenario, not with a compilation of multiple videos."
   good_example_text = "One scenario sustains until the end of the video, rather than having multiple scenarios or compilations."
-  bad_example_text = "It is composed of multiple scenarios or is a compilation."
+  bad_example_text = "It is composed of multiple scenarios or is a compilation, and includes multiple characters without consistency in the context."
+  good_example_title = "video with single scenario"
+  bad_example_title = "compilation video"
   good_url = "/good_example.mp4"
   bad_url = "/bad_scene.mp4"
 }
@@ -66,11 +76,13 @@ var vue_app = new Vue({
     instruction: instruction,
     good_example_text: good_example_text,
     bad_example_text: bad_example_text,
+    good_example_title: good_example_title,
+    bad_example_title: bad_example_title,
     task_series: task_series,
     cur_task: 0,
     video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
     cur_video_seen_second: 0,
-    required_seeing_second: 6000,
+    required_seeing_second: 20000,
     was_playing:false,
     batch_number: batch_number,
     item_not_clicked: true,
@@ -123,6 +135,10 @@ var vue_app = new Vue({
     },
     return_result: function(event){
       store_data(this.task_series, this.cur_task)
+      //below for testing
+      if(Object.keys(to_return['task_result']).length == 0){
+        to_return['task_result']['dummy']='dummy'
+      }
       $("#to_return").val(JSON.stringify(to_return))
     }
 

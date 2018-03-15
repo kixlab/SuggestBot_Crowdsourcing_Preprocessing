@@ -27,12 +27,14 @@ var batch_number = {{batch_number}}
       </iframe>-->
     </div>
     <div class="col s7">
+      <p v-if="cur_video_seen_second< required_seeing_second"><i>You can select the answer once you see certain length of the video</i></p>
+      <p v-if="cur_video_seen_second>= required_seeing_second"><i>Now you can select the answer and proceed</i></p>
       <div v-if="example === 'video_quality'" id="video_quality">
         <p>Is the <font size="5">visual quality</font> good enough to observe character's emotions and actions?</p>
         <p>Is the <font size="5">video quality</font> good enough to capture facial expressions or subtle actions?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>
+        <p v-bind:class="{invisible :cur_video_seen_second< required_seeing_second}">
           <input name="video_quality" type="radio" id="video_quality_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="video_quality_yes">Yes</label>
           <input name="video_quality" type="radio" id="video_quality_no" :disabled="cur_video_seen_second< required_seeing_second"/>
@@ -44,7 +46,7 @@ var batch_number = {{batch_number}}
         <p>Can you clearly understand the conversation from the <font size="5">audio</font>?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>
+        <p v-bind:class="{invisible :cur_video_seen_second< required_seeing_second}">
           <input name="sound_quality" type="radio" id="sound_quality_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="sound_quality_yes">Yes</label>
           <input name="sound_quality" type="radio" id="sound_quality_no" :disabled="cur_video_seen_second< required_seeing_second"/>
@@ -56,7 +58,7 @@ var batch_number = {{batch_number}}
         <p>Does the video mainly involve <font size="5">English</font> as language?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>
+        <p v-bind:class="{invisible :cur_video_seen_second< required_seeing_second}">
           <input name="language" type="radio" id="language_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="language_yes">Yes</label>
           <input name="language" type="radio" id="language_no" :disabled="cur_video_seen_second< required_seeing_second"/>
@@ -67,7 +69,7 @@ var batch_number = {{batch_number}}
         <p>Is the video mainly composed of <font size="5">conversational scene</font> between customers and employees?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>
+        <p v-bind:class="{invisible :cur_video_seen_second< required_seeing_second}">
           <input name="conversation" type="radio" id="conversation_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="conversation_yes">Yes</label>
           <input name="conversation" type="radio" id="conversation_no" :disabled="cur_video_seen_second< required_seeing_second"/>
@@ -78,14 +80,13 @@ var batch_number = {{batch_number}}
         <p>Does the video contain <font size="5">single scenario</font>, not multiple scenarios?
           <a class="chip modal-trigger" href="#example">Example</a>
         </p>
-        <p>
+        <p v-bind:class="{invisible :cur_video_seen_second< required_seeing_second}">
           <input name="scene" type="radio" id="scene_yes" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="scene_yes">Yes</label>
           <input name="scene" type="radio" id="scene_no" :disabled="cur_video_seen_second< required_seeing_second"/>
           <label for="scene_no">No</label>
         </p>
       </div>
-      <p><i>You can select answer once you see certain amount of the video</i></p>
       <div id="buttons">
         <form method="POST">
           {% csrf_token %}
@@ -110,7 +111,7 @@ var batch_number = {{batch_number}}
     <div v-else-if="tuto_first===false" class="modal-content">
       <div class="row">
         <div class="col s12">
-          <h6>Example of good video</h6>
+          <h6>Example of [[good_example_title]]</h6>
           <p>[[good_example_text]]</p>
           <video id="good_ex" class="video-js" v-bind:src="example_video_route+good_url" type="video/mp4" autoplay style="height:180px; width:320px">
           </video>
@@ -121,7 +122,7 @@ var batch_number = {{batch_number}}
     <div v-else-if="tuto_second===false" class="modal-content">
       <div class="row">
         <div class="col s12">
-          <h6>Example of bad video</h6>
+          <h6>Example of [[bad_example_title]]</h6>
           <p>[[bad_example_text]]</p>
           <video id="bad_ex" v-bind:src="example_video_route+bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
           </video>

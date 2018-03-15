@@ -35,7 +35,11 @@ def video_quality_inspection(request, wid, aid):
 
 def inspection_test(request):
     if request.method=="POST":
-        return render(request, "token_return.html", {'token':"Thank you! Please go to Coffee time doc and write feedback!"})
+        form = InspectionResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+        criteria = to_return['criteria']
+        return render(request, "token_return.html", {'token':"Thank you for testing it! When writing feedback in the coffee time doc, please write '"+criteria+"' next to your name!"})
 
     task_to_throw = test_deployer()
 
