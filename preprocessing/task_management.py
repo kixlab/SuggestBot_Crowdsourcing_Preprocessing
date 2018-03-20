@@ -205,7 +205,6 @@ def isp_select_field(wid, aid):
 def test_deployer():
     randomnum = random.uniform(0,1)
     print(randomnum)
-    batch_number = 5
     batch_id = "test"
     if randomnum >=0 and randomnum <0.2:
         criteria = "conversation"

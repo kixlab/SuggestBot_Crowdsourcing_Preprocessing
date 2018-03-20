@@ -8,7 +8,13 @@
 <script src="{% static 'js/videojs-markers.js' %}"></script>
 <script>
 //prompt time should be dictionary, key with time and value with whether the task is done on the time or not
-var prompt_time = {6: false, 26: false, 50:false,}
+var prompt_time = '{{prompt_time}}'
+prompt_time = JSON.parse(prompt_time.replace(/&quot;/g,'"'))
+// condition is about whether it is data colleciton or experiment
+  // for current stage, in the data collection condition, workers can pick 'no figure'.
+  // 'data_collection', 'experiment'
+var condition = "{{condition}}"
+var primitive_video_url = "{{video_url}}"
 </script>
 {% endblock %}
 
@@ -20,30 +26,31 @@ var prompt_time = {6: false, 26: false, 50:false,}
   <div class="col s6">
     <div class="row">
       <div class="col s3">
-        <p>Where the character image should be embedded.</p>
+        <img src="{% static 'img/figures/' %}{{condition}}/{{video_url}}/{{video_url}}{{character}}.png" style="width:100%">
       </div>
       <div class="col s9" id="instruction">
         <p>
-        Watch the video, and while watching the video, you will be prompted to answer the questions.
-      </p>
+          Watch the video, and while watching the video, you will be prompted to answer the questions.
+        </p>
       </div>
     </div>
     <div>
+      <!-- source is decided in the javascript file-->
       <video id="main_video" class="video-js vjs-default-skin vjs-big-play-centered"
       controls preload="auto" width="480" height="270"
-      data-setup="{}"
+      data-setup='{ "inactivityTimeout": 0 }'
        style="margin:auto;">
-        <source src= "https://github.com/kixlab/suggestbotData/blob/master/media/uniform/NADIA_uniform00.mp4?raw=true" type='video/mp4'>
       </video>
     </div>
   </div>
 
   <!-- labeling interface -->
   <div v-bind:class="{disabled_task : state!='tagging'}" class="col s6">
-    <!--<div>Label emotion</div>-->
+    <!-- Descriptions for valence and arousal labeling -->
     <div>
       <h5 style="margin-bottom: 10px;">Decide current valence and arousal value of the character.</h5>
     </div>
+    <!-- images to support valence labeling -->
     <div id="valence_image" class="row" style="margin-bottom: 0px">
       <div id="valance_images" class="col s10 push-s1">
         <table>
@@ -69,6 +76,7 @@ var prompt_time = {6: false, 26: false, 50:false,}
         </table>
       </div>
     </div>
+    <!-- radio buttons for valence labeling -->
     <div id="valence_radios">
       <div id="valence_nagative" class="table_radios col s1">
         Negative
@@ -123,6 +131,7 @@ var prompt_time = {6: false, 26: false, 50:false,}
         Positive
       </div>
     </div>
+    <!-- images to support arousal labeling -->
     <div id="arousal_image" class="row" style="margin-bottom: 0px">
       <div id="arousal_images" class="col s10 push-s1">
         <table>
@@ -148,6 +157,7 @@ var prompt_time = {6: false, 26: false, 50:false,}
         </table>
       </div>
     </div>
+    <!-- radio buttons for arousal labeling -->
     <div id="arousal_radios">
       <div id="arousal_low" class="table_radios col s1">
         Low
@@ -202,9 +212,11 @@ var prompt_time = {6: false, 26: false, 50:false,}
         High
       </div>
     </div>
+    <!-- emotion category description -->
     <div style="margin-top:60px">
       <h5>Decide in which basic emotion the character is belonging now.</h5>
     </div>
+    <!-- emotion category radios -->
     <div id="emotion_cateogries" class="row">
       <input name="ekman" type="radio" id="fear"/>
       <label for="fear" class="ekman_label">Fear</label>
@@ -221,20 +233,29 @@ var prompt_time = {6: false, 26: false, 50:false,}
       <input name="ekman" type="radio" id="neutral"/>
       <label for="neutral" class="ekman_label" style="border-right: none">Neutral</label>
     </div>
+    <!-- Description for reasoning -->
     <div>
       <h5>Write your reasoning why you decided so.</h5>
     </div>
+    <!-- input box for reasoning -->
     <div id="reasoning_box" class="row">
       <input type="text" id="reasoning">
       <label for="reasoning">Your reasoning</label>
+    </div>
+    <div v-if="condition=='data_collection'">
+      <h5>If the figure's voice or image of body does not exist in the moment, click below to proceed.</h5>
+      <div class="btn red darken-1" id="no_figure" v-on:click="add_data('no_figure')">No Figure</div>
     </div>
     <div class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data">Add Label and Proceed</div>
   </div>
 
 </div>
 <hr style="top: 10px; position: relative; border-bottom: none; padding-top: 12px">
-  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" :disabled="!submittable"/>
-
+<form method="POST">
+{% csrf_token %}
+  <input type="text" name="to_return" id="to_return" style="display:none"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!submittable"/>
+</form>
 
 </div>
 
