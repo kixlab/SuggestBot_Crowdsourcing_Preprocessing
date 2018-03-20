@@ -19,4 +19,5 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('preprocessing/', include('preprocessing.urls')),
+    path('emotion_labeling/', include('emotion_labeling.urls')),
 ]

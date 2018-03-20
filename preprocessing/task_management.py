@@ -226,6 +226,7 @@ def test_deployer():
         'batch_id': batch_id,
         'criteria': criteria,
         'task_series': json.dumps(task_series),
+        'debug' : 1,
     }
     return return_dict
 
@@ -250,6 +251,7 @@ def isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, vote_type):
         'batch_id' : aid,
         'criteria' : vote_type,
         'task_series' : json.dumps(task_series),
+        'debug' : 0,
     }
 
     return return_dict

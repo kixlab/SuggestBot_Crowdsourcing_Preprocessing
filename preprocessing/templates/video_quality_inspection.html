@@ -11,6 +11,7 @@ var task_series = "{{task_series}}"
 task_series = JSON.parse(task_series.replace(/&quot;/g,'"'));
 var batch_id = "{{batch_id}}"
 var batch_number = {{batch_number}}
+var debug = {{debug}}
 </script>
 {% endblock %}
 
@@ -27,7 +28,7 @@ var batch_number = {{batch_number}}
       </iframe>-->
     </div>
     <div class="col s7">
-      <p v-if="cur_video_seen_second< required_seeing_second"><i>You can select the answer once you see certain length of the video</i></p>
+      <p v-if="cur_video_seen_second< required_seeing_second"><i>You can select the answer once you watch the video for a certain amount of time</i></p>
       <p v-if="cur_video_seen_second>= required_seeing_second"><i>Now you can select the answer and proceed</i></p>
       <div v-if="example === 'video_quality'" id="video_quality">
         <p>Is the <font size="5">visual quality</font> good enough to observe character's emotions and actions?</p>
@@ -103,19 +104,22 @@ var batch_number = {{batch_number}}
   <!--below is a modal for examples...!-->
   <div id="example" class="modal">
     <div v-if="tuto_exp===false" class="modal-content">
-      <h5>Video quality inspection task</h5>
+      <h5>Inspect the [[instruction_title]] {{batch_number}} video.</h5>
       <p>You will watch {{batch_number}} videos, and decide whether [[instruction]]<p>
       <p>Before doing the task, you will be watching one good example video and one bad example video.</p>
-      <p>Hit next to watch a good example. </p>
+      <p>Hit next to watch the good example. </p>
     </div>
     <div v-else-if="tuto_first===false" class="modal-content">
       <div class="row">
         <div class="col s12">
           <h6>Example of [[good_example_title]]</h6>
-          <p>[[good_example_text]]</p>
-          <video id="good_ex" class="video-js" v-bind:src="example_video_route+good_url" type="video/mp4" autoplay style="height:180px; width:320px">
+          <p>[[good_example_text]] </p>
+          <video id="good_ex" class="video-js" v-bind:src="example_video_route+good_url" type="video/mp4" style="height:180px; width:320px">
           </video>
-          <p><i>You can proceed to the bad example once you watch the example video.</i></p>
+          <span class="btn-floating" v-on:click="play_example('good_ex')" :disabled="example_being_played">
+            <i class="material-icons">play_arrow</i>
+          </span>
+          <i>You can proceed to the bad example once you watch the example video.</i>
         </div>
       </div>
     </div>
@@ -124,9 +128,12 @@ var batch_number = {{batch_number}}
         <div class="col s12">
           <h6>Example of [[bad_example_title]]</h6>
           <p>[[bad_example_text]]</p>
-          <video id="bad_ex" v-bind:src="example_video_route+bad_url" type="video/mp4" autoplay style="height:180px; width:320px">
+          <video id="bad_ex" class="video-js" v-bind:src="example_video_route+bad_url" type="video/mp4" style="height:180px; width:320px">
           </video>
-          <p><i>You can proceed to the task once you watch the example video.</i></p>
+          <span class="btn-floating" v-on:click="play_example('bad_ex')" :disabled="example_being_played">
+            <i class="material-icons">play_arrow</i>
+          </span>
+          <i>You can proceed to the task once you watch the example video.</i>
         </div>
       </div>
     </div>
@@ -151,6 +158,9 @@ var batch_number = {{batch_number}}
       <a v-else href="#!" class="modal-action modal-close btn">Close</a>
     </div>
   </div>
+  <p v-if="debug">
+  [[cur_video_seen_second]]
+  </p>
 </div>
 
 <script src="{% static 'js/video_quality_inspection.js' %}"></script>
