@@ -20,18 +20,24 @@ var vue_app = new Vue({
     video_url: video_url,
   },
   methods:{
+    //add label data to the colleted data
     add_data: function(message="add"){
+      //retrieve values from the interface
       var valence = $("input[name='valence']:checked").val()
       var arousal = $("input[name='arousal']:checked").val()
       var category = $("input[name='ekman']:checked").attr("id")
       var reasoning = $("#reasoning").val()
       if(message=="no_figure"){
+        // if worker decided that no character exist, then store string that signify that no figure exists
         this.collected_data[this.current_marker] = "no_figure"
       }else{
+        //else,
         if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8){
+          // if values are not filled make workers fill the values properly. (Escape)
           alert("Select value, or write proper reasoning to proceed.")
           return
         }else{
+          // if values are filled, stor them
           var dict = {
             'valence' : valence,
             'arousal' : arousal,
@@ -41,21 +47,26 @@ var vue_app = new Vue({
           this.collected_data[this.current_marker] = dict
         }
       }
-
+        //change the state to 'watching' state
         this.state='watching'
+        //change marker to 'done status'
         $("#stop_marker_"+this.current_marker).removeClass("currentMarker").addClass("doneMarker")
+        // reset current marker variable and input fields
         this.current_marker = -1;
         $("input[name='valence']").prop('checked', false)
         $("input[name='arousal']").prop('checked', false)
         $("input[name='ekman']").prop('checked', false)
         $("#reasoning").val("")
+        // when all the necessary markers are done, enable submit function
         if(Object.keys(this.collected_data).length==Object.keys(prompt_time).length){
           alert("Now you labeled character's emotion for all required moments. If you do not think revision is necessary, return with submit button below.")
           vue_app.submittable = true;
         }
+        // play the video
         player.play()
 
     },
+    // return data to the backend-connected input field
     return_data: function(){
       to_return = {}
       to_return['labels'] = this.collected_data
@@ -80,15 +91,15 @@ var player = videojs('main_video', vjs_options)
 player.src(video_url)
   // when seeking for unseen video parts, return to current point
 player.on('seeking', function(){
-  console.log("seek")
-  console.log(this.currentTime())
+  //make workers unable to see futher the seen range
   if(this.currentTime()>maximal_time){
     this.currentTime(cur_time)
     alert("You cannot seek to unseen video time.")
   }
 })
-  // when maximal point is updated, update the value
+
 player.on('timeupdate', function(){
+    // when maximal point is updated, update the value
   if(this.seeking()==false){
     cur_time = this.currentTime()
     if(cur_time > maximal_time){
@@ -96,6 +107,7 @@ player.on('timeupdate', function(){
       $("#playedBar").css("width", (maximal_time/player.duration()*100).toString()+"%")
     }
   }
+  // while doing the task, limit the range of the video time that workers can check
   if(vue_app.state == "tagging"){
     if(this.currentTime()>vue_app.tagging_max_time-replay_padding){
       this.pause();
@@ -128,17 +140,22 @@ player.markers({
 
   },
   onMarkerReached: function(marker){
-    console.log(marker['key'])
+    // only when the worker did saw the marked time before
     if(marker['time']<maximal_time){
+      // when passing through markered time to be labeled
       if(prompt_time[marker['time']]==false || parseFloat(marker['time'])==vue_app.current_marker){
+        //make it blink in red
         $("#main_video").css("border-color", "red");
         window.setTimeout(function(){
           $("#main_video").css("border-color", "transparent");
         }, 1000)
+        // give the marker id :)
         if($("[data-marker-key='"+marker['key']+"']").attr('id')==undefined){
           $("[data-marker-key='"+marker['key']+"']").attr('id', 'stop_marker_'+marker['time'].toString())
         }
       }else if(prompt_time[marker['time']-stop_padding]==false){
+        //if reached blue marker is not done yet
+        //make them rewatch!
         player.pause()
         $("#stop_marker_"+(marker['time']-stop_padding).toString()).addClass("currentMarker")
         vue_app.current_marker = marker['time']-stop_padding
@@ -158,7 +175,7 @@ player.markers({
         player.play()
         player.controls(false)
         console.log(replay_padding*2000)
-        window.setTimeout(enforce_replay, 2000*replay_padding)
+        window.setTimeout(after_replay, 2000*replay_padding)
       }
     }
   },
@@ -172,12 +189,14 @@ player.markers({
   markers: markers,
 })
 
-function enforce_replay(){
+// after rewatching
+function after_replay(){
   player.pause()
   player.controls(true)
   vue_app.state = "tagging";
 }
 
+//recast data to the input field, for emotion labeling and reasoning
 function recast_data(marker_time){
   player.pause()
   vue_app.state="tagging";

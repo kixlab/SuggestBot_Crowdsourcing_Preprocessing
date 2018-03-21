@@ -32,3 +32,8 @@ def experiment1(request, video_title, wid, aid):
     # based on the condition, url will be differently assigned
 
     return render(request, "emotion_labeling_task.html", task_to_throw)
+
+
+def experiment2(request, video_title, wid, aid):
+
+    return render(request, "emotion_checking_task.html", {})
