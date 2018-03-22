@@ -14,6 +14,8 @@ class Video(models.Model):
     language_passed = models.BooleanField(default = False)
     conversation_passed = models.BooleanField(default = False)
     scene_passed = models.BooleanField(default = False)
+    #face_detection = models.BooleanField(default = False) # this will be used to check if face bounding boxes are generated
+    #face_grouped = models.BooleanField(default = False) # this will be used to check if face grouping is finished
     def __str__(self):
         return self.video_title
 

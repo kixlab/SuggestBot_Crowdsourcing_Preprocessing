@@ -44,3 +44,14 @@ def inspection_test(request):
     task_to_throw = test_deployer()
 
     return render(request, "video_quality_inspection.html", task_to_throw)
+
+def face_boundingbox_grouping(request):
+    if request.method=="POST":
+        form = FaceGroupingResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+        return render(request, "token_return.html")
+
+    task_to_throw = test_deployer()
+
+    return render(request, "face_boundingbox_grouping.html", task_to_throw)
