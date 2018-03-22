@@ -70,3 +70,19 @@ transition-duration: 0s!important;
 .doneMarker{
   background-color: #00e676 !important;
 }
+
+.emotion_word_check{
+  opacity: 0.5;
+  font-size: 10px;
+  text-align: center;
+}
+
+.emotion_word_check_highlighted{
+  opacity: 1 !important;
+  font-size: 20px !important;
+  text-align: center;
+}
+
+.cursor_none{
+  cursor: auto !important;
+}

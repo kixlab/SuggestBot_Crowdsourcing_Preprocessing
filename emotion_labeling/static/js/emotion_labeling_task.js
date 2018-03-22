@@ -6,11 +6,14 @@ if(condition == "experiment"){
   video_url = "https://github.com/kixlab/suggestbotData/blob/master/media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
+
+
 // Below part is for vue app
 var vue_app = new Vue({
   el: "#vue_app",
   delimiters: ['[[', ']]'],
   data:{
+    step: step,
     state: "watching", // watching, enforced_replay, tagging
     current_marker: -1,
     tagging_max_time: -1,
@@ -20,43 +23,74 @@ var vue_app = new Vue({
     video_url: video_url,
   },
   methods:{
-    //add label data to the colleted data
+    //add label data to the colleted data-- for label and reason condition!
     add_data: function(message="add"){
-      //retrieve values from the interface
-      var valence = $("input[name='valence']:checked").val()
-      var arousal = $("input[name='arousal']:checked").val()
-      var category = $("input[name='ekman']:checked").attr("id")
-      var reasoning = $("#reasoning").val()
-      if(message=="no_figure"){
-        // if worker decided that no character exist, then store string that signify that no figure exists
-        this.collected_data[this.current_marker] = "no_figure"
-      }else{
-        //else,
-        if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8){
-          // if values are not filled make workers fill the values properly. (Escape)
-          alert("Select value, or write proper reasoning to proceed.")
+      // for the labeling condition
+      if(this.step=="label_and_reason"){
+        //retrieve values from the interface
+        var valence = $("input[name='valence']:checked").val()
+        var arousal = $("input[name='arousal']:checked").val()
+        var category = $("input[name='ekman']:checked").attr("id")
+        var reasoning = $("#reasoning").val()
+        if(message=="no_figure"){
+          // if worker decided that no character exist, then store string that signify that no figure exists
+          this.collected_data[this.current_marker] = "no_figure"
+        }else{
+          //else,
+          if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8){
+            // if values are not filled make workers fill the values properly. (Escape)
+            alert("Select values, or write proper reasoning to proceed.")
+            return
+          }else{
+            // if values are filled, stor them
+            var dict = {
+              'valence' : valence,
+              'arousal' : arousal,
+              'category' : category,
+              'reasoning' : reasoning,
+            }
+            this.collected_data[this.current_marker] = dict
+          }
+        }
+
+      }else if(this.step=='sanity_check'){
+        // for the sanity check step
+        var check_result = $("input[name='check']").prop('checked')
+        if(check_result ==undefined){
+          alert("Please check whether the reasoning makes sense")
           return
         }else{
-          // if values are filled, stor them
+          var aid = label_to_check[this.current_marker]['label_aid']
+          var wid = label_to_check[this.current_marker]['label_wid']
           var dict = {
-            'valence' : valence,
-            'arousal' : arousal,
-            'category' : category,
-            'reasoning' : reasoning,
+            'qualified' : check_result,
+            'label_aid' : aid,
+            'label_wid' : wid,
           }
           this.collected_data[this.current_marker] = dict
+
         }
       }
+      // reset input fields
+      $("input[name='valence']").prop('checked', false)
+      $("input[name='arousal']").prop('checked', false)
+      if(this.step=='label_and_reason'){
+        $("input[name='ekman']").prop('checked', false)
+        $("#reasoning").val("")
+      }else if(this.step=='sanity_check'){
+        $(".emotion_word_check").removeClass('emotion_word_check_highlighted')
+        $("#current_reasoning").text("")
+        $("input[name='check']").prop('checked', false)
+      }
+
+
+
         //change the state to 'watching' state
         this.state='watching'
         //change marker to 'done status'
         $("#stop_marker_"+this.current_marker).removeClass("currentMarker").addClass("doneMarker")
-        // reset current marker variable and input fields
+        // reset current marker variable
         this.current_marker = -1;
-        $("input[name='valence']").prop('checked', false)
-        $("input[name='arousal']").prop('checked', false)
-        $("input[name='ekman']").prop('checked', false)
-        $("#reasoning").val("")
         // when all the necessary markers are done, enable submit function
         if(Object.keys(this.collected_data).length==Object.keys(prompt_time).length){
           alert("Now you labeled character's emotion for all required moments. If you do not think revision is necessary, return with submit button below.")
@@ -73,6 +107,9 @@ var vue_app = new Vue({
       to_return['condition'] = condition
       $("#to_return").val(JSON.stringify(to_return))
     },
+    no_figure_option: function(){
+      return (this.step=='label_and_reason' && this.condition=='data_collection')
+    }
   }
 })
 
@@ -191,6 +228,9 @@ player.markers({
 
 // after rewatching
 function after_replay(){
+  if(vue_app.step=="sanity_check"){
+    posting_data(label_to_check, vue_app.current_marker)
+  }
   player.pause()
   player.controls(true)
   vue_app.state = "tagging";
@@ -211,16 +251,39 @@ function recast_data(marker_time){
   }
 
   $("#stop_marker_"+marker_time).removeClass('doneMarker').addClass('currentMarker')
-  if(vue_app.collected_data[marker_time]!= 'no_figure'){
-    var val_val = vue_app.collected_data[marker_time]['valence']
-    var aro_val = vue_app.collected_data[marker_time]['arousal']
-    var ekman_val = vue_app.collected_data[marker_time]['category']
-    var reasoning_val = vue_app.collected_data[marker_time]['reasoning']
+  if(vue_app.step=='label_and_reason'){
+    if(vue_app.collected_data[marker_time]!= 'no_figure'){
+      posting_data(vue_app.collected_data, marker_time)
+    }
+  }else if(vue_app.step=='sanity_check'){
+    posting_data(label_to_check, marker_time)
+    var checked = vue_app.collected_data[marker_time]
+    if(checked){
+      checked = "check_yes"
+    }else{
+      checked = "check_no"
+    }
+    $("#"+checked).prop('checked', true)
+  }
 
-    $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
-    $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
+
+}
+
+function posting_data(dict, marker_time){
+  var val_val = dict[marker_time]['valence']
+  var aro_val = dict[marker_time]['arousal']
+  var ekman_val = dict[marker_time]['category']
+  var reasoning_val = dict[marker_time]['reasoning']
+
+  $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
+  $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
+  if(vue_app.step=="label_and_reason"){
     $("#"+ekman_val).prop('checked', true);
     $("#reasoning").val(reasoning_val)
+  }else if(vue_app.step=="sanity_check"){
+    $("#"+ekman_val+"_check").addClass("emotion_word_check_highlighted")
+    $("#current_reasoning").text(reasoning_val)
+
   }
 
 }

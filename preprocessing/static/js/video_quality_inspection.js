@@ -27,7 +27,7 @@ if(criteria == "video_quality"){
 }else if(criteria == "sound_quality"){
   instruction_title = "audio quality of"
   instruction = "you can recognize utterances of characters with the audio of the video. For instance, if you think you can understand the intention or emotion of characters and can dictate majority of the conversation, you can decide that the video is fair in the audio quality."
-  good_example_text = "You can grasp character’s utterance from the audio of the video."
+  good_example_text = "You can grasp character’s utterance from the audio of the video, and there is no significant background noises such as music or chit-chats."
   bad_example_text = "It is hard to understand what is being said in the video."
   good_example_title = "video with fine audio quality"
   bad_example_title = "video with bad audio quality"
@@ -53,11 +53,11 @@ if(criteria == "video_quality"){
   good_url = "/good_example.mp4"
 
 }else if(criteria == "scene"){
-  instruction_title = "number of scenarios of"
-  instruction = "they are composed of a single scenario, not with a compilation of multiple videos."
-  good_example_text = "One scenario sustains until the end of the video, rather than having multiple scenarios or compilations."
-  bad_example_text = "It is composed of multiple scenarios or is a compilation, and includes multiple characters without consistency in the context."
-  good_example_title = "video with single scenario"
+  instruction_title = "the consistency of the flow in"
+  instruction = "they are consistent videos, not with a compilation of multiple different videos."
+  good_example_text = "The story or the flow of the video is consistent, even with angle or scene changes within the video. It is not a compilation of multiple unrelated videos."
+  bad_example_text = "It is a concatenation of multiple unrelated videos, and you can spot inconsistency in the flow or the story. The characters and the context of the video might suddenly change. A compilation is one example of such a video."
+  good_example_title = "video with a consistent flow"
   bad_example_title = "compilation video"
   good_url = "/good_example.mp4"
   bad_url = "/bad_scene.mp4"

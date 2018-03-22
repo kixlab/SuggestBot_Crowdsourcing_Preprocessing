@@ -11,7 +11,7 @@ def search_and_accumulate_url(request):
         print("!")
         form = SearchKeyword(request.POST)
         if form.is_valid():
-            keyword = form.cleaned_data['video_keyword']
+            keyword = json.loads(form.cleaned_data['video_keyword'])
             vid_num = form.cleaned_data['video_num']
             accumulated_num = video_search_and_accumulate(keyword, vid_num)
             print(keyword)
