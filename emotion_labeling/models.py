@@ -32,6 +32,7 @@ class Emotion_check_Meta(models.Model):
 
 class Emotion_label_experiment(Emotion_label_Meta):
     experiment_video = models.ForeignKey(Experiment_Video, on_delete=models.CASCADE, null=True, blank=True)
+    condition = models.CharField(max_length = 200, default = "")
     def __str__(self):
         return self.experiment_video.video_title + "_" + str(self.time) +"_from_worker_" +self.wid
 

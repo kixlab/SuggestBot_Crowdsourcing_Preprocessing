@@ -4,9 +4,20 @@ from django.http import HttpResponse
 from .forms import *
 from .video_url_accumulate import *
 from .task_management import *
+from .socket_management import *
 import json
+from django.template.context_processors import csrf
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import numpy as np
+import cv2
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
 
 def search_and_accumulate_url(request):
+    send_url("dorothy")
     if request.method=="POST":
         print("!")
         form = SearchKeyword(request.POST)
@@ -44,3 +55,17 @@ def inspection_test(request):
     task_to_throw = test_deployer()
 
     return render(request, "video_quality_inspection.html", task_to_throw)
+
+# below view function receives post request from external client
+#specifically, it receives image data and store it into the designated path
+@require_http_methods(['POST'])
+@csrf_exempt
+def receive_facial_result(request):
+    if request.method=="POST":
+        print("heh")
+        data = request.FILES['media']
+        #need to decide where to store the file...
+        path = default_storage.save('img.png', ContentFile(data.read()))
+        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+
+    return render(request, 'search_and_accumulate_url.html')

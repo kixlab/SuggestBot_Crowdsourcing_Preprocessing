@@ -6,12 +6,12 @@ from random import shuffle
 EMO_VOTE_NUM = 3
 TASK_TIME_LIMIT = 30
 
-def Experiment_Label_Store(exp_video, result, w_id, a_id):
+def Experiment_Label_Store(exp_video, result, w_id, a_id, condition):
     labels = result['labels']
     token = str(uuid.uuid4().hex.upper()[0:6])
     for time in labels:
         label = labels[time]
-        label_ds = Emotion_label_experiment(experiment_video = exp_video, time=float(time), valence=int(label['valence']), arousal=int(label['arousal']), category = label['category'], reasoning = label['reasoning'], wid= w_id, aid= a_id)
+        label_ds = Emotion_label_experiment(experiment_video = exp_video, time=float(time), valence=int(label['valence']), arousal=int(label['arousal']), category = label['category'], reasoning = label['reasoning'], wid= w_id, aid= a_id, condition=condition)
         label_ds.save()
 
     return token
@@ -19,7 +19,8 @@ def Experiment_Label_Store(exp_video, result, w_id, a_id):
 def Experiment_Check_Task_Deployer(prompt_time, video, w_id, a_id):
     return_dict = {}
     for key in prompt_time:
-        filtered_labels = Emotion_label_experiment.objects.filter(experiment_video = video, time = key).annotate(num_task = Count('emotion_check_experiment')).filter(num_task__lt = EMO_VOTE_NUM)
+        # ** should only filter out those in 'experiment_reasoning' class! ** 
+        filtered_labels = Emotion_label_experiment.objects.filter(experiment_video = video, time = key, condition='experiment_reasoning').annotate(num_task = Count('emotion_check_experiment')).filter(num_task__lt = EMO_VOTE_NUM)
         if filtered_labels.count() > 0:
             min_num_task = filtered_labels.aggregate(Min('num_task'))['num_task__min']
             print(min_num_task)

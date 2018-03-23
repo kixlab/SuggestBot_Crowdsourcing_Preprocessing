@@ -2,8 +2,8 @@
 var stop_padding = 5;
 var replay_padding = 3;
 var video_url;
-if(condition == "experiment"){
-  video_url = "https://github.com/kixlab/suggestbotData/blob/master/media/uniform/"+primitive_video_url+".mp4?raw=true"
+if(condition.includes("experiment")){
+  video_url = "https://github.com/kixlab/suggestbotData/blob/master/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 
@@ -27,6 +27,10 @@ var vue_app = new Vue({
     add_data: function(message="add"){
       // for the labeling condition
       if(this.step=="label_and_reason"){
+        // to prefill the field
+        if(condition == "experiment_baseline"){
+          $("#reasoning").val("No Reasoning")
+        }
         //retrieve values from the interface
         var valence = $("input[name='valence']:checked").val()
         var arousal = $("input[name='arousal']:checked").val()
@@ -205,7 +209,7 @@ player.markers({
           vue_app.tagging_max_time = player.duration()+replay_padding
         }
 
-        alert("Now You will be seen the part of the video (around the marker), and decide the character's emotional status.")
+        alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
         prompt_time[marker['time']-stop_padding] = true;
         vue_app.state = 'enforced_replay';
         player.currentTime(player.currentTime()-stop_padding-replay_padding)

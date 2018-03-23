@@ -24,18 +24,42 @@ var step = "{{step}}"
 
 
 {% block content %}
-<div id="vue_app" class="row">
+<div id="vue_app" class="row" style="visibility: hidden">
   <div class="row" style="margin-bottom: 0px">
   <!-- Video Viewer -->
   <div class="col s6">
     <div class="row">
       <div class="col s3">
-        <img src="{% static 'img/figures/' %}{{condition}}/{{video_url}}/{{video_url}}{{character}}.png" style="width:100%">
+        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png" style="width:100%; margin-top:20px">
       </div>
       <div class="col s9" id="instruction">
-        <p>
-          Watch the video, and while watching the video, you will be prompted to answer the questions.
-        </p>
+        <div v-if="step=='label_and_reason'">
+          <p>
+            You will label the emotion of the character in the left, at the moment when the border of the video player blinks in red.
+          <p>
+          <p>
+            Emotion label includes <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>, <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Basic Emotion Class</a>.
+          </p>
+          <p v-if="condition=='experiment_reasoning'">
+            You will also give the reason why you labeled the emotion of the character like you did.
+          </p>
+        </div>
+        <div v-if="step=='sanity_check'">
+          <p>
+            You will see how other workers did on labeling the emotion of the character in the left, at the moment when the border of the video player blinks in red.
+          <p>
+          <p>
+            Emotion label that workers labeled includes <a href="#">Valence</a>, <a href="#">Arousal</a>, and <a href="#">Basic Emotion Class</a>.
+          </p>
+          <p>
+            You will also read the reason why other crowd workers did labeling like what they did.
+          </p>
+          <p>
+            Your task is to decide whether that reasoning logically makes sense. Remember, you are not to decide whether the label is 'right' or 'wrong', but to check the plausibility of the label.
+          </p>
+
+        </div>
+        <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial">Tutorial</a>
       </div>
     </div>
     <div>
@@ -170,7 +194,7 @@ var step = "{{step}}"
     <!-- radio buttons for arousal labeling -->
     <div id="arousal_radios" class="row" style="margin-bottom: 0px; border-bottom: 1px solid #cccccc">
       <div id="arousal_low" class="table_radios col s1">
-        Low
+        Calm
       </div>
       <div id="valance_images" class="col s10">
         <table>
@@ -219,12 +243,12 @@ var step = "{{step}}"
         </table>
       </div>
       <div id="arousal_high" class="table_radios col s1">
-        High
+        Excited
       </div>
     </div>
     <!-- emotion category description -->
     <div v-if="step=='label_and_reason'">
-      <h5>Decide in which basic emotion the character is belonging now.</h5>
+      <h5>Decide which basic emotion the character is in now.</h5>
     </div>
     <!-- emotion category radios -->
     <div v-if="step=='label_and_reason'" id="emotion_cateogries" class="row" style="margin-bottom: 0px">
@@ -262,8 +286,8 @@ var step = "{{step}}"
     </div>
 
     <!-- Description for reasoning -->
-    <div v-if="step=='label_and_reason'">
-      <h5>Write your reasoning why you decided so.</h5>
+    <div v-if="step=='label_and_reason'" v-bind:class="{hidden_item: condition!='experiment_reasoning'}">
+      <h5>Write the reason why you labeled like the above.</h5>
     </div>
     <!-- checking other's reasoning -->
     <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
@@ -272,15 +296,16 @@ var step = "{{step}}"
     </div>
     <!-- inputting checked result -->
     <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
-      <h5 style="margin-bottom:0">Does the reasoning about the label make sense?</h5>
+      <h5 style="margin-bottom:0">Are the label and the reasoning plausible considering the context of the video?</h5>
       <input name="check" type="radio" id="check_yes" val='true'/>
       <label for="check_yes" class="ekman_label">Yes</label>
       <input name="check" type="radio" id="check_no" val='false'/>
       <label for="check_no" class="ekman_label" style="border: none">No</label>
     </div>
+
     <!-- input box for reasoning -->
-    <div v-if="step=='label_and_reason'" id="reasoning_box" class="row" style="margin-bottom:0px">
-      <input type="text" id="reasoning">
+    <div v-if="step=='label_and_reason'" id="reasoning_box" v-bind:class="{hidden_item: condition!='experiment_reasoning'}" class="row" style="margin-bottom:0px">
+      <textarea class='materialize-textarea' type="text" id="reasoning" style="padding:0"></textarea>
       <label for="reasoning">Your reasoning</label>
     </div>
     <div v-if="no_figure_option()">
@@ -301,5 +326,20 @@ var step = "{{step}}"
 
 </div>
 
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <img v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:100%; max-width:100%; display:block; margin: auto;"/>
+  </div>
+  <div class='modal-footer'>
+    <span :disabled="cur_tuto==0" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="cur_tuto >= max_tuto" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="!dismissible()" class='btn modal-action modal-close blue-grey darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+  </div>
+</div>
+<script>
+var max_tuto = 12
+</script>
+
 <script src="{% static 'js/emotion_labeling_task.js' %}"></script>
+<script src="{% static 'js/tutorial.js' %}"></script>
 {% endblock %}

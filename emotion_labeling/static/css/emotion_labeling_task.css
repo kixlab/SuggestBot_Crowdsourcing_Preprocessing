@@ -86,3 +86,7 @@ transition-duration: 0s!important;
 .cursor_none{
   cursor: auto !important;
 }
+
+.hidden_item{
+  display: none !important;
+}
