@@ -1,0 +1,92 @@
+.table_radios{
+  padding: 0px !important;
+  text-align: center;
+  width: 10%;
+}
+
+.table_image_containers{
+  width: 20%;
+  padding-bottom : 0px;
+  padding-top : 0px;
+}
+
+.table_images{
+  width: 100%;
+}
+
+.radios_padding{
+  width: 5% !important;
+}
+
+.radio_without_label{
+  padding-left: 25px !important;
+}
+
+.ekman_label{
+  padding-left: 25px !important;
+  padding-right: 5px;
+  border-right: solid 1px #cccccc;
+}
+
+.vjs-load-progress{
+  visibility: hidden;
+}
+
+#playedBar{
+  background-color: blue;
+  position: absolute;
+  display: block;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 0;
+  left: 0;
+  top: 0;
+}
+
+.disabled_task{
+  opacity: 0.3;
+  pointer-events: none;
+}
+.HiddenMarker{
+  width: 1px !important;
+  background-color: #80deea !important;
+}
+
+.vjs-fade-in,.vjs-fade-out {
+visibility: visible !important;
+opacity: 1 !important;
+transition-duration: 0s!important;
+}
+
+#main_video{
+  border: 3px solid transparent;
+}
+
+.currentMarker{
+  background-color: #ffb300 !important;
+}
+
+.doneMarker{
+  background-color: #00e676 !important;
+}
+
+.emotion_word_check{
+  opacity: 0.5;
+  font-size: 10px;
+  text-align: center;
+}
+
+.emotion_word_check_highlighted{
+  opacity: 1 !important;
+  font-size: 20px !important;
+  text-align: center;
+}
+
+.cursor_none{
+  cursor: auto !important;
+}
+
+.hidden_item{
+  display: none !important;
+}

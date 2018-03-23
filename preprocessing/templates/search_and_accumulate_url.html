@@ -2,22 +2,45 @@
 
 {% block content %}
 
-<form class="col s12" method="post">{% csrf_token %}
+
   <div class="row">
 
     <p class="col s12"> Input keywords to search and accumulate video urls in the database </p>
     <div class="input-field col s8">
-      <input id="video_keyword" name="video_keyword" type="text" class="validate"></input>
-      <label for="video_keyword">Video Keyword</label>
+      <input id="video_keyword_single" type="text" class="validate"></input>
+      <label for="video_keyword_single">Video Keyword</label>
+
     </div>
+    <div class='col s4'>
+      <span id="add" class="btn blue darken-1" onclick="add_keyword()">Add keyword</span>
+    </div>
+    <div class='col s12' id="keyword_roster"></div>
+    <form class="col s12" method="post" style="margin: 0; padding: 0;">{% csrf_token %}
     <div class="input-field col s8">
       <input id="video_num" name="video_num" type="number" class="validate"></input>
-      <label for="video_num">Number of videos</label>
+      <label for="video_num">Total number of videos</label>
     </div>
     <div class="input-field col s4">
-      <input id="submit" type="submit" class="btn"></input>
+      <input id="video_keyword" type="text" name="video_keyword" style="display:none"></input>
+      <input id="submit" type="submit" class="btn" onclick="cast_data()"></input>
     </div>
+    </form>
   </div>
-</form>
+<script>
+var keywords = []
+function add_keyword(){
+  if($("#video_keyword_single").val().length>0){
+    var kw = $("#video_keyword_single").val()
+    keywords.push(kw)
+    $("#keyword_roster").prepend("<p>"+kw+"</p>")
+    $("#video_keyword_single").val("")
+  }
+}
+function cast_data(){
+  if(keywords.length>0){
+    $("#video_keyword").val(JSON.stringify(keywords))
+  }
+}
+</script>
 
 {% endblock %}

@@ -15,7 +15,7 @@ batch_number = 5
 #below is the number of votes for each tasks
 vote_number = 3
 
-TASK_TIME_LIMIT = 5
+TASK_TIME_LIMIT = 30
 
 # TODO function to remove any outdated tasks
 def isp_remove_outdated_tasks():
@@ -205,7 +205,6 @@ def isp_select_field(wid, aid):
 def test_deployer():
     randomnum = random.uniform(0,1)
     print(randomnum)
-    batch_number = 5
     batch_id = "test"
     if randomnum >=0 and randomnum <0.2:
         criteria = "conversation"
@@ -226,6 +225,7 @@ def test_deployer():
         'batch_id': batch_id,
         'criteria': criteria,
         'task_series': json.dumps(task_series),
+        'debug' : 1,
     }
     return return_dict
 
@@ -250,6 +250,7 @@ def isp_generate_votes_and_throw_tasks(wid, aid, tasks_to_deploy, vote_type):
         'batch_id' : aid,
         'criteria' : vote_type,
         'task_series' : json.dumps(task_series),
+        'debug' : 0,
     }
 
     return return_dict

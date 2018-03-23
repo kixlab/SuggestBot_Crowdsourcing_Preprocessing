@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['0.0.0.0', '115.68.222.144', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'emotion_labeling.apps.EmotionLabelingConfig',
     'preprocessing.apps.PreprocessingConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -119,3 +120,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000

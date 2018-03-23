@@ -7,7 +7,7 @@
 
 
 
-var good_url, bad_url, instruction, good_example_text, bad_example_text, good_example_title, bad_example_title;
+var good_url, bad_url, instruction_title, instruction, good_example_text, bad_example_text, good_example_title, bad_example_title;
 
 var to_return = {
   'batch_id' : batch_id,
@@ -16,7 +16,8 @@ var to_return = {
 }
 
 if(criteria == "video_quality"){
-  instruction = "that you can recognize the behavior of characters with the visual of the video."
+  instruction_title = "visual quality of"
+  instruction = "you can recognize the behavior of characters with the visual of the video. For instance, if you think you can describe what characters are doing, like 'The character is walking' or 'The character is paying money', you can decide that the video is fair in the visual quality."
   good_example_text = "You can grasp character’s behavior, facial expression, and emotion from the visual of the video."
   bad_example_text = "It is hard to understand what is going on visually, and hard to capture facial expressions."
   good_example_title = "video with fine visual quality"
@@ -24,15 +25,17 @@ if(criteria == "video_quality"){
   good_url = "/good_example.mp4"
   bad_url = "/bad_visual.mp4"
 }else if(criteria == "sound_quality"){
-  instruction = "that you can recognize utterances of characters with the audio of the video."
-  good_example_text = "You can grasp character’s utterance from the audio of the video."
+  instruction_title = "audio quality of"
+  instruction = "you can recognize utterances of characters with the audio of the video. For instance, if you think you can understand the intention or emotion of characters and can dictate majority of the conversation, you can decide that the video is fair in the audio quality."
+  good_example_text = "You can grasp character’s utterance from the audio of the video, and there is no significant background noises such as music or chit-chats."
   bad_example_text = "It is hard to understand what is being said in the video."
   good_example_title = "video with fine audio quality"
   bad_example_title = "video with bad audio quality"
   good_url = "/good_example.mp4"
   bad_url = "/bad_audio.mp4"
 }else if(criteria == "language"){
-  instruction = "that are majorly composed of conversation in English."
+  instruction_title = "language of"
+  instruction = "they are majorly composed of conversation in English."
   good_example_text = "Conversation is in English."
   bad_example_text = "Conversation is not in English."
   good_example_title = "video in English"
@@ -40,7 +43,8 @@ if(criteria == "video_quality"){
   good_url = "/good_example.mp4"
   bad_url = "/bad_language.mp4"
 }else if(criteria == "conversation"){
-  instruction = "that are majorly composed of conversational scenes."
+  instruction_title = "existence of conversation in"
+  instruction = "they are majorly composed of conversational scenes between customers and employees."
   good_example_text = "A video is not monologue or lecture but majorly composed of conversation."
   bad_example_text = "A video is not in conversation, but in other forms like monologue or lecture."
   good_example_title = "conversation video"
@@ -49,16 +53,17 @@ if(criteria == "video_quality"){
   good_url = "/good_example.mp4"
 
 }else if(criteria == "scene"){
-  instruction = "that are composed of a single scenario, not with a compilation of multiple videos."
-  good_example_text = "One scenario sustains until the end of the video, rather than having multiple scenarios or compilations."
-  bad_example_text = "It is composed of multiple scenarios or is a compilation, and includes multiple characters without consistency in the context."
-  good_example_title = "video with single scenario"
+  instruction_title = "the consistency of the flow in"
+  instruction = "they are consistent videos, not with a compilation of multiple different videos."
+  good_example_text = "The story or the flow of the video is consistent, even with angle or scene changes within the video. It is not a compilation of multiple unrelated videos."
+  bad_example_text = "It is a concatenation of multiple unrelated videos, and you can spot inconsistency in the flow or the story. The characters and the context of the video might suddenly change. A compilation is one example of such a video."
+  good_example_title = "video with a consistent flow"
   bad_example_title = "compilation video"
   good_url = "/good_example.mp4"
   bad_url = "/bad_scene.mp4"
 }
 
-
+console.log(instruction_title)
 var vue_app = new Vue({
   el: "#vueapp",
   delimiters: ['[[', ']]'],
@@ -73,6 +78,7 @@ var vue_app = new Vue({
     //good and bad video example url
     good_url: good_url,
     bad_url: bad_url,
+    instruction_title : instruction_title,
     instruction: instruction,
     good_example_text: good_example_text,
     bad_example_text: bad_example_text,
@@ -87,15 +93,23 @@ var vue_app = new Vue({
     batch_number: batch_number,
     item_not_clicked: true,
     example_video_route: example_video_route,
+    example_being_played: false,
+    debug: debug,
   },
   methods:{
+    play_example: function(message){
+      document.getElementById(message).play();
+      this.example_being_played = true;
+    },
     tutorial_next: function(event){
       if(this.tuto_exp==false){
         this.tuto_exp = true;
         $("#modal_next").addClass("disabled")
+        this.example_being_played=false;
       }else if(this.tuto_first==false){
         this.tuto_first = true;
         $("#modal_next").addClass("disabled")
+        this.example_being_played=false;
       }else if(this.tuto_second==false){
         this.tuto_second = true;
         $(".modal").modal("close")
@@ -146,11 +160,13 @@ var vue_app = new Vue({
   updated: function(){
     if(this.tuto_exp==true && this.tuto_first==false){
       $("#good_ex").on("ended", function(){
+        vue_app.example_being_played=false;
         $("#modal_next").removeClass("disabled")
       })
 
     }else if(this.tuto_first==true && this.tuto_second==false){
       $("#bad_ex").on("ended", function(){
+        vue_app.example_being_played=false;
         $("#modal_next").removeClass("disabled")
       })
     }
