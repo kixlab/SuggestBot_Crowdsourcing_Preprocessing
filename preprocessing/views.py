@@ -9,8 +9,6 @@ import json
 from django.template.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-import numpy as np
-import cv2
 import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
