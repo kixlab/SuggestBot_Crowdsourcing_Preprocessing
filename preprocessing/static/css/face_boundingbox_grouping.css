@@ -1,0 +1,7 @@
+.face-image-wrapper img
+{
+  width: 180px;
+  height: auto;
+  cursor: pointer;
+  border: 10px solid transparent;
+}

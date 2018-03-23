@@ -17,7 +17,7 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 def search_and_accumulate_url(request):
-    send_url("dorothy")
+    #send_url("dorothy")
     if request.method=="POST":
         print("!")
         form = SearchKeyword(request.POST)
@@ -56,6 +56,7 @@ def inspection_test(request):
 
     return render(request, "video_quality_inspection.html", task_to_throw)
 
+
 # below view function receives post request from external client
 #specifically, it receives image data and store it into the designated path
 @require_http_methods(['POST'])
@@ -69,3 +70,14 @@ def receive_facial_result(request):
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
 
     return render(request, 'search_and_accumulate_url.html')
+
+def face_boundingbox_grouping(request):
+    if request.method=="POST":
+        form = FaceGroupingResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+        return render(request, "token_return.html")
+
+    task_to_throw = test_deployer()
+
+    return render(request, "face_boundingbox_grouping.html", task_to_throw)

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/face_boundingbox_grouping.css'%}" rel="stylesheet">
+<link href="{%static 'css/emoji.css'%}" rel="stylesheet">
+<script>
+var task_series = "{{task_series}}"
+task_series = JSON.parse(task_series.replace(/&quot;/g,'"'));
+var batch_id = "{{batch_id}}"
+var batch_number = {{batch_number}}
+</script>
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class="row">
+  <div class="col s12">
+    <h5>Your task is to group face images of identical person. The faces all appear in the video below.</h5>
+    <br/>
+    <div class="col s5" id='vueapp-video'> <!-- *************** first vue app *************** -->
+      <p>Please watch this video to figure out identical faces:</p>
+      <iframe id='player' width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+ url">
+      </iframe>
+    </div>
+    <div class="col s7">
+      <br/>
+      <p><strong><u>HOW TO GROUP IMAGES:</u></strong></p>
+      <p><strong>Step1: Click on the face images that you think is a same person.</strong></p>
+      <p><strong>Step2: When finish selecting identical faces, click <span style="color:MediumVioletRed;">GIVE A NAME</span> button.</strong></p>
+      <p><strong>Step3: Repeat step 1 and 2 until there is no image left to select <i class="em em-smiley"></i> </strong></p>
+      <p><strong>TIP: If you want to correct the name of a face,</strong></p>
+      <ol style="text-indent:20px;">
+        <li>select the name tag on the right side, i.e., <strong><span style="color:green;">Pikachu</span></strong>,</li>
+        <li>select the face you want to correct,</li>
+        <li>click the name tag, i.e., <strong><span style="color:green;">Pikachu</span></strong> again to finish selecting.</li>
+      </ol>
+      <br/>
+      <div id="buttons">
+        <button onclick="give_name()" name="bleh" class="pink darken-1 btn" id="give_name">GIVE A NAME</button>
+        <button onclick="next_task()" class="btn" disabled id="next_task">Next</button>
+        <form method="POST" style="padding:0; display:inline-block;">
+          {% csrf_token %}
+          <input onclick="return_result()" name="submit" type="submit" class="btn" disabled id="submit"/>
+          <input name='to_return' type='text' style='display:none' id="to_return"/>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br/>
+<div class="row">
+  <div class="col s9">
+    <div class="face-image-wrapper">
+      <div id="face-images"></div>
+    </div>
+  </div>
+
+  <div class="col s3">
+    <p><strong>Name Tags</strong></p>
+    <div id='addnametag'></div>
+    <!--div><button onclick="change_name()" class="green darken-1 btn" id="change_name1">Pikachu</button></div><br/-->
+    <div><button class="blue darken-1 btn" style="margin-bottom:10px" id="change_name2" disabled>Not Sure Which Person</button><br>
+    <button class="red darken-1 btn" id="change_name3" disabled>Not a Person</button></div><br>
+  </div>
+</div>
+
+<script src="{% static 'js/face_boundingbox_grouping.js' %}"></script>
+{% endblock %}
