@@ -1,9 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 import json
+from django.http import HttpResponse
 from .forms import *
 from .models import *
 from .emotion_label_management import *
+import uuid
 # Create your views here.
+
+def in_lab(request):
+    print(request)
+    worker_id = str(uuid.uuid4().hex.upper()[0:6])
+    ass_id = str(uuid.uuid4().hex.upper()[0:6])
+    return redirect('/emotion_labeling/experiment1/experiment_reasoning/example/'+worker_id+'/'+ass_id)#HttpResponse("<a >Click here to be redirected</a>")
+
 def experiment1(request, condition, video_title, wid, aid):
     exp_video = Experiment_Video.objects.filter(video_title = video_title)[0]
     if request.method=="POST":
