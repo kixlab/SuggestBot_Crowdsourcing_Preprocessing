@@ -21,22 +21,38 @@ var batch_number = {{batch_number}}
   <div class="col s12">
     <h5>Your task is to group face images of identical person. The faces all appear in the video below.</h5>
     <br/>
-    <div class="col s5" id='vueapp-video'> <!-- *************** first vue app *************** -->
-      <p>Please watch this video to figure out identical faces:</p>
-      <iframe id='player' width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+ url">
-      </iframe>
+    <div class="col s6">
+      <div id='vueapp-video'> <!-- *************** first vue app *************** -->
+        <p>Please watch this video to figure out identical faces:</p>
+        <iframe id='player' width="480" height="270" v-bind:src="'https://www.youtube.com/embed/'+ url">
+        </iframe>
+      </div>
+      <div>
+        <p style="margin-left:10px;"><strong><u>HOW TO GROUP IMAGES:</u></strong></p>
+        <p style="margin-left:10px;"><strong>Step1: Click on the face images that you think is a same person.</strong></p>
+        <p style="margin-left:10px;"><strong>Step2: When finish selecting identical faces, click <span style="color:MediumVioletRed;">GIVE A NAME</span> button.</strong></p>
+        <p style="margin-left:10px;"><strong>Step3: Repeat step 1 and 2 until there is no image left to select <i class="em em-smiley"></i> </strong></p>
+      </div>
     </div>
-    <div class="col s7">
-      <br/>
-      <p><strong><u>HOW TO GROUP IMAGES:</u></strong></p>
-      <p><strong>Step1: Click on the face images that you think is a same person.</strong></p>
-      <p><strong>Step2: When finish selecting identical faces, click <span style="color:MediumVioletRed;">GIVE A NAME</span> button.</strong></p>
-      <p><strong>Step3: Repeat step 1 and 2 until there is no image left to select <i class="em em-smiley"></i> </strong></p>
-      <p><strong>TIP: If you want to correct the name of a face,</strong></p>
+    <div class="col s6">
+      <br/><br/>
+      <p><strong>TIP 1: If you want to correct the name of a face,</strong></p>
       <ol style="text-indent:20px;">
-        <li>select the name tag on the right side, i.e., <strong><span style="color:green;">Pikachu</span></strong>,</li>
+        <li>select the name tag on the right side, i.e., <strong><span style="color:red;">Pikachu</span></strong>,</li>
         <li>select the face you want to correct,</li>
-        <li>click the name tag, i.e., <strong><span style="color:green;">Pikachu</span></strong> again to finish selecting.</li>
+        <li>click the name tag, i.e., <strong><span style="color:red;">Pikachu</span></strong> again to finish selecting.</li>
+      </ol>
+      <p><strong>TIP 2: If you are uncertain which person an image belongs to,</strong></p>
+      <ol style="text-indent:20px;">
+        <li>click <strong><span style="color:green;">NOT SURE WHICH PERSON</span></strong>,</li>
+        <li>select the face images that you are not which person's face it is,</li>
+        <li>click <strong><span style="color:green;">NOT SURE WHICH PERSON</span></strong> again to finish selecting.</li>
+      </ol>
+      <p><strong>TIP 3: If there is an image which is not a human face, i.e., chair, dog, tree, etc,</strong></p>
+      <ol style="text-indent:20px;">
+        <li>click <strong><span style="color:green;">NOT A PERSON</span></strong>,</li>
+        <li>select the images that are not human faces,</li>
+        <li>click <strong><span style="color:green;">NOT A PERSON</span></strong> again to finish selecting.</li>
       </ol>
       <br/>
       <div id="buttons">
@@ -64,8 +80,8 @@ var batch_number = {{batch_number}}
     <p><strong>Name Tags</strong></p>
     <div id='addnametag'></div>
     <!--div><button onclick="change_name()" class="green darken-1 btn" id="change_name1">Pikachu</button></div><br/-->
-    <div><button class="blue darken-1 btn" style="margin-bottom:10px" id="change_name2" disabled>Not Sure Which Person</button><br>
-    <button class="red darken-1 btn" id="change_name3" disabled>Not a Person</button></div><br>
+    <!--div><button onclick="noclue_which_person()" class="darken-1 btn" title="click this if you are not sure which person the selected/highlighted images belong to" style="margin-bottom:10px; background-color: #DAF7A6; color: #808080;" id="nametag1">Not Sure Which Person</button><br-->
+    <!--button onclick="not_a_person()" class="darken-1 btn" title="click this if the selected/highlighted images are not a person, i.e., chair, cup, etc" style="background-color: #DAF7A6; color: #808080;" id="nametag2">Not a Person</button></div><br-->
   </div>
 </div>
 
