@@ -3,7 +3,7 @@ var stop_padding = 5;
 var replay_padding = 3;
 var video_url;
 if(condition.includes("experiment")){
-  video_url = "https://github.com/kixlab/suggestbotData/blob/master/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  video_url = "https://github.com/kixlab/suggestbotData/blob/master/experiment/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 
