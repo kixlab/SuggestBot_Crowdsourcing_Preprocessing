@@ -30,7 +30,7 @@ var batch_number = {{batch_number}}
       <div>
         <p style="margin-left:10px;"><strong><u>HOW TO GROUP IMAGES:</u></strong></p>
         <p style="margin-left:10px;"><strong>Step1: Click on the face images that you think is a same person.</strong></p>
-        <p style="margin-left:10px;"><strong>Step2: When finish selecting identical faces, click <span style="color:MediumVioletRed;">GIVE A NAME</span> button.</strong></p>
+        <p style="margin-left:10px;"><strong>Step2: When finish selecting, click <span style="color:MediumVioletRed;">GROUP THE SELECTED</span> button.</strong></p>
         <p style="margin-left:10px;"><strong>Step3: Repeat step 1 and 2 until there is no image left to select <i class="em em-smiley"></i> </strong></p>
       </div>
     </div>
@@ -38,9 +38,9 @@ var batch_number = {{batch_number}}
       <br/><br/>
       <p><strong>TIP 1: If you want to correct the name of a face,</strong></p>
       <ol style="text-indent:20px;">
-        <li>select the name tag on the right side, i.e., <strong><span style="color:red;">Pikachu</span></strong>,</li>
+        <li>select the name tag on the right side, i.e., <strong><span style="color:red;">Person 1</span></strong>,</li>
         <li>select the face you want to correct,</li>
-        <li>click the name tag, i.e., <strong><span style="color:red;">Pikachu</span></strong> again to finish selecting.</li>
+        <li>click the name tag, i.e., <strong><span style="color:red;">Person 1</span></strong> again to finish selecting.</li>
       </ol>
       <p><strong>TIP 2: If you are uncertain which person an image belongs to,</strong></p>
       <ol style="text-indent:20px;">
@@ -56,7 +56,7 @@ var batch_number = {{batch_number}}
       </ol>
       <br/>
       <div id="buttons">
-        <button onclick="give_name()" name="bleh" class="pink darken-1 btn" id="give_name">GIVE A NAME</button>
+        <button onclick="give_name()" name="bleh" class="pink darken-1 btn" id="give_name">GROUP THE SELECTED</button>
         <button onclick="next_task()" class="btn" disabled id="next_task">Next</button>
         <form method="POST" style="padding:0; display:inline-block;">
           {% csrf_token %}
@@ -70,14 +70,14 @@ var batch_number = {{batch_number}}
 
 <br/>
 <div class="row">
-  <div class="col s9">
+  <div class="col s8">
     <div class="face-image-wrapper">
       <div id="face-images"></div>
     </div>
   </div>
 
-  <div class="col s3">
-    <p><strong>Name Tags</strong></p>
+  <div class="col s4">
+    <p><strong>Click the buttons to modify: </strong></p>
     <div id='addnametag'></div>
     <!--div><button onclick="change_name()" class="green darken-1 btn" id="change_name1">Pikachu</button></div><br/-->
     <!--div><button onclick="noclue_which_person()" class="darken-1 btn" title="click this if you are not sure which person the selected/highlighted images belong to" style="margin-bottom:10px; background-color: #DAF7A6; color: #808080;" id="nametag1">Not Sure Which Person</button><br-->
