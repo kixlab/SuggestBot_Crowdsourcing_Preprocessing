@@ -332,17 +332,6 @@ var step = "{{step}}"
     <h3 v-if="!disabled_task()">Tutorial - hit 'to the task' to proceed</h3>
     <h3 v-if="!loaded">Tutorial - image is being loaded...</h3>
     <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
-    <div v-bind:class="{hidden_item:loaded}" style="max-height:90%; max-width:100%; display:block; margin: auto;" class="preloader-wrapper big active">
-      <div class="spinner-layer spinner-blue-only">
-      <div class="circle-clipper left">
-        <div class="circle"></div>
-      </div><div class="gap-patch">
-        <div class="circle"></div>
-      </div><div class="circle-clipper right">
-        <div class="circle"></div>
-      </div>
-    </div>
-  </div>
   </div>
   <div class='modal-footer'>
     <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
