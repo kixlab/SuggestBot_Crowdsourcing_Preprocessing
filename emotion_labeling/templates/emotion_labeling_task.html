@@ -38,7 +38,9 @@ var step = "{{step}}"
             You will label the emotion of the character in the left, at the moment when the border of the video player blinks in red.
           <p>
           <p>
-            Emotion label includes <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>, <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and <a class='modal-trigger' href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Basic Emotion Class</a>.
+            Emotion label includes <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
+            <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
+            <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Basic Emotion Class</a>.
           </p>
           <p v-if="condition=='experiment_reasoning'">
             You will also give the reason why you labeled the emotion of the character like you did.

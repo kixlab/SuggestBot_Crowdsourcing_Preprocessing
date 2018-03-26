@@ -71,5 +71,6 @@ $(document).ready(function(){
   document.getElementById('tuto_img').onload = function(){
     tuto_vue.loaded = true;
   }
-  
+  $(".tooltipped").tooltip({html: true});
+
 })
