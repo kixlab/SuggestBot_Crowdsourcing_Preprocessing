@@ -328,12 +328,12 @@ var step = "{{step}}"
 
 <div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
   <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
-    <img v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:100%; max-width:100%; display:block; margin: auto;"/>
+    <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:100%; max-width:100%; display:block; margin: auto;"/>
   </div>
   <div class='modal-footer'>
-    <span :disabled="cur_tuto==0" class='btn red darken-1' v-on:click="previous_step">Prev</span>
-    <span :disabled="cur_tuto >= max_tuto" class='btn blue darken-1' v-on:click="next_step">Next</span>
-    <span :disabled="!dismissible()" class='btn modal-action modal-close blue-grey darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+    <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="disabled_task()" class='btn modal-action modal-close blue-grey darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
   </div>
 </div>
 <script>
