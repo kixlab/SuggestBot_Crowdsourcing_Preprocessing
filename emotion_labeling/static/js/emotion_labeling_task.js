@@ -128,7 +128,11 @@ var vjs_options = {
     volumePanel: {inline: false}
   },
 }
+document.getElementById('main_video').onloadedmetadata = function(){
+    load_markers()
+}
 var player = videojs('main_video', vjs_options)
+
 player.src(video_url)
   // when seeking for unseen video parts, return to current point
 player.on('seeking', function(){
@@ -156,79 +160,15 @@ player.on('timeupdate', function(){
     }
   }
 })
+
+
 // make div for signify how much a worker has seen
 $(".vjs-progress-holder").prepend("<div id='playedBar' class='cyan lighten-3'></div>");
 
 //generate markers for prompt
   //generate the data structure for markers
 var markers=[];
-for(var key in prompt_time){
-  markers.push({
-    time: key,
-    text: "Task",
-  })
-  markers.push({
-    time: parseFloat(key) + parseFloat(stop_padding),
-    text: "Hidden",
-    class: "HiddenMarker",
-  })
-}
 
-player.markers({
-  markerStyle:{
-    'width': '5px',
-    'border-radius' : '0%',
-
-  },
-  onMarkerReached: function(marker){
-    // only when the worker did saw the marked time before
-    if(marker['time']<maximal_time){
-      // when passing through markered time to be labeled
-      if(prompt_time[marker['time']]==false || parseFloat(marker['time'])==vue_app.current_marker){
-        //make it blink in red
-        $("#main_video").css("border-color", "red");
-        window.setTimeout(function(){
-          $("#main_video").css("border-color", "transparent");
-        }, 1000)
-        // give the marker id :)
-        if($("[data-marker-key='"+marker['key']+"']").attr('id')==undefined){
-          $("[data-marker-key='"+marker['key']+"']").attr('id', 'stop_marker_'+marker['time'].toString())
-        }
-      }else if(prompt_time[marker['time']-stop_padding]==false){
-        //if reached blue marker is not done yet
-        //make them rewatch!
-        player.pause()
-        $("#stop_marker_"+(marker['time']-stop_padding).toString()).addClass("currentMarker")
-        vue_app.current_marker = marker['time']-stop_padding
-
-        var keys = Object.keys(prompt_time);
-        var key_idx = keys.indexOf(vue_app.current_marker.toString())
-        if(key_idx<keys.length){
-          vue_app.tagging_max_time = parseFloat(keys[key_idx+1])
-        }else{
-          vue_app.tagging_max_time = player.duration()+replay_padding
-        }
-
-        alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
-        prompt_time[marker['time']-stop_padding] = true;
-        vue_app.state = 'enforced_replay';
-        player.currentTime(player.currentTime()-stop_padding-replay_padding)
-        player.play()
-        player.controls(false)
-        console.log(replay_padding*2000)
-        window.setTimeout(after_replay, 2000*replay_padding)
-      }
-    }
-  },
-  onMarkerClick: function(marker){
-    if(vue_app.state=="watching"){
-      if($("[data-marker-key='"+marker['key']+"']").hasClass("doneMarker")){
-        recast_data(marker['time'])
-      }
-    }
-  },
-  markers: markers,
-})
 
 // after rewatching
 function after_replay(){
@@ -290,4 +230,83 @@ function posting_data(dict, marker_time){
 
   }
 
+}
+
+function load_markers(){
+  for(var key in prompt_time){
+    markers.push({
+      time: parseFloat(key),
+      text: "Task",
+    })
+    var t = parseFloat(key) + parseFloat(stop_padding)
+    console.log(t)
+    console.log(player)
+    console.log(player.duration())
+    if(t>player.duration()){
+      t = player.duration()-1
+      console.log('overflow')
+    }
+    markers.push({
+      time: t,
+      text: "Hidden",
+      class: "HiddenMarker",
+    })
+  }
+
+  player.markers({
+    markerStyle:{
+      'width': '5px',
+      'border-radius' : '0%',
+
+    },
+    onMarkerReached: function(marker){
+      console.log('reached')
+      // only when the worker did saw the marked time before
+      if(marker['time']<maximal_time){
+        // when passing through markered time to be labeled
+        if(prompt_time[marker['time']]==false || parseFloat(marker['time'])==vue_app.current_marker){
+          //make it blink in red
+          $("#main_video").css("border-color", "red");
+          window.setTimeout(function(){
+            $("#main_video").css("border-color", "transparent");
+          }, 1000)
+          // give the marker id :)
+          if($("[data-marker-key='"+marker['key']+"']").attr('id')==undefined){
+            $("[data-marker-key='"+marker['key']+"']").attr('id', 'stop_marker_'+marker['time'].toString())
+          }
+        }else if(prompt_time[marker['time']-stop_padding]==false || marker['time']==player.duration()-1){
+          //if reached blue marker is not done yet
+          //make them rewatch!
+          player.pause()
+          $("#stop_marker_"+(marker['time']-stop_padding).toString()).addClass("currentMarker")
+          vue_app.current_marker = marker['time']-stop_padding
+
+          var keys = Object.keys(prompt_time);
+          var key_idx = keys.indexOf(vue_app.current_marker.toString())
+          if(key_idx<keys.length){
+            vue_app.tagging_max_time = parseFloat(keys[key_idx+1])
+          }else{
+            vue_app.tagging_max_time = player.duration()+replay_padding
+          }
+
+          alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
+          prompt_time[marker['time']-stop_padding] = true;
+          vue_app.state = 'enforced_replay';
+          player.currentTime(player.currentTime()-stop_padding-replay_padding)
+          player.play()
+          player.controls(false)
+          console.log(replay_padding*2000)
+          window.setTimeout(after_replay, 2000*replay_padding)
+        }
+      }
+    },
+    onMarkerClick: function(marker){
+      if(vue_app.state=="watching"){
+        if($("[data-marker-key='"+marker['key']+"']").hasClass("doneMarker")){
+          recast_data(marker['time'])
+        }
+      }
+    },
+    markers: markers,
+  })
 }

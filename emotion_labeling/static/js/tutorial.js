@@ -12,8 +12,6 @@ var tuto_vue = new Vue({
       return (this.cur_tuto==0)||!this.loaded;
     },
     disabled_next: function(){
-      console.log(this.loaded)
-      console.log((this.cur_tuto>=this.max_tuto)||(!this.loaded))
       return (this.cur_tuto>=this.max_tuto)||(!this.loaded);
     },
     disabled_task: function(){
@@ -30,7 +28,6 @@ var tuto_vue = new Vue({
       if(this.cur_tuto<this.max_tuto){
         this.cur_tuto++;
         this.loaded = false;
-        console.log(this.loaded)
       }
     },
     previous_step: function(){
@@ -74,4 +71,5 @@ $(document).ready(function(){
   document.getElementById('tuto_img').onload = function(){
     tuto_vue.loaded = true;
   }
+  
 })
