@@ -245,12 +245,20 @@ function load_markers(){
     if(t>player.duration()){
       t = player.duration()-1
       console.log('overflow')
+      markers.push({
+        time: t,
+        text: "Hidden",
+        class: "HiddenMarker",
+        last: parseFloat(key),
+      })
+    }else{
+      markers.push({
+        time: t,
+        text: "Hidden",
+        class: "HiddenMarker",
+      })
     }
-    markers.push({
-      time: t,
-      text: "Hidden",
-      class: "HiddenMarker",
-    })
+
   }
 
   player.markers({
@@ -274,25 +282,35 @@ function load_markers(){
           if($("[data-marker-key='"+marker['key']+"']").attr('id')==undefined){
             $("[data-marker-key='"+marker['key']+"']").attr('id', 'stop_marker_'+marker['time'].toString())
           }
-        }else if(prompt_time[marker['time']-stop_padding]==false || marker['time']==player.duration()-1){
+        }else if(prompt_time[marker['time']-stop_padding]==false || prompt_time[marker['last']]==false){
           //if reached blue marker is not done yet
           //make them rewatch!
           player.pause()
           $("#stop_marker_"+(marker['time']-stop_padding).toString()).addClass("currentMarker")
-          vue_app.current_marker = marker['time']-stop_padding
+          if(marker['time']==player.duration()-1){
+            vue_app.current_marker = marker['last'];
+          }else{
+            vue_app.current_marker = marker['time']-stop_padding
+          }
+
 
           var keys = Object.keys(prompt_time);
           var key_idx = keys.indexOf(vue_app.current_marker.toString())
-          if(key_idx<keys.length){
+          if(key_idx<keys.length-1){
             vue_app.tagging_max_time = parseFloat(keys[key_idx+1])
           }else{
             vue_app.tagging_max_time = player.duration()+replay_padding
           }
 
           alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
-          prompt_time[marker['time']-stop_padding] = true;
+          if(marker['time']==player.duration()-1){
+            player.currentTime(player.duration()-1-replay_padding)
+            prompt_time[marker['last']] = true;
+          }else{
+            player.currentTime(player.currentTime()-stop_padding-replay_padding)
+            prompt_time[marker['time']-stop_padding] = true;
+          }
           vue_app.state = 'enforced_replay';
-          player.currentTime(player.currentTime()-stop_padding-replay_padding)
           player.play()
           player.controls(false)
           console.log(replay_padding*2000)
