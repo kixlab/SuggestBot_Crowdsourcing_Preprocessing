@@ -11,16 +11,18 @@ var directory = "/static/face_images/";
 // max number of face images to be loaded
 var max_num_img_loaded = 20;
 //max number of name tag that can be created
-var max_num_nametag = 7;
+var max_num_nametag = 9;
 
 
 // give character name for each group to distinguish different groups
-var character_name = ['Pikachu', 'Eevee', 'Mew', 'Squirtle', 'Raichu', 'Snorlax', 'Ditto', 'Not Sure Which Person', 'Not a Person'];
+var character_name = ['Not Sure Which Person', 'Not a Person', 'Pikachu', 'Eevee', 'Mew', 'Squirtle', 'Raichu', 'Snorlax', 'Ditto'];
 // nametag name
-var namecolor = ['pink', 'green', 'blue', 'brown', 'red', 'skyblue', 'yellow', 'gray', 'gray'];
+var namecolor = ['gray', 'gray', 'pink', 'green', 'blue', 'brown', 'red', 'skyblue', 'yellow'];
 // the grouping result will be saved below
 var grouping_array = [];
 var temp_grouping_array = [];
+var min_unselected = [];
+
 // actual numaber of face images loaded
 var actual_num_img_loaded = 0;
 // current name tag id. that the worker is working on
@@ -111,11 +113,24 @@ window.onload = function() {
   for (var i=0; i<actual_num_img_loaded; i++){
     temp_grouping_array[i] = false;
   }
-  grouping_array[0] = temp_grouping_array.slice(0);
+
+  // display NOT SURE WHICH PERSON and NOT A PERSON button
+  grouping_array[cur_name] = temp_grouping_array.slice(0);
+  create_nametag();
+  cur_name++;
+  num_name++;
+  grouping_array[cur_name] = temp_grouping_array.slice(0);
+  min_unselected = temp_grouping_array.slice(0);
+  // the first unselected image is highlighted
+  highlight_min_unselected();
+  create_nametag();
+  cur_name++;
+  num_name++;
+  grouping_array[cur_name] = temp_grouping_array.slice(0);
 
   // check the first faceimage as selected
-  grouping_array[0][0] = true;
-  console.log("grouping_array[0]", grouping_array[0]);
+  grouping_array[2][0] = true;
+  console.log("grouping_array[2]", grouping_array[2]);
   document.getElementById("face1").style.border = "10px solid yellow";
 }
 
@@ -228,6 +243,7 @@ function create_nametag(){
   };
   // add onclick button to the name tags [end]
 }
+
 
 // the first unselected image is highlighted
 function highlight_min_unselected(){
