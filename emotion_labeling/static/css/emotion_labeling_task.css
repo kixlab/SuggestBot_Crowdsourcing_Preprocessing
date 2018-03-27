@@ -51,6 +51,7 @@
 .HiddenMarker{
   width: 1px !important;
   background-color: #80deea !important;
+  visibility: hidden !important;
 }
 
 .vjs-fade-in,.vjs-fade-out {
@@ -60,7 +61,7 @@ transition-duration: 0s!important;
 }
 
 #main_video{
-  border: 3px solid transparent;
+  border: 5px solid transparent;
 }
 
 .currentMarker{
@@ -89,4 +90,12 @@ transition-duration: 0s!important;
 
 .hidden_item{
   display: none !important;
+}
+
+.vjs-fullscreen-control {
+    display: none !important;
+}
+
+#replay_btn{
+  visibility: hidden;
 }

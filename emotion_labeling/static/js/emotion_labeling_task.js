@@ -2,11 +2,17 @@
 var stop_padding = 5;
 var replay_padding = 3;
 var video_url;
+var times=[];
+var emotion_category =[
+  'fearful', 'angry', 'sad', 'disgusted', 'happy', 'surprised', 'frustrated', 'depressed', 'excited', 'neutral'
+]
+for(var key in prompt_time){
+  times.push(parseFloat(key))
+}
+times.sort(function(a, b){return a-b;})
 if(condition.includes("experiment")){
   video_url = "https://github.com/kixlab/suggestbotData/blob/master/experiment/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
-
-
 
 // Below part is for vue app
 var vue_app = new Vue({
@@ -16,11 +22,13 @@ var vue_app = new Vue({
     step: step,
     state: "watching", // watching, enforced_replay, tagging
     current_marker: -1,
+    replay_start_time: -1,
     tagging_max_time: -1,
     collected_data: {},
     submittable: false,
     condition: condition,
     video_url: video_url,
+    proceed_action: "ADD",
   },
   methods:{
     //add label data to the colleted data-- for label and reason condition!
@@ -35,13 +43,16 @@ var vue_app = new Vue({
         var valence = $("input[name='valence']:checked").val()
         var arousal = $("input[name='arousal']:checked").val()
         var category = $("input[name='ekman']:checked").attr("id")
+        if(category == 'other'){
+          category = $("input[name='for_other']").val()
+        }
         var reasoning = $("#reasoning").val()
         if(message=="no_figure"){
           // if worker decided that no character exist, then store string that signify that no figure exists
           this.collected_data[this.current_marker] = "no_figure"
         }else{
           //else,
-          if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8){
+          if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8 || category==""){
             // if values are not filled make workers fill the values properly. (Escape)
             alert("Select values, or write proper reasoning to proceed.")
             return
@@ -80,6 +91,7 @@ var vue_app = new Vue({
       $("input[name='arousal']").prop('checked', false)
       if(this.step=='label_and_reason'){
         $("input[name='ekman']").prop('checked', false)
+        $("input[name='for_other']").val("")
         $("#reasoning").val("")
       }else if(this.step=='sanity_check'){
         $(".emotion_word_check").removeClass('emotion_word_check_highlighted')
@@ -91,7 +103,10 @@ var vue_app = new Vue({
 
         //change the state to 'watching' state
         this.state='watching'
+        $('#replay_btn').css("visibility","hidden")
         //change marker to 'done status'
+        $("#maxBar").css("width", "0%");
+        $(".emotion_marker").removeClass("HiddenMarker")
         $("#stop_marker_"+this.current_marker).removeClass("currentMarker").addClass("doneMarker")
         // reset current marker variable
         this.current_marker = -1;
@@ -100,6 +115,7 @@ var vue_app = new Vue({
           alert("Now you labeled character's emotion for all required moments. If you do not think revision is necessary, return with submit button below.")
           vue_app.submittable = true;
         }
+        vue_app.current_action_add()
         // play the video
         player.play()
 
@@ -113,7 +129,13 @@ var vue_app = new Vue({
     },
     no_figure_option: function(){
       return (this.step=='label_and_reason' && this.condition=='data_collection')
-    }
+    },
+    current_action_add: function(){
+      this.proceed_action = "ADD"
+    },
+    current_action_revise: function(){
+      this.proceed_action = "REVISE"
+    },
   }
 })
 
@@ -162,9 +184,11 @@ player.on('timeupdate', function(){
 })
 
 
-// make div for signify how much a worker has seen
+// make div for signify how much a worker has seen, replay button, etc
+$(".vjs-control-bar").append("<button id='replay_btn' class='vjs-control vjs-button' onclick='replay()'></button>")
+$("#replay_btn").append("<i class='small material-icons' style='margin-top: 5px; font-size:20px;'>replay</i>")
 $(".vjs-progress-holder").prepend("<div id='playedBar' class='cyan lighten-3'></div>");
-
+$(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 100%; background-color: black; width: 0%;'></div>");
 //generate markers for prompt
   //generate the data structure for markers
 var markers=[];
@@ -178,14 +202,16 @@ function after_replay(){
   player.pause()
   player.controls(true)
   vue_app.state = "tagging";
+  $('#replay_btn').css("visibility","hidden")
 }
 
 //recast data to the input field, for emotion labeling and reasoning
 function recast_data(marker_time){
   player.pause()
   vue_app.state="tagging";
+  $('#replay_btn').css("visibility","hidden")
   vue_app.current_marker = parseFloat(marker_time);
-
+  vue_app.replay_start_time = vue_app.current_marker-replay_padding
   var keys = Object.keys(prompt_time);
   var key_idx = Object.keys(vue_app.collected_data).length;
   if(key_idx<keys.length){
@@ -193,8 +219,10 @@ function recast_data(marker_time){
   }else{
     vue_app.tagging_max_time = player.duration()+replay_padding
   }
-
-  $("#stop_marker_"+marker_time).removeClass('doneMarker').addClass('currentMarker')
+  var stopper_percentage = (1-vue_app.tagging_max_time/player.duration())*100
+  $("#maxBar").css("width", stopper_percentage.toString()+"%")
+  $(".emotion_marker").addClass("HiddenMarker")
+  $("#stop_marker_"+marker_time).removeClass('doneMarker').removeClass("HiddenMarker").addClass('currentMarker')
   if(vue_app.step=='label_and_reason'){
     if(vue_app.collected_data[marker_time]!= 'no_figure'){
       posting_data(vue_app.collected_data, marker_time)
@@ -209,7 +237,7 @@ function recast_data(marker_time){
     }
     $("#"+checked).prop('checked', true)
   }
-
+  vue_app.current_action_revise()
 
 }
 
@@ -222,7 +250,12 @@ function posting_data(dict, marker_time){
   $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
   $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
   if(vue_app.step=="label_and_reason"){
-    $("#"+ekman_val).prop('checked', true);
+    if(emotion_category.indexOf(ekman_val)==-1){
+      $("#other").prop('checked', true);
+      $("#for_other").val(ekman_val)
+    }else{
+      $("#"+ekman_val).prop('checked', true);
+    }
     $("#reasoning").val(reasoning_val)
   }else if(vue_app.step=="sanity_check"){
     $("#"+ekman_val+"_check").addClass("emotion_word_check_highlighted")
@@ -232,11 +265,23 @@ function posting_data(dict, marker_time){
 
 }
 
+function replay(){
+  if(vue_app.current_marker != -1){
+    player.currentTime(vue_app.current_marker - replay_padding)
+    vue_app.state = 'enforced_replay';
+    player.play()
+    player.controls(false)
+    console.log(replay_padding*2000)
+    window.setTimeout(after_replay, 2000*replay_padding)
+  }
+}
+
 function load_markers(){
   for(var key in prompt_time){
     markers.push({
       time: parseFloat(key),
       text: "Task",
+      class: "emotion_marker",
     })
     var t = parseFloat(key) + parseFloat(stop_padding)
     console.log(t)
@@ -265,7 +310,6 @@ function load_markers(){
     markerStyle:{
       'width': '5px',
       'border-radius' : '0%',
-
     },
     onMarkerReached: function(marker){
       console.log('reached')
@@ -286,7 +330,9 @@ function load_markers(){
           //if reached blue marker is not done yet
           //make them rewatch!
           player.pause()
-          $("#stop_marker_"+(marker['time']-stop_padding).toString()).addClass("currentMarker")
+
+          $(".emotion_marker").addClass("HiddenMarker")
+          $("#stop_marker_"+(marker['time']-stop_padding).toString()).removeClass("HiddenMarker").addClass("currentMarker")
           if(marker['time']==player.duration()-1){
             vue_app.current_marker = marker['last'];
           }else{
@@ -302,19 +348,22 @@ function load_markers(){
             vue_app.tagging_max_time = player.duration()+replay_padding
           }
 
+          var stopper_percentage = (1-vue_app.tagging_max_time/player.duration())*100
+          $("#maxBar").css("width", stopper_percentage.toString()+"%")
+
           alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
-          if(marker['time']==player.duration()-1){
+          vue_app.replay_start_time = vue_app.current_marker-replay_padding
+          prompt_time[vue_app.current_marker] = true;
+
+          /*if(marker['time']==player.duration()-1){
             player.currentTime(player.duration()-1-replay_padding)
             prompt_time[marker['last']] = true;
           }else{
             player.currentTime(player.currentTime()-stop_padding-replay_padding)
             prompt_time[marker['time']-stop_padding] = true;
-          }
-          vue_app.state = 'enforced_replay';
-          player.play()
-          player.controls(false)
-          console.log(replay_padding*2000)
-          window.setTimeout(after_replay, 2000*replay_padding)
+          }*/
+          replay()
+          vue_app.current_action_add()
         }
       }
     },
