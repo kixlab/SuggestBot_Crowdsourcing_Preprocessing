@@ -15,9 +15,9 @@ var max_num_nametag = 9;
 
 
 // give character name for each group to distinguish different groups
-var character_name = ['Not Sure Which Person', 'Not a Person', 'Pikachu', 'Eevee', 'Mew', 'Squirtle', 'Raichu', 'Snorlax', 'Ditto'];
+var character_name = ['Not Sure Which Person', 'Not a Person', 'Person 1', 'Person 2', 'Person 3', 'Person 4', 'Person 5', 'Person 6', 'Person 7'];
 // nametag name
-var namecolor = ['gray', 'gray', 'pink', 'green', 'blue', 'brown', 'red', 'skyblue', 'yellow'];
+var namecolor = ['gray', 'gray', 'pink', 'green', 'blue', 'brown', 'yellow', 'red', 'skyblue'];
 // the grouping result will be saved below
 var grouping_array = [];
 var temp_grouping_array = [];
@@ -120,18 +120,13 @@ window.onload = function() {
   cur_name++;
   num_name++;
   grouping_array[cur_name] = temp_grouping_array.slice(0);
-  min_unselected = temp_grouping_array.slice(0);
-  // the first unselected image is highlighted
-  highlight_min_unselected();
   create_nametag();
   cur_name++;
   num_name++;
   grouping_array[cur_name] = temp_grouping_array.slice(0);
+  min_unselected = temp_grouping_array.slice(0);
 
-  // check the first faceimage as selected
-  grouping_array[2][0] = true;
-  console.log("grouping_array[2]", grouping_array[2]);
-  document.getElementById("face1").style.border = "10px solid yellow";
+  //document.getElementById("face1").style.border = "10px solid yellow";
 }
 
 
@@ -139,25 +134,36 @@ window.onload = function() {
 // functions ///////////////////////////////////////////////////////////////////
 function give_name(){
   if (num_name < max_num_nametag){
+    // if no image is selected,
+    var check_selected = 0;
+    for (var i=0; i<actual_num_img_loaded; i++){
+      if (grouping_array[cur_name][i] == true){
+        check_selected = 1;
+      }
+    }
+    if (check_selected == 0){
+      alert("Please select at least one image to create a new group.");
+    }
+    else {
+      // get number of images that are finished being grouped
+      get_num_grouped_images();
 
-    // get number of images that are finished being grouped
-    get_num_grouped_images();
+      // apply opacity to all images that are finished being grouped
+      apply_opacity();
 
-    // apply opacity to all images that are finished being grouped
-    apply_opacity();
+      // create a name Tags
+      create_nametag();
 
-    // create a name Tags
-    create_nametag();
+      num_name++;
+      cur_name++;
 
-    num_name++;
-    cur_name++;
+      // create another group array
+      grouping_array[num_name] = temp_grouping_array.slice(0);
+      min_unselected = temp_grouping_array.slice(0);
 
-    // create another group array
-    grouping_array[num_name] = temp_grouping_array.slice(0);
-    min_unselected = temp_grouping_array.slice(0);
-
-    // the first unselected image is highlighted
-    highlight_min_unselected();
+      // the first unselected image is highlighted
+      //highlight_min_unselected();
+    }
   }
   else {
     alert("sorry, you reached the maximum number of name tags that can be generated is reached.");
@@ -192,15 +198,29 @@ function create_nametag(){
   var t = document.createTextNode(character_name[num_name]);
   nametag.appendChild(t);
   var location = document.getElementById("addnametag");
+  var exit_span = document.createElement("span");
+  var exit = document.createTextNode(" Click again to exit");
   var br = document.createElement("br");
   location.appendChild(nametag);
+  //location.appendChild(exit_span);
+  //exit_span.appendChild(exit);
+  //exit_span.id = "exit_span" + (num_name+1);
+  //exit_span.hidden = true;
   location.appendChild(br);
+
   // add onclick button to the name tags
   nametag.onclick = function() {
+
+    var selected_nametag = this.id;
+
     if (flag_nametag == undefined){
-      var selected_nametag = this.id;
       cur_name = selected_nametag.replace(/^nametag/, '');
       cur_name--;
+
+      document.getElementById(selected_nametag).firstChild.data = "Click to Exit Edit Mode";
+      // show exit guide span attr
+      //var exit_span = "exit_span" + (cur_name+1);
+      //document.getElementById(exit_span).hidden = false;
 
       // disable other buttons
       document.getElementById('give_name').disabled = true;
@@ -224,6 +244,7 @@ function create_nametag(){
     }
     else {
       document.getElementById('give_name').disabled = false;
+      document.getElementById(selected_nametag).firstChild.data = character_name[cur_name];
       for (var i=0; i<num_name; i++){
         if (i != cur_name){
           var nametag_id = "nametag" + (i+1);
@@ -235,7 +256,7 @@ function create_nametag(){
       // apply opacity to all images that are finished being grouped
       apply_opacity();
       // the first unselected image is highlighted
-      highlight_min_unselected();
+      //highlight_min_unselected();
 
       flag_nametag = undefined;
       cur_name = num_name;
@@ -299,8 +320,8 @@ function apply_opacity(){
     for (var j=0; j<actual_num_img_loaded; j++){
       if (grouping_array[i][j] == true){
         var img_id = "face" + (j+1);
-        document.getElementById(img_id).style.opacity = "0.2";
-        document.getElementById(img_id).style.border = "10px solid white";
+        document.getElementById(img_id).style.opacity = "0.3";
+        document.getElementById(img_id).style.border = "10px solid " + namecolor[i];
         document.getElementById(img_id).style.pointerEvents = "none";
       }
     }
