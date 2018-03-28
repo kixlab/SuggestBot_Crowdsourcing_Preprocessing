@@ -110,7 +110,7 @@ transition-duration: 0s!important;
 .emotion_td_label{
   font-size: 12px;
   width: 35px;
-  border-left: 1px solid #9e9e9e;
+  border-right: 1px solid #9e9e9e;
 }
 
 td{

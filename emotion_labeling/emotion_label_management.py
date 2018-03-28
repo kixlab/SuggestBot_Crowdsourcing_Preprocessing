@@ -5,13 +5,40 @@ from random import shuffle
 
 EMO_VOTE_NUM = 3
 TASK_TIME_LIMIT = 30
-
+EMOTION_CATEGORY = [
+  'fearful', 'angry', 'sad', 'disgusted', 'happy', 'surprised', 'frustrated', 'depressed', 'excited', 'neutral'
+]
 def Experiment_Label_Store(exp_video, result, w_id, a_id, condition):
     labels = result['labels']
     token = str(uuid.uuid4().hex.upper()[0:6])
     for time in labels:
         label = labels[time]
+        print(label)
         label_ds = Emotion_label_experiment(experiment_video = exp_video, time=float(time), valence=int(label['valence']), arousal=int(label['arousal']), category = label['category'], reasoning = label['reasoning'], wid= w_id, aid= a_id, condition=condition)
+        for emotion in label['minor_category']:
+            if emotion in EMOTION_CATEGORY:
+                if emotion == 'fearful':
+                    label_ds.fearful_m = True
+                elif emotion == 'angry':
+                    label_ds.angry_m = True
+                elif emotion == 'sad':
+                    label_ds.sad_m = True
+                elif emotion == 'disgusted':
+                    label_ds.disgusted_m = True
+                elif emotion == 'happy':
+                    label_ds.happy_m = True
+                elif emotion == 'surprised':
+                    label_ds.surprised_m = True
+                elif emotion == 'frustrated':
+                    label_ds.frustrated_m = True
+                elif emotion == 'depressed':
+                    label_ds.depressed_m = True
+                elif emotion == 'excited':
+                    label_ds.excited_m = True
+                elif emotion == 'neutral':
+                    label_ds.neutral_m = True
+            else:
+                label_ds.other_m = emotion
         label_ds.save()
 
     return token
@@ -19,7 +46,7 @@ def Experiment_Label_Store(exp_video, result, w_id, a_id, condition):
 def Experiment_Check_Task_Deployer(prompt_time, video, w_id, a_id):
     return_dict = {}
     for key in prompt_time:
-        # ** should only filter out those in 'experiment_reasoning' class! ** 
+        # ** should only filter out those in 'experiment_reasoning' class! **
         filtered_labels = Emotion_label_experiment.objects.filter(experiment_video = video, time = key, condition='experiment_reasoning').annotate(num_task = Count('emotion_check_experiment')).filter(num_task__lt = EMO_VOTE_NUM)
         if filtered_labels.count() > 0:
             min_num_task = filtered_labels.aggregate(Min('num_task'))['num_task__min']

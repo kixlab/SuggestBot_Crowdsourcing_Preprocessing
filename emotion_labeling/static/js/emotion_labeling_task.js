@@ -44,6 +44,20 @@ var vue_app = new Vue({
         var valence = $("input[name='valence']:checked").val()
         var arousal = $("input[name='arousal']:checked").val()
         var category = $("input[name='ekman']:checked").attr("id")
+        var minor_category = []
+        minor_category.push(category)
+        $("input[name='ekman_mul']:checked").map(function(_, e){
+          var topush;
+          if($(e).val() != "other"){
+            topush=$(e).val()
+          }else{
+            topush=$("#for_other").val()
+          }
+          if(minor_category.indexOf(topush)<0){
+            minor_category.push(topush)
+          }
+
+        })
         if(category == 'other'){
           category = $("input[name='for_other']").val()
         }
@@ -63,6 +77,7 @@ var vue_app = new Vue({
               'valence' : valence,
               'arousal' : arousal,
               'category' : category,
+              'minor_category': minor_category,
               'reasoning' : reasoning,
             }
             this.collected_data[this.current_marker] = dict
@@ -92,6 +107,7 @@ var vue_app = new Vue({
       $("input[name='arousal']").prop('checked', false)
       if(this.step=='label_and_reason'){
         $("input[name='ekman']").prop('checked', false)
+        $("input[name='ekman_mul']").prop('checked', false)
         $("input[name='for_other']").val("")
         $("#reasoning").val("")
       }else if(this.step=='sanity_check'){
@@ -246,6 +262,7 @@ function posting_data(dict, marker_time){
   var val_val = dict[marker_time]['valence']
   var aro_val = dict[marker_time]['arousal']
   var ekman_val = dict[marker_time]['category']
+  var ekman_mul_val = dict[marker_time]['minor_category']
   var reasoning_val = dict[marker_time]['reasoning']
 
   $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
@@ -258,6 +275,15 @@ function posting_data(dict, marker_time){
       $("#"+ekman_val).prop('checked', true);
     }
     $("#reasoning").val(reasoning_val)
+    for(ek_m_v in ekman_mul_val){
+      console.log(ekman_mul_val[ek_m_v])
+      if(emotion_category.indexOf(ekman_mul_val[ek_m_v])>=0){
+        $("#"+ekman_mul_val[ek_m_v]+"_mul").prop('checked', true);
+      }else{
+        $("#other_mul").prop('checked', true);
+        $("#for_other").val(ekman_mul_val[ek_m_v])
+      }
+    }
   }else if(vue_app.step=="sanity_check"){
     $("#"+ekman_val+"_check").addClass("emotion_word_check_highlighted")
     $("#current_reasoning").text(reasoning_val)
