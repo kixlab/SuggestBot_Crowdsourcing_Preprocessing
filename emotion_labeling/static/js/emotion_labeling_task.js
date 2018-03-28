@@ -21,6 +21,7 @@ var vue_app = new Vue({
   data:{
     step: step,
     state: "watching", // watching, enforced_replay, tagging
+    tagging_phase: 0,
     current_marker: -1,
     replay_start_time: -1,
     tagging_max_time: -1,

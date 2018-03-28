@@ -256,31 +256,152 @@ var step = "{{step}}"
     </div>
     <!-- emotion category radios -->
     <div v-if="step=='label_and_reason'" id="emotion_cateogries" class="row" style="margin-bottom: 0px">
-      <input name="ekman" type="radio" id="fearful"/>
-      <label for="fearful" class="ekman_label">Fearful</label>
-      <input name="ekman" type="radio" id="angry"/>
-      <label for="angry" class="ekman_label">Angry</label>
-      <input name="ekman" type="radio" id="sad"/>
-      <label for="sad" class="ekman_label">Sad</label>
-      <input name="ekman" type="radio" id="disgusted"/>
-      <label for="disgusted" class="ekman_label">Disgusted</label>
-      <input name="ekman" type="radio" id="happy"/>
-      <label for="happy" class="ekman_label">Happy</label>
-      <input name="ekman" type="radio" id="surprised"/>
-      <label for="surprised" class="ekman_label">Surprised</label>
-      <input name="ekman" type="radio" id="frustrated"/>
-      <label for="frustrated" class="ekman_label">Frustrated</label>
-      <input name="ekman" type="radio" id="depressed"/>
-      <label for="depressed" class="ekman_label">Depressed</label>
-      <input name="ekman" type="radio" id="excited"/>
-      <label for="excited" class="ekman_label">Excited</label>
-      <input name="ekman" type="radio" id="neutral"/>
-      <label for="neutral" class="ekman_label">Neutral</label>
-      <div>
-      <input name="ekman" type="radio" id="other"/>
-      <label for="other" class="ekman_label" style="border-right: none; padding-right: 0;">Other</label>
-      <input name="for_other" type='text' id="for_other" style="width: 100px; height: 25px; margin-bottom: 0; border: 0.5px solid #9e9e9e; border-radius: 0;"/>
-    </div>
+      <table class="col s12">
+        <tbody>
+          <tr>
+            <th>major</th>
+            <th>minor</th>
+            <th>emotion</th>
+            <th>major</th>
+            <th>minor</th>
+            <th>emotion</th>
+            <th>major</th>
+            <th>minor</th>
+            <th>emotion</th>
+          </tr>
+          <tr>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="fearful"/>
+              <label for="fearful" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="fearful_mul"/>
+              <label for="fearful_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Fearful
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="angry"/>
+              <label for="angry" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="angry_mul"/>
+              <label for="angry_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Angry
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="sad"/>
+              <label for="sad" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="sad_mul"/>
+              <label for="sad_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Sad
+            </td>
+          </tr>
+          <tr>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="disgusted"/>
+              <label for="disgusted" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="disgusted_mul"/>
+              <label for="disgusted_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Disgusted
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="happy"/>
+              <label for="happy" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="happy_mul"/>
+              <label for="happy_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Happy
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="surprised"/>
+              <label for="surprised" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="surprised_mul"/>
+              <label for="surprised_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Surprised
+            </td>
+          </tr>
+          <tr>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="frustrated"/>
+              <label for="frustrated" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="frustrated_mul"/>
+              <label for="frustrated_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Frustrated
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="depressed"/>
+              <label for="depressed" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="depressed_mul"/>
+              <label for="depressed_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Depressed
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="excited"/>
+              <label for="excited" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="excited_mul"/>
+              <label for="excited_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Excited
+            </td>
+          </tr>
+          <tr>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="depressed"/>
+              <label for="depressed" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="neutral_mul"/>
+              <label for="neutral_mul" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td emotion_td_label">
+              Neutral
+            </td>
+            <td class="emotion_td">
+              <input name="ekman" type="radio" id="other"/>
+              <label for="other" class="ekman_label"></label>
+            </td>
+            <td class="emotion_td">
+              <input name="ekman_mul" type="checkbox" id="other_mul"/>
+              <label for="other_mul" class="ekman_label"></label>
+            </td>
+            <td colspan='4'class="emotion_td emotion_td_label">
+              Other
+              <input name="for_other" type='text' id="for_other" style="width: 100px; height: 25px; margin-bottom: 0; border: 0.5px solid #9e9e9e; border-radius: 0;"/>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
     </div>
     <!-- checking other's emotion label -->
     <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
