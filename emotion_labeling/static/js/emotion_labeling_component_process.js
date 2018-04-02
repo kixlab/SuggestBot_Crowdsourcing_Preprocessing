@@ -45,8 +45,9 @@ var vue_app = new Vue({
     proceed_action: "ADD",
     cur_motor_exp: [],
     cur_physio_exp: [],
-    cur_cog_exp: "",
-    cur_motiv_exp: "",
+    cur_cog_motiv_exp: "",
+    state_string: 'Video Watching'
+    //cur_motiv_exp: "",
   },
   methods:{
     //add label data to the colleted data-- for label and reason condition!
@@ -111,8 +112,8 @@ var vue_app = new Vue({
               'reasoning' : reasoning,
               'motor' : this.cur_motor_exp,
               'physio' : this.cur_physio_exp,
-              'cognitive' : this.cur_cog_exp,
-              'motivational' : this.cur_motiv_exp,
+              'cog_motiv' : this.cur_cog_motiv_exp,
+              //'motivational' : this.cur_motiv_exp,
             }
             this.collected_data[this.current_marker] = dict
           }
@@ -152,13 +153,14 @@ var vue_app = new Vue({
         //for component process
       $("input[name='motor']").prop('checked', false)
       $("input[name='physio']").prop('checked', false)
-      $("#cognitive").val("")
-      $("#motivational").val("")
+      $("#cog_motiv").val("")
+      //$("#motivational").val("")
 
 
 
         //change the state to 'watching' state
         this.state='watching'
+        this.state_string="Watching Video"
         this.tagging_phase = 0
         $('#replay_btn').css("visibility","hidden")
         //change marker to 'done status'
@@ -193,6 +195,9 @@ var vue_app = new Vue({
     current_action_revise: function(){
       this.proceed_action = "REVISE"
     },
+    expression_existence: function(){
+      return (this.cur_motor_exp.length==0) && (this.cur_physio_exp.length==0)
+    },
     tagging_phase_add: function(){
       //post component analysis results
       this.cur_motor_exp =[]
@@ -204,17 +209,17 @@ var vue_app = new Vue({
       $("input[name='physio']:checked").map(function(_, e){
         vue_app.cur_physio_exp.push($(e).val())
       })
-      this.cur_cog_exp = $("#cognitive").val()
-      this.cur_motiv_exp = $("#motivational").val()
+      this.cur_cog_motiv_exp = $("#cog_motiv").val()
+      //this.cur_motiv_exp = $("#motivational").val()
 
-      if(this.cur_cog_exp.length <8 || this.cur_motiv_exp.length <8){
+      if(this.cur_cog_motiv_exp.length <8){
         alert('Please write your analysis about the event and the character.')
         return;
       }
       $("#motor_display").empty()
       $("#physiological_display").empty()
-      $("#cognitive_display").empty()
-      $("#motivational_display").empty()
+      $("#cog_motiv_display").empty()
+      //$("#motivational_display").empty()
       for(i in this.cur_motor_exp){
         if(i%3==0){
           $("#motor_display").append("<tr id='motor_row_"+i.toString()+"'></tr>")
@@ -231,13 +236,18 @@ var vue_app = new Vue({
           $("#physio_row_"+(parseInt(i/3)*3).toString()).append("<td style='font-size: 12px'>"+physio_expression_dict[this.cur_physio_exp[i]]+"</td>")
         }
       }
-      $("#cognitive_display").text(this.cur_cog_exp)
-      $("#motivational_display").text(this.cur_motiv_exp)
+      $("#cog_motiv_display").text(this.cur_cog_motiv_exp)
+      //$("#motivational_display").text(this.cur_motiv_exp)
+      this.state_string="Labeling Step B"
       this.tagging_phase++;
-
     },
     tagging_phase_substract: function(){
+      this.state_string="Labeling Step A"
       this.tagging_phase--;
+
+    },
+    tagging_step_A: function(){
+      return (this.tagging_phase==0)&&(this.state=="tagging")
     },
   }
 })
@@ -305,13 +315,15 @@ function after_replay(){
   player.pause()
   player.controls(true)
   vue_app.state = "tagging";
-  $('#replay_btn').css("visibility","hidden")
+  vue_app.state_string="Labeling Step A"
+  $('#replay_btn').css("visibility", "visible")
 }
 
 //recast data to the input field, for emotion labeling and reasoning
 function recast_data(marker_time){
   player.pause()
   vue_app.state="tagging";
+  vue_app.state_string="Labeling Step A"
   $('#replay_btn').css("visibility","hidden")
   vue_app.current_marker = parseFloat(marker_time);
   vue_app.replay_start_time = vue_app.current_marker-replay_padding
@@ -352,8 +364,8 @@ function posting_data(dict, marker_time){
   var reasoning_val = dict[marker_time]['reasoning']
   var motor_exp = dict[marker_time]['motor']
   var physio_exp = dict[marker_time]['physio']
-  var motiv_exp = dict[marker_time]['motivational']
-  var cog_exp = dict[marker_time]['cognitive']
+  //var motiv_exp = dict[marker_time]['motivational']
+  var cog_motiv_exp = dict[marker_time]['cog_motiv']
 
   $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
   $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
@@ -381,8 +393,8 @@ function posting_data(dict, marker_time){
     for(i in physio_exp){
       $("#"+physio_exp[i]).prop('checked', true);
     }
-    $("#cognitive").val(cog_exp)
-    $("#motivational").val(motiv_exp)
+    $("#cog_motiv").val(cog_motiv_exp)
+    //$("#motivational").val(motiv_exp)
   }else if(vue_app.step=="sanity_check"){
     $("#"+ekman_val+"_check").addClass("emotion_word_check_highlighted")
     $("#current_reasoning").text(reasoning_val)
@@ -527,3 +539,8 @@ exclusive_checkbox(['eyes_opening', 'eyes_closing'])
 exclusive_checkbox(['volume_increasing', 'volume_decreasing'])
 exclusive_checkbox(['moving_towards', 'withdrawing', 'against'])
 exclusive_checkbox(['silence', 'short_utterance', 'long_utterance'])
+$("a").on('mouseover', function(){
+  $(this).css("color", "#d50000")
+}).on('mouseout', function(){
+  $(this).css("color","")
+})

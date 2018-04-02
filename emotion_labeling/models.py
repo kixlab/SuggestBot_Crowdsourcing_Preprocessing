@@ -47,6 +47,39 @@ class Emotion_label_experiment(Emotion_label_Meta):
     def __str__(self):
         return self.experiment_video.video_title + "_" + str(self.time) +"_from_worker_" +self.wid
 
+class Emotion_Label_Component_Process(Emotion_label_Meta):
+    experiment_video = models.ForeignKey(Experiment_Video, on_delete=models.CASCADE, null=True, blank=True)
+    smiling = models.BooleanField(default = False)
+    mouth_opening = models.BooleanField(default = False)
+    mouth_closing = models.BooleanField(default = False)
+    mouth_tensing= models.BooleanField(default = False)
+    frown = models.BooleanField(default = False)
+    tears = models.BooleanField(default = False)
+    eyes_opening = models.BooleanField(default = False)
+    eyes_closing = models.BooleanField(default = False)
+    volume_increasing = models.BooleanField(default = False)
+    volume_decreasing = models.BooleanField(default = False)
+    v_trembling = models.BooleanField(default = False)
+    v_assertive = models.BooleanField(default = False)
+    g_abrupt = models.BooleanField(default = False)
+    moving_towards = models.BooleanField(default = False)
+    withdrawing = models.BooleanField(default = False)
+    against = models.BooleanField(default = False)
+    silence = models.BooleanField(default = False)
+    short_utterance = models.BooleanField(default = False)
+    long_utterance = models.BooleanField(default = False)
+    s_melody = models.BooleanField(default = False)
+    s_disturbance = models.BooleanField(default = False)
+    s_tempo = models.BooleanField(default = False)
+    shiver = models.BooleanField(default = False)
+    pale = models.BooleanField(default = False)
+    breathing_slow = models.BooleanField(default = False)
+    breathing_faster = models.BooleanField(default = False)
+    sweating = models.BooleanField(default = False)
+    blushing = models.BooleanField(default = False)
+    cog_motiv = models.CharField(max_length=10000, default="")
+    #motivational = models.CharField(max_length=10000, default="")
+
 class Emotion_check_experiment(Emotion_check_Meta):
     emotion_label = models.ForeignKey(Emotion_label_experiment, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):

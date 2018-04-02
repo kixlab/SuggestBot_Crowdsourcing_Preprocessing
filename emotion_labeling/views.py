@@ -52,7 +52,7 @@ def experiment1_cp(request, video_title, wid, aid):
         form = EmotionResult(request.POST)
         print(form)
         to_return = json.loads(form.cleaned_data['to_return'])
-        token = Experiment_Label_Store(exp_video, to_return, wid, aid, condition)
+        token = Experiment_Label_Component_Process_Store(exp_video, to_return, wid, aid)
         token = {'token': token}
         return render(request, "token_return.html", token)
 

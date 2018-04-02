@@ -34,17 +34,26 @@ var step = "{{step}}"
       </div>
       <div class="col s10" id="instruction">
         <div v-if="step=='label_and_reason'">
-          <p style="margin-bottom:0">
-            You will label the emotion of the character in the left, at the moment when the border of the video player blinks in red.
-          </p>
-          <p style="margin-bottom:0">
-            Emotion label includes <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
-            <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
-            <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
-          </p>
-          <p  style="margin-bottom:0" v-if="condition=='experiment_reasoning'">
-            You will also give the reason why you labeled the emotion of the character like you did.
-          </p>
+          <div v-if="state!='tagging'">
+            <p>Please watch the video. Concentrate when the the video is blinking.</p>
+          </div>
+          <div v-if="tagging_step_A()">
+            <p>Please answer Expression and Cognitive Component.</p>
+            <p>Hover over the the <a href="#">blue words</a> if you need additional tips and instructions.</p>
+          </div>
+          <div v-bind:class="{hidden_item:tagging_phase!=1}">
+            <p style="margin-bottom:0">
+              Please answer emotion of the character.
+            </p>
+            <p style="margin-bottom:0">
+              You will be asked to annotate <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
+              <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
+              <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
+            </p>
+            <p  style="margin-bottom:0" v-if="condition=='experiment_reasoning'">
+              Please provide an explanation on the link between reasoning in step A and step B.
+            </p>
+          </div>
         </div>
         <div v-if="step=='sanity_check'">
           <p style="margin-bottom:0">
@@ -75,11 +84,14 @@ var step = "{{step}}"
 
   <!-- labeling interface -->
   <div class="col s5">
-    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:block; float:right; margin: 10px 0% 10px 50%; width: 50%;">Tutorial</a>
+    <div>
+    <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0%; width: 50%;">Tutorial</a>
+    </div>
     <div v-bind:class="{disabled_task : state!='tagging'}">
       <div id="component_process_task" class="row" v-bind:class="{hidden_item : tagging_phase!=0}">
-        <div id="motor_expression" class="row" style="margin-bottom:0">
-          <h6>Motor Expression</h6>
+        <div id="motor_physio_expression" class="row" style="margin-bottom:0">
+          <h6>Expression</h6>
           <table>
             <tr>
               <th colspan='6'>
@@ -200,79 +212,103 @@ var step = "{{step}}"
                 <label for="s_tempo" class="component_label">Speech Tempo Change</label>
               </td>
             </tr>
-          </table>
-        </div>
-        <div id="physiological_expression" class="row" style="margin-bottom:0">
-          <h6>Neurophysiological Component</h6>
-          <table>
             <tr>
-              <td colspan='2'>
+              <th>Physiological Response</th>
+            </tr>
+            <tr>
+              <td colspan='8'>
                 <input name="physio" id="shiver" type="checkbox" value="shiver"/>
                 <label for="shiver" class="component_label">Feeling Cold Shivers</label>
               </td>
-              <td colspan='2'>
+              <td colspan='8'>
                 <input name="physio" id="pale" type="checkbox" value="pale"/>
                 <label for="pale" class="component_label">Getting Pale</label>
               </td>
-              <td colspan='2'>
+              <td colspan='8'>
                 <input name="physio" id="breathing_slow" type="checkbox" value="breathing_slow"/>
                 <label for="breathing_slow" class="component_label">Breathing Slowing Down</label>
               </td>
             </tr>
             <tr>
-              <td colspan='2'>
+              <td colspan='8'>
                 <input name="physio" id="breathing_faster" type="checkbox" value="breathing_faster"/>
                 <label for="breathing_faster" class="component_label">Breathing Getting Faster</label>
               </td>
-              <td colspan='2'>
+              <td colspan='8'>
                 <input name="physio" id="sweating" type="checkbox" value="sweating"/>
                 <label for="sweating" class="component_label">Sweating</label>
               </td>
-              <td colspan='2'>
+              <td colspan='8'>
                 <input name="physio" id="blushing" type="checkbox" value="blushing"/>
                 <label for="blushing" class="component_label">Blushing</label>
               </td>
             </tr>
           </table>
         </div>
-        <div id="cognitive_component" class="row" style="margin-bottom:0">
-          <h6>Cognitive Component</h6>
-          <h6>Please write about the nature of the event, the way the character appraise the event, and possible consequences of the event.</h6>
-          <textarea name="cognitive" id="cognitive" class="materialize-textarea" style="padding:0;margin:0;"></textarea>
-          <label for='cognitive'></label>
+        <div id="cog_motiv_component" class="row" style="margin-bottom:0">
+          <h6>Describe 1) the event the character is in,
+            2) <a href='#' class="tooltipped" data-tooltip="How suddenly and abruptly did the event occur?
+            <br>How probable is the occurrence of the event in general?
+            <br>How pleasant/unpleasant is the event in general, independently of the current situation?
+            <br>How likely is that the event was mostly caused by chance or natural causes?
+            <br>How likely is it that the event was mostly caused by the person’s own behavior?
+            <br>How likely is it that the event was mostly caused by someone else’s behavior?
+            <br>If the event is caused by a behavior, how likely is it that the event was caused intentionally?
+            <br>How likely is it that the event violated laws or social norms?" style='font-weight: bold'>
+              the nature of the event</a>,
+            3) <a href='#' class="tooltipped" data-tooltip="How familiar was the person with the event?
+            <br>How important/relevant is the event to the person’s current goals or needs?
+            <br>How different is the event from what the person expected at this moment?
+            <br>How likely is it that the event would not be consistent with the person’s image of him/herself?
+            <br>Are the potential consequences of the event clearly envisaged and may they occur in the near future?" style='font-weight: bold'>
+              the way the character appraise the event</a>
+            , 4) <a href='#' class="tooltipped" data-tooltip="How likely will the consequences of the event bring positive/negative, desirable/undesirable outcomes to the person?
+            <br>Did the event require the person to react immediately?
+            <br>Would the consequences of event be ineluctable or still be avoidable and modifiable?
+            <br>Could the consequences of event still be avoided or modified to the person’s advantage?
+            <br>Would the person be able to live with, and adjust to, the consequences of the event?" style='font-weight: bold'>
+              possible consequences of the event</a>,
+            and 5) <a href='#' class="tooltipped" data-tooltip="Moving attention towards the event
+            <br>Moving attention away from the event
+            <br>Information search
+            <br>Attention self-centered
+            <br>Attention directed towards others
+            <br>Physically moving towards the event
+            <br>Physically moving away from the event" style='font-weight: bold'>
+              the action tendency of the character toward the event</a>.</h6>
+          <textarea name="cog_motiv" id="cog_motiv" class="materialize-textarea" style="padding:0;margin:0;"></textarea>
+          <label for='cog_motiv'></label>
 
         </div>
-        <div id="motivational_component" class="row" style="margin-bottom:0">
+        <!--below for the case when motivational component is added in-->
+        <!--<div id="motivational_component" class="row" style="margin-bottom:0; display:none">
           <h6>Motivational Component</h6>
           <h6>Please write about the action tendency and the attitude of the character towards the event.</h6>
           <textarea name="motivational" id="motivational" class="materialize-textarea" style="padding:0;margin:0;"></textarea>
           <label for='motivational'></label>
-        </div>
+        </div>-->
         <span class='btn blue' v-on:click="tagging_phase_add">Proceed</span>
       </div>
       <div v-bind:class="{hidden_item : tagging_phase != 1}">
         <!--selected values-->
         <div>
           <h6 >Below are component values that you analyzed</h6>
-          <div v-bind:class="{hidden_item:cur_motor_exp.length==0}">
-            <h6 style="text-decoration: underline">Motor Expression</h6>
+          <div v-bind:class="{hidden_item:expression_existence()}">
+            <h6 style="text-decoration: underline">Expression</h6>
             <table id="motor_display">
             </table>
-          </div>
-          <div v-bind:class="{hidden_item:cur_physio_exp.length==0}">
-            <h6 style="text-decoration: underline">Physiological Component</h6>
             <table id="physiological_display">
             </table>
           </div>
-          <h6 style="text-decoration: underline">Cognitive Component</h6>
-          <p id="cognitive_display" style='margin:0'></p>
-          <h6 style="text-decoration: underline">Motivational Component</h6>
-          <p id="motivational_display" style='margin:0'></p>
+          <h6 style="text-decoration: underline">Event</h6>
+          <p id="cog_motiv_display" style='margin:0'></p>
+          <!--<h6 style="text-decoration: underline">Motivational Component</h6>
+          <p id="motivational_display" style='margin:0'></p>-->
         </div>
-
+      <hr>
       <!-- Descriptions for valence and arousal labeling -->
         <div v-if="step=='label_and_reason'">
-          <h6 style="margin-bottom: 0px;">Decide current valence and arousal value of the character.</h6>
+          <h6 style="margin-bottom: 0px;">Considering your answer in step A, choose the best emotion of the character.</h6>
         </div>
         <!-- images to support valence labeling -->
         <div style="text-align: center; text-decoration: underline">Valence</div>
@@ -439,14 +475,17 @@ var step = "{{step}}"
           </div>
         </div>
         <!-- emotion category description -->
-        <div v-if="step=='label_and_reason'">
-          <h6>Decide which emotion class the character is in now.</h6>
+        <div v-if="step=='label_and_reason'" style="text-align:center; text-decoration:underline">
+          Emotion Category
         </div>
         <!-- emotion category radios -->
         <div v-if="step=='label_and_reason'" id="emotion_cateogries" class="row" style="margin-bottom: 0px">
           <table class="col s12">
             <tbody>
               <tr>
+                <th>major</th>
+                <th>minor</th>
+                <th>emotion</th>
                 <th>major</th>
                 <th>minor</th>
                 <th>emotion</th>
@@ -491,8 +530,6 @@ var step = "{{step}}"
                 <td class="emotion_td emotion_td_label">
                   Sad
                 </td>
-              </tr>
-              <tr>
                 <td class="emotion_td">
                   <input name="ekman" type="radio" id="disgusted"/>
                   <label for="disgusted" class="ekman_label"></label>
@@ -504,6 +541,8 @@ var step = "{{step}}"
                 <td class="emotion_td emotion_td_label">
                   Disgusted
                 </td>
+              </tr>
+              <tr>
                 <td class="emotion_td">
                   <input name="ekman" type="radio" id="happy"/>
                   <label for="happy" class="ekman_label"></label>
@@ -526,8 +565,6 @@ var step = "{{step}}"
                 <td class="emotion_td emotion_td_label">
                   Surprised
                 </td>
-              </tr>
-              <tr>
                 <td class="emotion_td">
                   <input name="ekman" type="radio" id="frustrated"/>
                   <label for="frustrated" class="ekman_label"></label>
@@ -550,6 +587,8 @@ var step = "{{step}}"
                 <td class="emotion_td emotion_td_label">
                   Depressed
                 </td>
+              </tr>
+              <tr>
                 <td class="emotion_td">
                   <input name="ekman" type="radio" id="excited"/>
                   <label for="excited" class="ekman_label"></label>
@@ -561,11 +600,9 @@ var step = "{{step}}"
                 <td class="emotion_td emotion_td_label">
                   Excited
                 </td>
-              </tr>
-              <tr>
                 <td class="emotion_td">
-                  <input name="ekman" type="radio" id="depressed"/>
-                  <label for="depressed" class="ekman_label"></label>
+                  <input name="ekman" type="radio" id="neutral"/>
+                  <label for="neutral" class="ekman_label"></label>
                 </td>
                 <td class="emotion_td">
                   <input name="ekman_mul" type="checkbox" id="neutral_mul" value="neutral"/>
@@ -586,7 +623,6 @@ var step = "{{step}}"
                   Other
                   <input name="for_other" type='text' id="for_other" style="width: 100px; height: 25px; margin-bottom: 0; border: 0.5px solid #9e9e9e; border-radius: 0;"/>
                 </td>
-
               </tr>
             </tbody>
           </table>
@@ -595,7 +631,7 @@ var step = "{{step}}"
 
         <!-- Description for reasoning -->
         <div v-if="step=='label_and_reason'" v-bind:class="{hidden_item: condition!='experiment_reasoning'}">
-          <h6>Write the reason why you labeled like the above.</h6>
+          <h6>Describe why you choose this emotion, using the information you generated in the step A. </h6>
         </div>
         <!-- input box for reasoning -->
         <div v-if="step=='label_and_reason'" id="reasoning_box" v-bind:class="{hidden_item: condition!='experiment_reasoning'}" class="row" style="margin-bottom:0px">
@@ -615,7 +651,7 @@ var step = "{{step}}"
 </div>
 
 </div>
-</div>
+
 <hr>
 <form method="POST">
 {% csrf_token %}
