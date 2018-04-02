@@ -88,7 +88,7 @@ var vue_app = new Vue({
     cur_task: 0,
     video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
     cur_video_seen_second: 0,
-    required_seeing_second: 20000,
+    required_seeing_second: 2000,
     was_playing:false,
     batch_number: batch_number,
     item_not_clicked: true,
