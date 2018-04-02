@@ -25,6 +25,7 @@ def video_search_and_accumulate(keywords, number_of_items):
                     maxResults = 10,
                     part = "id, snippet",
                     order = "relevance",
+                    videoEmbeddable = 'true',
                     type = "video",
                     ).execute()
             else:
@@ -33,6 +34,7 @@ def video_search_and_accumulate(keywords, number_of_items):
                     maxResults = 10,
                     part = "id, snippet",
                     order = "relevance",
+                    videoEmbeddable = 'true',
                     type = "video",
                     pageToken = next_page_tokens[idx],
                     ).execute()
