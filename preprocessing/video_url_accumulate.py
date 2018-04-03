@@ -27,6 +27,7 @@ def video_search_and_accumulate(keywords, number_of_items):
                     order = "relevance",
                     videoEmbeddable = 'true',
                     type = "video",
+                    relevanceLanguage = 'eng',
                     ).execute()
             else:
                 search_response = youtube.search().list(
@@ -37,6 +38,7 @@ def video_search_and_accumulate(keywords, number_of_items):
                     videoEmbeddable = 'true',
                     type = "video",
                     pageToken = next_page_tokens[idx],
+                    relevanceLanguage = 'eng',
                     ).execute()
             next_page_tokens[idx] = search_response.get("nextPageToken")
             for search_result in search_response.get("items", []):
