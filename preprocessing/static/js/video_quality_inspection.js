@@ -44,8 +44,8 @@ if(criteria == "video_quality"){
   bad_url = "/bad_language.mp4"
 }else if(criteria == "conversation"){
   instruction_title = "existence of conversation in"
-  instruction = "they are majorly composed of conversational scenes between customers and employees."
-  good_example_text = "A video is not monologue or lecture but majorly composed of conversation."
+  instruction = "they are majorly composed of conversational scenes with real humans."
+  good_example_text = "A video is not monologue or lecture but majorly composed of conversation with real humans."
   bad_example_text = "A video is not in conversation, but in other forms like monologue or lecture."
   good_example_title = "conversation video"
   bad_example_title = "video without conversation"
@@ -88,7 +88,7 @@ var vue_app = new Vue({
     cur_task: 0,
     video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
     cur_video_seen_second: 0,
-    required_seeing_second: 20000,
+    required_seeing_second: 15000,
     was_playing:false,
     batch_number: batch_number,
     item_not_clicked: true,

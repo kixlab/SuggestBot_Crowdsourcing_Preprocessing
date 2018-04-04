@@ -15,7 +15,7 @@ batch_number = 5
 #below is the number of votes for each tasks
 vote_number = 3
 
-TASK_TIME_LIMIT = 30
+TASK_TIME_LIMIT = 120
 
 # TODO function to remove any outdated tasks
 def isp_remove_outdated_tasks():
