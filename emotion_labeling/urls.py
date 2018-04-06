@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^experiment1_cp_likert/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_cp_likert),
     #sanity check
     url(r'^experiment2/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment2),
+    url(r'^bonus_for_hits/(?P<hit>[\w\-]+)/$', views.bonus_for_hits),
 #    url(r'^video_quality_inspection/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.video_quality_inspection),
 
 ]

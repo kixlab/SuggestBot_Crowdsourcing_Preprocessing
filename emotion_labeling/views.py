@@ -169,3 +169,13 @@ def experiment2(request, video_title, wid, aid):
         'step': "sanity_check",
     }
     return render(request, "emotion_labeling_task.html", task_to_throw)
+
+def bonus_for_hits(request, hit):
+    passed_num =0
+    assignments = mtc.get_assingments(hit)
+    for a in assignments:
+        label_count = Emotion_Label_Component_Process_Likert.objects.filter(wid = a.WorkerId, aid= a.AssignmentId).count()
+        if label_count > 0 :
+            mtc.grant_bonus(a.WorkerId, a.AssignmentId, Price(4.00), "You passed prescreen, so you get this bonus!")
+            passed_num = passed_num+1
+    return HttpResponse("Paid bonus to "+str(passed_num)+" workers")
