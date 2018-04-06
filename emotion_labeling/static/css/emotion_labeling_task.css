@@ -124,3 +124,19 @@ th{
 .component_label{
   font-size: 12px !important;
 }
+
+.check_indicator{
+  display: block;
+  margin-left: 4.5px;
+}
+
+.likert_item{
+  margin: auto;
+  display:block;
+  width: 25px;
+}
+.likert_icon{
+  width: 60px;
+  position: relative;
+  left: -18px;
+}

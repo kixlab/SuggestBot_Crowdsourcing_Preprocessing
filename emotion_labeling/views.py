@@ -5,7 +5,11 @@ from .forms import *
 from .models import *
 from .emotion_label_management import *
 import uuid
+from boto.mturk.connection import MTurkConnection
+from boto.mturk.price import Price
 # Create your views here.
+
+#mtc = MTurkConnection(aws_access_key_id='fake', aws_secret_access_key='fake', host='mechanicalturk.sandbox.amazonaws.com')
 
 def in_lab(request, video_title):
     print(request)
@@ -77,6 +81,50 @@ def experiment1_cp(request, video_title, wid, aid):
     # based on the condition, url will be differently assigned
 
     return render(request, "emotion_labeling_component_process.html", task_to_throw)
+
+def experiment1_cp_prescreening(request, video_title, wid, aid):
+    if request.method=="POST":
+        # test
+        if request.POST['expression']=='3' and request.POST['event']=='1':
+            #mtc.grant_bonus(wid, aid, Price(4.00), "You passed prescreen, so you get this bonus!")
+            return redirect('/emotion_labeling/experiment1_cp_likert/'+video_title+'/'+wid+'/'+aid)
+        else:
+            token = {'token': str(uuid.uuid4().hex.upper()[0:6])}
+            return render(request, "prescreen_fail_token_return.html", token)
+    return render(request, 'emotion_labeling_component_process_prescreening.html',{})
+
+def experiment1_cp_likert(request, video_title, wid, aid):
+    exp_video = Experiment_Video.objects.filter(video_title = video_title)[0]
+    if request.method=="POST":
+        form = EmotionResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+        token = Experiment_Label_Component_Process_Store_Likert(exp_video, to_return, wid, aid)
+        token = {'token': token}
+        return render(request, "token_return.html", token)
+
+    prompt_time = json.loads(exp_video.video_prompt_time)
+    print(prompt_time)
+
+    task_to_throw = {
+    # which video?
+        'video_title': exp_video.video_title,
+        'video_url': exp_video.video_url,
+    # which character?
+        'character': "",
+    # in which condition?  --> condition should be 'experiment_reasoning' or 'experiment_baseline'
+        'condition': 'experiment_reasoning',
+    # in which time do the system prompts?
+        'prompt_time': exp_video.video_prompt_time,
+    # additional info that is sent for sanity check
+        'label_to_check': json.dumps({}),
+        'step': "label_and_reason",
+    }
+    # *** for images, you should store them in '/static/img/figures/{{condition}}/{{video_url}}/{{video_url}}{{character}}'
+    # based on the condition, url will be differently assigned
+
+    return render(request, "emotion_labeling_component_process_likert.html", task_to_throw)
+
 
 def experiment2(request, video_title, wid, aid):
     Delete_Deprecated_Check_Task()
