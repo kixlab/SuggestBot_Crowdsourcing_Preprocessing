@@ -131,3 +131,10 @@ class Emotion_check_experiment(Emotion_check_Meta):
     emotion_label = models.ForeignKey(Emotion_label_experiment, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
         return self.emotion_label.experiment_video.video_title + "_" + str(self.emotion_label.time)+ "_by_" + self.emotion_label.wid+"check_result"
+
+class Bonus_Paid(models.Model):
+    wid = models.CharField(default="", max_length=2000)
+    aid = models.CharField(default="", max_length=2000)
+    hid = models.CharField(default="", max_length=2000)
+    def __str__(self):
+        return self.wid+"_"+self.aid

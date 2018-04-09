@@ -40,12 +40,11 @@
           </div>
           <div v-if="tagging_step_A()">
             <p>Please answer questions about the character's expressions or physiological traits.</p>
-            <p>You should answer questions based on the <span style="color:red">objective evidence</span> from the video. Compare current expression with the character's expression in the emotionally neutral status.</p>
-            <p>If the video lacks information, or you are not sure please select 'Not sure' option, and provide the reason why it lacks the information.</p>
-            <p>When the character's expression is changing without any propensity, please select neutral value. <br>(middel value for selection in between two types of expressions / low value for existence of an expression)</p>
+            <p>You should answer questions based on the <span style="color:red">objective evidence</span> from the video. Compare the current expression with the character's expression in the emotionally neutral status.</p>
+            <p>If the video lacks information, or you are not sure about the expression, please select 'Not sure' option, and provide the reason why it lacks the information.</p>
           </div>
           <div v-if="tagging_step_B()">
-            <p>Please answer questions about the appraisal of the event.</p>
+            <p>Please answer questions about the appraisal of the event and the action tendency of the character.</p>
             <p>Here, the event in concern is (1) <span style="color: red">happening when the player is blinking</span>, and (2) <span style="color: red">dominantly affecting the character's emotion</span>.</p>
             <p>Event can be caused by external stimuli, like by other's behavior, or by internal stimuli, like remembering memory.</p>
             <p>Here, you are not given 'Not sure' option, but should estimate the appraisal of the event, <span style="color: red">from the perspective of the character.</span></p>
@@ -77,13 +76,13 @@
   <div class="col s5">
     <div>
     <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
-    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0%; width: 50%;">Tutorial</a>
+    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 50%;">Tutorial</a>
     </div>
     <div v-bind:class="{disabled_task : state!='tagging'}">
       <div id="component_process_task" class="row" v-bind:class="{hidden_item : tagging_phase==question_page}">
         <div v-for="(item, index) in questions" style="border-bottom: 1px solid #9e9e9e" v-bind:class="{hidden_item : question_hidden(index)==false}">
           <h6 style="font-weight: bold">[[item.question]]</h6>
-          <div v-if="questions[index]['info']" style="color: red"><i class="tiny material-icons" style="color: red">announcement</i>[[item.info]]</div>
+          <div v-if="questions[index]['info']" style="color: red; font-size: 11px"><i class="material-icons" style="color: red; font-size:11px">announcement</i>[[item.info]]</div>
           <table>
             <tr>
               <td>[[item.negative]]
@@ -94,7 +93,7 @@
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='1' v-bind:id="questions[index]['name']+'_1'">
                   <label v-bind:for="questions[index]['name']+'_1'"></label>
-                  <img v-if="questions[index]['image']" class='likert_icon' src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png">
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_1.png'" onerror="$(this).css('display', 'none');">
                 </div>
               </td>
               <td>
@@ -103,7 +102,7 @@
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='2' v-bind:id="questions[index]['name']+'_2'">
                   <label v-bind:for="questions[index]['name']+'_2'"></label>
-                  <img v-if="questions[index]['image']" class='likert_icon' src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}qwe.png" onerror="this.src = '{% static 'img/figures/experiment/' %}grumpy_customer/grumpy_customer.png';">
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_2.png'" onerror="$(this).css('display', 'none');">
 
                 </div>
               </td>
@@ -113,7 +112,7 @@
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='3' v-bind:id="questions[index]['name']+'_3'">
                   <label v-bind:for="questions[index]['name']+'_3'"></label>
-                  <img v-if="questions[index]['image']" class='likert_icon' src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}qwe.png" onerror="this.src = '{% static 'img/figures/experiment/' %}grumpy_customer/grumpy_customer.png';">
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_3.png'" onerror="$(this).css('display', 'none');">
                 </div>
               </td>
               <td>
@@ -122,7 +121,7 @@
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='4' v-bind:id="questions[index]['name']+'_4'">
                   <label v-bind:for="questions[index]['name']+'_4'"></label>
-                  <img v-if="questions[index]['image']" class='likert_icon' src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}qwe.png" onerror="this.src = '{% static 'img/figures/experiment/' %}grumpy_customer/grumpy_customer.png';">
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_4.png'" onerror="$(this).css('display', 'none');">
                 </div>
               </td>
               <td>
@@ -131,7 +130,7 @@
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='5' v-bind:id="questions[index]['name']+'_5'">
                   <label v-bind:for="questions[index]['name']+'_5'"></label>
-                  <img v-if="questions[index]['image']" class='likert_icon' src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png">
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_5.png'" onerror="$(this).css('display', 'none');">
                 </div>
               </td>
               <td>
@@ -490,7 +489,7 @@
         </div>
     </div>
     <div>
-      <div>page : [[tagging_phase+1]]/[[question_page+1]]</div>
+      <div style="display: inline-block">page : [[tagging_phase+1]]/[[question_page+1]]</div>
       <div style="float:right">
         <div v-if="step=='label_and_reason'" class='btn light-red darken-1' id="tagging_prev" v-on:click="tagging_phase_substract()" v-bind:class="{hidden_item:tagging_phase==0}">BACK</div>
         <div v-if="step=='label_and_reason'" class='btn light-red darken-1' id="tagging_next" v-on:click="tagging_phase_add()" v-bind:class="{hidden_item:tagging_phase==question_page}">NEXT</div>

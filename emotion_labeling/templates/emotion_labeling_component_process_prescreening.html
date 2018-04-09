@@ -10,14 +10,13 @@
   <div v-bind:class="{hidden_item:step!=0}" class="row" style="display:block; margin: auto;">
     <h3>Pass the test, and start the $X task</h3>
     <p>which takes about ~ min</p>
-    <p>You will be given 2 test problems and if you pass them, you will be able to start a task about labeling the emotional phenomenons of a character</p>
+    <p>You will be given 2 test problems and if you pass them, you will be able to start a task about labeling the emotional aspects of a character</p>
     <h4>First, you will be tested whether you can understand our criteria.</h4>
-    <p>In our task, you will be asked to decide the expression and the physiological traits of a character.</p>
+    <p>1. In our task, you will be asked to decide the expression and the physiological traits of a character.</p>
     <p>Keep belows in your mind when labeling</p>
     <p>(1) When labeling expressions, you need to focus on the objective evidence from the video.</p>
     <p>(2) You need to decide expressions of the character compared to expressions when the character is in emotionally neutral state.</p>
-    <p>(3) If the video lacks information or you are not sure, select 'Not sure' option, and provide the reason why it lacks the information.</p>
-    <p>(4) When the character's expression is changing without any propensity in between two expressions, please select neutral value.</p>
+    <p>(3) If the video lacks information or you are not sure about the expression, select 'Not sure' option, and provide the reason why it lacks the information.</p>
     <br>
     <p>In the test, you will watch a short clip and decide an expression state of the character.</p>
     <p>This problem will be quite similar to what you are going to do in the main task.</p>
@@ -26,57 +25,85 @@
     <p>Watch a short clip and decide an expression state of the character according to criteria below.</p>
     <p>(1) When labeling expressions, you need to focus on the objective evidence from the video.</p>
     <p>(2) You need to decide expressions of the character compared to expressions when the character is in emotionally neutral state.</p>
-    <p>(3) If the video lacks information or you are not sure, select 'Not sure' option, and provide the reason why it lacks the information.</p>
-    <p>(4) When the character's expression is changing without any propensity in between two expressions, please select neutral value.</p>
+    <p>(3) If the video lacks information or you are not sure about the expression, select 'Not sure' option, and provide the reason why it lacks the information.</p>
     <video id="expression_video" class="video-js" src="" type="video/mp4" style="height:180px; width:320px" controls>
     </video>
+    <div>Question</div>
     <div>
       <span>Not at all</span>
-      <input name='expression' type='radio' value='1' id="expression_1">
+      <input name='expression1' type='radio' value='1' id="expression_1">
       <label for='expression_1'></label>
-      <input name='expression' type='radio' value='2' id="expression_2">
+      <input name='expression1' type='radio' value='2' id="expression_2">
       <label for='expression_2'></label>
-      <input name='expression' type='radio' value='3' id="expression_3">
+      <input name='expression1' type='radio' value='3' id="expression_3">
       <label for='expression_3'></label>
-      <input name='expression' type='radio' value='4' id="expression_4">
+      <input name='expression1' type='radio' value='4' id="expression_4">
       <label for='expression_4'></label>
-      <input name='expression' type='radio' value='5' id="expression_5">
+      <input name='expression1' type='radio' value='5' id="expression_5">
       <label for='expression_5'></label>
       <span>Definitely</span>
   </div>
   <div>
-    <input name='expression' type='radio' value='6' id="expression_6">
+    <input name='expression1' type='radio' value='6' id="expression_6">
     <label for='expression_6'>Not sure / Lack information</label>
     <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
   </div>
+  <hr>
+  <video id="expression_video" class="video-js" src="" type="video/mp4" style="height:180px; width:320px" controls>
+  </video>
+  <div>Question</div>
+  <div>
+    <span>Not at all</span>
+    <input name='expression2' type='radio' value='1' id="expression2_1">
+    <label for='expression2_1'></label>
+    <input name='expression2' type='radio' value='2' id="expression2_2">
+    <label for='expression2_2'></label>
+    <input name='expression2' type='radio' value='3' id="expression2_3">
+    <label for='expression2_3'></label>
+    <input name='expression2' type='radio' value='4' id="expression2_4">
+    <label for='expression2_4'></label>
+    <input name='expression2' type='radio' value='5' id="expression2_5">
+    <label for='expression2_5'></label>
+    <span>Definitely</span>
+</div>
+<div>
+  <input name='expression2' type='radio' value='6' id="expression2_6">
+  <label for='expression2_6'>Not sure / Lack information</label>
+  <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
+</div>
   </div>
   <div v-bind:class="{hidden_item:step!=2}">
-    <p>In the task, you will also be asked to appraise the event that is related to emotional status of the character.</p>
-    <p>In many cases, many events can happen, and deciding and focusing on a single event might be difficult.</p>
+    <p>2. In the task, you will also be asked to appraise the event that is related to emotional status of the character.</p>
+    <p>In many cases, many events can happen simultaneously, and deciding and focusing on a single event might be difficult.</p>
     <p>If that is the case, apply following criteria and decide one event to focus on</p>
     <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion.</p>
-    <p>(2) The event should be happening right now in the video. However, it can be related to the past, like 'remembering past memory'</p>
+    <p>(2) The event should be happening right now in the video. It can be related to the past, but should happening right now, like 'remembering past memory'</p>
     <br>
     <p> In the test, you will watch a short clip and decide which event is the target event according to above criteria.</p>
     <p> In the task, you will appraise the event you decided in various aspects, like its positiveness or negativeness to the character.</p>
   </div>
   <div v-bind:class="{hidden_item:step!=3}">
-    <p>Watch a short clip and decide which event is the target event according to below criteria.</p>
-    <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion.</p>
-    <p>(2) The event should be happening right now in the video. However, it can be related to the past, like 'remembering past memory'</p>
-    <video id="event_video" class="video-js" src="" type="video/mp4" style="height:180px; width:320px" controls>
+    <p>The context of the video : The boy is waiting for his father who is the astronaut and currently in the space. One day he meets an alien and they are having conversation.</p>
+    <video id="event_video" class="video-js" src="{%static 'example_video'%}/prescreening_2.mp4" type="video/mp4" style="height:180px; width:320px" controls>
     </video>
+    <p>After watching the short clip, decide which event is the target event according to below criteria.</p>
+    <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion, <b>the boy</b>, in this case.</p>
+    <p>(2) The event should be happening right now in the video. It can be related to the past, but should happening right now, like 'remembering past memory'</p>
+
     <div>
       <input name='event' type='radio' value='1' id="event_1">
-      <label for='event_1'>Father's death</label>
+      <label for='event_1'>Remembering father</label>
       <input name='event' type='radio' value='2' id="event_2">
-      <label for='event_2'>Remembering father's death</label>
+      <label for='event_2'>Father going into space</label>
       <input name='event' type='radio' value='3' id="event_3">
-      <label for='event_3'>Alien's disappearance</label>
+      <label for='event_3'>Disappearance of alien</label>
     </div>
   </div>
+  <div v-if="step==4" style="margin-bottom: 10px;">
+    <button id='submit' v-if="step==4" type='submit' class='btn'>To the main task</button>
+  </div>
   <div>
-    <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=3" v-on:click="next_step()" class='btn'>Next</span> <button id='submit' v-if="step==3" type='submit' v-on:click="return_prescreen()" class='btn disabled'>See the Result</button>
+    <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=3" v-on:click="next_step()" class='btn'>Next</span> <span v-if="step==3" v-on:click="enable_task()" class='btn'>Next</span>
   </div>
 </div>
 <script>
@@ -89,16 +116,24 @@
       prob_2: -1,
     },
     methods:{
-      return_prescreen: function(){
+      enable_task: function(){
         if($("input[name='event']:checked").val()==undefined){
           alert("Please select your answer!")
           return;
+        }else if($("input[name='event']:checked").val()!="1"){
+          alert("You got wrong on this problem. Think again and decide.")
+          return
+        }else{
+          this.step++;
         }
       },
       next_step: function(){
         if(this.step==1){
-          if($("input[name='expression']:checked").val()==undefined){
+          if($("input[name='expression1']:checked").val()==undefined || $("input[name='expression2']:checked").val()==undefined){
             alert("Please select your answer!")
+            return;
+          }else if($("input[name='expression1']:checked").val()!="6" || $("input[name='expression2']:checked").val()!="6"){
+            alert("You got wrong on this problem. Think again and decide.")
             return;
           }
         }

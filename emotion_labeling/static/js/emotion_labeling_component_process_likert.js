@@ -48,12 +48,12 @@ var vue_app = new Vue({
     cur_cog_motiv_exp: "",
     state_string: 'Video Watching',
     questions: [
-        {name:'smiling', question: 'The character is smiling.', positive: 'Definitely', negative: 'Not at all', image: 'name', not_sure: true},
-        {name:'mouth_close_open', question: 'The mouth is...', positive: 'Opening', negative: 'Closing', image:'name', not_sure: true},
-        {name:'mouth_tensing', question: 'The mouth is tensing.', positive: 'Definitely', negative: 'Not at all', image:'name', not_sure: true},
-        {name:'frowning', question: 'The character is frowning.', positive: 'Definitely', negative: 'Not at all', image:'name', not_sure: true},
+        {name:'smiling', question: 'The character is smiling.', positive: 'Definitely', negative: 'Not at all', image: true, not_sure: true},
+        {name:'mouth_close_open', question: 'The mouth is...', positive: 'Opening', negative: 'Closing', not_sure: true},
+        {name:'mouth_tensing', question: 'The mouth is tensing.', positive: 'Definitely', negative: 'Not at all', image:true, not_sure: true},
+        {name:'frowning', question: 'The character is frowning.', positive: 'Definitely', negative: 'Not at all', image:true, not_sure: true},
         {name:'tear', question: 'The tear is coming out from the character.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'eyes_close_open', question: 'The eyes are....', positive: 'Opened', negative: 'Closed', image:'name', not_sure: true},
+        {name:'eyes_close_open', question: 'The eyes are....', positive: 'Opened', negative: 'Closed', not_sure: true},
         {name:'voice_volume', question: 'The voice volume is....', positive: 'Increased', negative: 'Decreased', not_sure: true},
         {name:'voice_trembling', question: 'The voice is trembling.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'voice_assertive', question: 'The voice is assertive', positive: 'Definitely', negative: 'Not at all', not_sure: true},
@@ -67,10 +67,10 @@ var vue_app = new Vue({
         {name:'speech_disturbed', question: 'The speech is being disturbed.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'speech_tempo', question: 'The speech tempo is...', positive: 'Fast', negative: 'Slow', not_sure: true},
         {name:'shiver', question: 'The character is feeling cold shivers.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'pale', question: 'The character is getting pale.', positive: 'Definitely', negative: 'Not at all', image:'name', not_sure: true},
+        {name:'pale', question: 'The character is getting pale.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'breathing', question: 'The character breathing is...', positive: 'Fast', negative: 'Slow', not_sure: true},
-        {name:'sweating', question: 'The character is sweating.', positive: 'Definitely', negative: 'Not at all', image:'name', not_sure: true},
-        {name:'blushing', question: 'The character is blushing.', positive: 'Definitely', negative: 'Not at all', image:'name', not_sure: true},
+        {name:'sweating', question: 'The character is sweating.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
+        {name:'blushing', question: 'The character is blushing.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
 
         {name:'sudden', question: 'How suddenly or abruptly did the event occur?', positive: 'Very suddenly', negative: 'Not suddenly at all',},
         {name:'probable', question: 'How probable is the occurence of the event in general?', positive: 'Very probable', negative: 'Not probable at all',},
@@ -83,8 +83,8 @@ var vue_app = new Vue({
         {name:'norm', question: "How likely is it that the event violated laws or social norms?", positive: 'Very likely', negative: 'Very unlikely',},
         {name:'goal', question: "How important / relevant is the event to the person's current goals or needs?", positive: 'Very important', negative: 'Not important at all',},
         {name:'expected', question: "How different is the event from what the person expected at this moment?", positive: 'Very different', negative: 'Not different at all',},
-        {name:'consistency', question: "How likely is it that the event would be consistent with the person's ideal image of him / herself?", positive: 'Very consistent', negative: 'Not consistent at all', info: 'TODO add explanation'},
-        {name:'envisaged', question: "Can the potential consequences of the event be clearly predicted and may they occur in the near future?", positive: 'Definitely', negative: 'Not at all', info: 'TODO add explanation'},
+        {name:'consistency', question: "How likely is it that the event would be consistent with the person's ideal image of him / herself?", positive: 'Very consistent', negative: 'Not consistent at all',},
+        {name:'envisaged', question: "Can the potential consequences of the event be clearly predicted and may they occur in the near future?", positive: 'Definitely', negative: 'Not at all',},
         {name:'consequence', question: "How likely will the consequences of the event bring positive / negative, desirable / undesirable outcomes to the person?", positive: 'Very positive', negative: 'Very negative',},
         {name:'immediate', question: "Did the event require the person to react immediately?", positive: 'Definitely', negative: 'Not at all',},
         {name:'avoidable', question: "Could the consequences of the event still be avoided or modified to the person's advantage?", positive: 'Definitely', negative: 'Not at all',},
@@ -94,8 +94,8 @@ var vue_app = new Vue({
         {name:'attention_people', question: "Is the character's attention self-centered or directed towards others?", positive: 'Directed towards others', negative: 'Self-centered',},
         {name:'physical_event', question: "Is the character physically moving towards the event, or physically moving away from the event?", positive: 'Physically moving towards', negative: 'Physically moving away',},
     ],
-    question_show_num: [3, 4, 6, 5, 4,5, 5, 5, 5],
-    question_page: 9,
+    question_show_num: [4, 6, 6, 6, 7, 7, 6],
+    question_page: 7,
     //cur_motiv_exp: "",
   },
   methods:{
@@ -268,9 +268,9 @@ var vue_app = new Vue({
       }
       if(pass){
         this.tagging_phase++;
-        if(this.tagging_phase==5){
+        if(this.tagging_phase==4){
           this.state_string = "Labeling Step B"
-        }else if(this.tagging_phase==9){
+        }else if(this.tagging_phase==7){
           this.state_string = "Labeling Step C"
         }
       }else{
@@ -280,17 +280,17 @@ var vue_app = new Vue({
     tagging_phase_substract: function(){
       //this.state_string="Labeling Step A"
       this.tagging_phase--;
-      if(this.tagging_phase==8){
+      if(this.tagging_phase==6){
         this.state_string = "Labeling Step B"
-      }else if(this.tagging_phase==4){
+      }else if(this.tagging_phase==3){
         this.state_string = "Labeling Step A"
       }
     },
     tagging_step_A: function(){
-      return (this.tagging_phase<5)&&(this.state=="tagging")
+      return (this.tagging_phase<4)&&(this.state=="tagging")
     },
     tagging_step_B: function(){
-      return (this.tagging_phase<9) && (this.tagging_phase>=5) &&(this.state=="tagging")
+      return (this.tagging_phase<7) && (this.tagging_phase>=4) &&(this.state=="tagging")
     }
   }
 })

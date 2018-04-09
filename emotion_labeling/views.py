@@ -85,12 +85,12 @@ def experiment1_cp(request, video_title, wid, aid):
 def experiment1_cp_prescreening(request, video_title, wid, aid):
     if request.method=="POST":
         # test
-        if request.POST['expression']=='3' and request.POST['event']=='1':
+        #if request.POST['expression']=='3' and request.POST['event']=='1':
             #mtc.grant_bonus(wid, aid, Price(4.00), "You passed prescreen, so you get this bonus!")
-            return redirect('/emotion_labeling/experiment1_cp_likert/'+video_title+'/'+wid+'/'+aid)
-        else:
-            token = {'token': str(uuid.uuid4().hex.upper()[0:6])}
-            return render(request, "prescreen_fail_token_return.html", token)
+        return redirect('/emotion_labeling/experiment1_cp_likert/'+video_title+'/'+wid+'/'+aid)
+        #else:
+        #    token = {'token': str(uuid.uuid4().hex.upper()[0:6])}
+        #    return render(request, "prescreen_fail_token_return.html", token)
     return render(request, 'emotion_labeling_component_process_prescreening.html',{})
 
 def experiment1_cp_likert(request, video_title, wid, aid):
@@ -170,12 +170,17 @@ def experiment2(request, video_title, wid, aid):
     }
     return render(request, "emotion_labeling_task.html", task_to_throw)
 
+# run this function only once unless you will pay bonus multiple times for a worker
 def bonus_for_hits(request, hit):
     passed_num =0
-    assignments = mtc.get_assingments(hit)
+    assignments = mtc.get_assignments(hit)
     for a in assignments:
         label_count = Emotion_Label_Component_Process_Likert.objects.filter(wid = a.WorkerId, aid= a.AssignmentId).count()
-        if label_count > 0 :
+        bonus = Bonus_Paid.objects.filter(wid=a.WorkerId, aid=a.AssignmentId, hid=hit).count()
+        if label_count > 0 and bonus == 0:
             mtc.grant_bonus(a.WorkerId, a.AssignmentId, Price(4.00), "You passed prescreen, so you get this bonus!")
+            nb = Bonus_Paid(wid=a.WorkerId, aid=AssignmentId, hid=hit)
+            nb.save()
+            # do accept also here?
             passed_num = passed_num+1
     return HttpResponse("Paid bonus to "+str(passed_num)+" workers")

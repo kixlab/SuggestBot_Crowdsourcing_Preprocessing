@@ -5,7 +5,7 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-
+var must_see_sec = 1000
 
 var good_url, bad_url, instruction_title, instruction, good_example_text, bad_example_text, good_example_title, bad_example_title;
 
@@ -88,7 +88,7 @@ var vue_app = new Vue({
     cur_task: 0,
     video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
     cur_video_seen_second: 0,
-    required_seeing_second: 15000,
+    required_seeing_second: must_see_sec,
     was_playing:false,
     batch_number: batch_number,
     item_not_clicked: true,
