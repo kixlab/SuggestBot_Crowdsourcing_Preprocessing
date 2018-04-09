@@ -28,6 +28,7 @@ def search_and_accumulate_url(request):
     return render(request, "search_and_accumulate_url.html", {})
 
 def video_quality_inspection(request, wid, aid):
+    isp_remove_outdated_tasks()
     if request.method=="POST":
         print("heyheyhey")
         form = InspectionResult(request.POST)
@@ -37,7 +38,7 @@ def video_quality_inspection(request, wid, aid):
             token = {'token': token}
             return render(request, "token_return.html", token)
 
-    isp_remove_outdated_tasks()
+
     task_to_throw = isp_select_field(wid, aid)
 
     return render(request, "video_quality_inspection.html", task_to_throw)
