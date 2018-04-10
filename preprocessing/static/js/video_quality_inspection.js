@@ -87,6 +87,7 @@ var vue_app = new Vue({
     task_series: task_series,
     cur_task: 0,
     video_seen_second: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
+    video_already_seen: Array.apply(null, Array(batch_number)).map(Number.prototype.valueOf,0),
     cur_video_seen_second: 0,
     required_seeing_second: must_see_sec,
     was_playing:false,
@@ -95,6 +96,7 @@ var vue_app = new Vue({
     example_video_route: example_video_route,
     example_being_played: false,
     debug: debug,
+    np_code: "",
   },
   methods:{
     play_example: function(message){
@@ -115,12 +117,12 @@ var vue_app = new Vue({
         $(".modal").modal("close")
       }
     },
-    next_task: function(event){
+    next_task: function(not_playable = false){
       this.was_playing=false;
       this.video_seen_second[this.cur_task]=this.cur_video_seen_second
-
+      this.video_already_seen[this.cur_task] = true
       //store data
-      proceed = store_data(this.task_series, this.cur_task)
+      proceed = store_data(this.task_series, this.cur_task, not_playable)
       if(!proceed){
         return
       }
@@ -154,7 +156,25 @@ var vue_app = new Vue({
         to_return['task_result']['dummy']='dummy'
       }
       $("#to_return").val(JSON.stringify(to_return))
-    }
+    },
+    not_playable: function(event){
+      if(this.video_already_seen[this.cur_task]){
+        this.next_task(true);
+      }else{
+        this.np_code = Math.random().toString(36).substring(4);
+        $("#not_playable_code").html(this.np_code)
+        $("#not_playable_modal").modal('open');
+      }
+    },
+    not_playable_code_return: function(){
+      if(this.np_code == $("#np_code_input").val()){
+        this.next_task(true);
+        $("#np_code").val("")
+        $("#not_playable_modal").modal('close')
+      }else{
+        alert("Input valid code.")
+      }
+    },
 
   },
   updated: function(){
@@ -209,19 +229,22 @@ function timecount(){
 $(document).ready(function(){
   $(".modal").modal({
     dismissible: false,
-  }).modal('open');
+  })
+  $("#example").modal('open');
 
   $("input[name='"+criteria+"']").on("click", function(){
     vue_app.item_not_clicked = false;
   })
 })
 
-function store_data(tasks, task_id){
+function store_data(tasks, task_id, not_playable = false){
   var checked = $("input[name='"+criteria+"']:checked")
   if(checked.length==1){
     if (checked.attr("id").includes("yes")){
       to_return['task_result'][tasks[task_id]] = true;
     }else if(checked.attr("id").includes("no")){
+      to_return['task_result'][tasks[task_id]] = false;
+    }else{
       to_return['task_result'][tasks[task_id]] = false;
     }
     checked.prop("checked", false);
@@ -229,7 +252,13 @@ function store_data(tasks, task_id){
     return true
   }
   else if(checked.length==0){
-    return false
+    if(not_playable){
+      to_return['task_result'][tasks[task_id]] = false;
+      checked.prop("checked", false);
+      return true;
+    }else{
+      return false
+    }
   }
 }
 
