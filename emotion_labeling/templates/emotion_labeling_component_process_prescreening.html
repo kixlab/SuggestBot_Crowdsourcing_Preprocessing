@@ -10,7 +10,7 @@
   <div v-bind:class="{hidden_item:step!=0}" class="row" style="display:block; margin: auto;">
     <h3>Pass the test, and start the $X task</h3>
     <p>which takes about ~ min</p>
-    <p>You will be given 2 test problems and if you pass them, you will be able to start a task about labeling the emotional aspects of a character</p>
+    <p>You will be given 2 test problems and if you pass them, you will be able to start a task of labeling the emotional aspects of a character while watching a video</p>
     <h4>First, you will be tested whether you can understand our criteria.</h4>
     <p>1. In our task, you will be asked to decide the expression and the physiological traits of a character.</p>
     <p>Keep belows in your mind when labeling</p>
@@ -26,11 +26,11 @@
     <p>(1) When labeling expressions, you need to focus on the objective evidence from the video.</p>
     <p>(2) You need to decide expressions of the character compared to expressions when the character is in emotionally neutral state.</p>
     <p>(3) If the video lacks information or you are not sure about the expression, select 'Not sure' option, and provide the reason why it lacks the information.</p>
-    <video id="expression_video" class="video-js" src="" type="video/mp4" style="height:180px; width:320px" controls>
+    <video id="expression_video1" class="video-js" src="{%static 'example_video'%}/prescreening_0.mp4" type="video/mp4" style="height:270px; width:480px" controls>
     </video>
-    <div>Question</div>
+    <p>The character's mouth is...</p>
     <div>
-      <span>Not at all</span>
+      <span>Opened</span>
       <input name='expression1' type='radio' value='1' id="expression_1">
       <label for='expression_1'></label>
       <input name='expression1' type='radio' value='2' id="expression_2">
@@ -41,7 +41,7 @@
       <label for='expression_4'></label>
       <input name='expression1' type='radio' value='5' id="expression_5">
       <label for='expression_5'></label>
-      <span>Definitely</span>
+      <span>Closed</span>
   </div>
   <div>
     <input name='expression1' type='radio' value='6' id="expression_6">
@@ -49,9 +49,9 @@
     <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
   </div>
   <hr>
-  <video id="expression_video" class="video-js" src="" type="video/mp4" style="height:180px; width:320px" controls>
+  <video id="expression_video2" class="video-js" src="{%static 'example_video'%}/prescreening_1.mp4" type="video/mp4" style="height:270px; width:480px" controls>
   </video>
-  <div>Question</div>
+  <p>The woman is smiling.</p>
   <div>
     <span>Not at all</span>
     <input name='expression2' type='radio' value='1' id="expression2_1">
@@ -84,7 +84,7 @@
   </div>
   <div v-bind:class="{hidden_item:step!=3}">
     <p>The context of the video : The boy is waiting for his father who is the astronaut and currently in the space. One day he meets an alien and they are having conversation.</p>
-    <video id="event_video" class="video-js" src="{%static 'example_video'%}/prescreening_2.mp4" type="video/mp4" style="height:180px; width:320px" controls>
+    <video id="event_video" class="video-js" src="{%static 'example_video'%}/prescreening_2.mp4" type="video/mp4" style="height:270px; width:480px" controls>
     </video>
     <p>After watching the short clip, decide which event is the target event according to below criteria.</p>
     <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion, <b>the boy</b>, in this case.</p>
@@ -103,7 +103,7 @@
     <button id='submit' v-if="step==4" type='submit' class='btn'>To the main task</button>
   </div>
   <div>
-    <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=3" v-on:click="next_step()" class='btn'>Next</span> <span v-if="step==3" v-on:click="enable_task()" class='btn'>Next</span>
+    <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=3" v-bind:class="{hidden_item:step==4}" v-on:click="next_step()" class='btn'>Next</span> <span v-if="step==3" v-on:click="enable_task()" class='btn'>Next</span>
   </div>
 </div>
 <script>
@@ -125,6 +125,7 @@
           return
         }else{
           this.step++;
+          $("video").each(function () { this.pause() });
         }
       },
       next_step: function(){
@@ -138,9 +139,11 @@
           }
         }
         this.step++;
+        $("video").each(function () { this.pause() });
       },
       prev_step: function(){
         this.step--;
+        $("video").each(function () { this.pause() });
       },
     }
   })
