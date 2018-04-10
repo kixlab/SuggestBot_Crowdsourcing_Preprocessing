@@ -40,6 +40,8 @@ def video_search_and_accumulate(keywords, number_of_items):
                     pageToken = next_page_tokens[idx],
                     relevanceLanguage = 'en',
                     ).execute()
+            print("search done for "+keywords[idx])
+            print(next_page_tokens[idx])
             next_page_tokens[idx] = search_response.get("nextPageToken")
             for search_result in search_response.get("items", []):
                 vtitle = search_result['snippet']['title']
