@@ -169,7 +169,7 @@ var vue_app = new Vue({
     not_playable_code_return: function(){
       if(this.np_code == $("#np_code_input").val()){
         this.next_task(true);
-        $("#np_code").val("")
+        $("#np_code_input").val("")
         $("#not_playable_modal").modal('close')
       }else{
         alert("Input valid code.")

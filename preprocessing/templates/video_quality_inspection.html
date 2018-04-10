@@ -96,7 +96,7 @@ var debug = {{debug}}
           <input v-else v-on:click="return_result" name="submit" type="submit" class="btn col s6" v-bind:class="{disabled: item_not_clicked}" id="submit"/>
           <input name='to_return' type='text' style='display:none' id="to_return"/>
         </form>
-        <a v-if="!video_already_seen[cur_task]" v-on:click="not_playable" class="pink darken-1 btn col s6" id="not_playable">Not Playable</a>
+        <a v-if="!video_already_seen[cur_task]" v-on:click="not_playable" class="pink darken-1 btn col s6" id="not_playable" style="margin-top: 10px">Not Playable</a>
       </div>
       </div>
     </div>
@@ -168,7 +168,7 @@ var debug = {{debug}}
       </div>
     </div>
     <div class="modal-footer">
-      <a href="#" class="modal-action modal-close btn">Cancel</a>
+      <a href="#" class="modal-action modal-close btn" onclick="$('#np_code_input').val('')">Cancel</a>
       <a href="#" class="modal-action btn" v-on:click="not_playable_code_return">Confirm</a>
     </div>
   </div>
