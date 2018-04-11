@@ -24,7 +24,7 @@ for(var key in prompt_time){
 }
 times.sort(function(a, b){return a-b;})
 if(condition.includes("experiment")){
-  video_url = primitive_video_url//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  video_url = primitive_video_url.replace(/&#39;/g, "'");//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 // Below part is for vue app
@@ -310,7 +310,7 @@ document.getElementById('main_video').onloadedmetadata = function(){
 }
 var player = videojs('main_video', vjs_options)
 
-player.src(primitive_video_url)
+player.src(video_url)
   // when seeking for unseen video parts, return to current point
 player.on('seeking', function(){
   //make workers unable to see futher the seen range
