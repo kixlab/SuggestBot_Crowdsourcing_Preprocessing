@@ -6,108 +6,175 @@
 <link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
 <form method="POST">
   {% csrf_token %}
-<div id='vue_app' style="margin-left: 20px;">
-  <div v-bind:class="{hidden_item:step!=0}" class="row" style="display:block; margin: auto;">
-    <h3>Pass the test, and start the $X task</h3>
-    <p>which takes about ~ min</p>
-    <p>You will be given 2 test problems and if you pass them, you will be able to start a task of labeling the emotional aspects of a character while watching a video.</p>
-    <h4>First, you will be tested whether you can understand our criteria.</h4>
-    <p>1. In our task, you will be asked to decide expressions and the physiological traits of a character.</p>
-    <p>Keep belows in your mind when labeling.</p>
-    <p>(1) When labeling expressions, you need to focus on the objective evidence from the video.</p>
-    <p>(2) You need to decide expressions of the character compared to expressions when the character is in emotionally neutral state.</p>
-    <p>(3) If the video lacks information or you are not sure about the expression, select 'Not sure' option, and provide the reason why it lacks the information.</p>
-    <br>
-    <p>In the test, you will watch two short clips and decide expressional states of the character.</p>
-    <p>These problems will be quite similar to what you are going to do in the main task.</p>
-  </div>
-  <div v-bind:class="{hidden_item:step!=1}">
-    <p>Watch short clips and decide expressional states of a character in each clips according to criteria below.</p>
-    <p>(1) When labeling expressions, you need to focus on the objective evidence from the video.</p>
-    <p>(2) You need to decide expressions of the character compared to expressions when the character is in emotionally neutral state.</p>
-    <p>(3) If the video lacks information or you are not sure about the expression, select 'Not sure' option, and provide the reason why it lacks the information.</p>
-    <h5>1. Clip 1</h5>
-    <video id="expression_video1" class="video-js" src="{%static 'example_video'%}/prescreening_0.mp4" type="video/mp4" style="height:270px; width:480px" controls>
-    </video>
-    <p>The character's mouth is...</p>
-    <div>
-      <span>Opened</span>
-      <input name='expression1' type='radio' value='1' id="expression_1">
-      <label for='expression_1'></label>
-      <input name='expression1' type='radio' value='2' id="expression_2">
-      <label for='expression_2'></label>
-      <input name='expression1' type='radio' value='3' id="expression_3">
-      <label for='expression_3'></label>
-      <input name='expression1' type='radio' value='4' id="expression_4">
-      <label for='expression_4'></label>
-      <input name='expression1' type='radio' value='5' id="expression_5">
-      <label for='expression_5'></label>
-      <span>Closed</span>
-  </div>
-  <div>
-    <input name='expression1' type='radio' value='6' id="expression_6">
-    <label for='expression_6'>Not sure / Lack information</label>
-    <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
-  </div>
-  <h5>2. Clip 2</h5>
-  <video id="expression_video2" class="video-js" src="{%static 'example_video'%}/prescreening_1.mp4" type="video/mp4" style="height:270px; width:480px" controls>
-  </video>
-  <p>The woman is smiling.</p>
-  <div>
-    <span>Not at all</span>
-    <input name='expression2' type='radio' value='1' id="expression2_1">
-    <label for='expression2_1'></label>
-    <input name='expression2' type='radio' value='2' id="expression2_2">
-    <label for='expression2_2'></label>
-    <input name='expression2' type='radio' value='3' id="expression2_3">
-    <label for='expression2_3'></label>
-    <input name='expression2' type='radio' value='4' id="expression2_4">
-    <label for='expression2_4'></label>
-    <input name='expression2' type='radio' value='5' id="expression2_5">
-    <label for='expression2_5'></label>
-    <span>Definitely</span>
-</div>
-<div>
-  <input name='expression2' type='radio' value='6' id="expression2_6">
-  <label for='expression2_6'>Not sure / Lack information</label>
-  <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
-</div>
-  </div>
-  <div v-bind:class="{hidden_item:step!=2}">
-    <p>2. In the task, you will also be asked to appraise the event that is related to emotional status of the character.</p>
-    <p>In many cases, many events can happen simultaneously, and deciding and focusing on a single event might be difficult.</p>
-    <p>If that is the case, apply following criteria and decide one event to focus on</p>
-    <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion.</p>
-    <p>(2) The event should be happening right now in the video. It can be related to the past, but should happening right now, like 'remembering past memory'.</p>
-    <br>
-    <p> In the test, you will watch a short clip and decide which event is the target event according to above criteria.</p>
-    <p> In the task, you will appraise the event you decided in various aspects, like its positiveness or negativeness to the character.</p>
-  </div>
-  <div v-bind:class="{hidden_item:step!=3}">
-    <p>The context of the video : The boy is waiting for his father who is the astronaut and currently in the space. One day he meets an alien and they are having conversation.</p>
-    <video id="event_video" class="video-js" src="{%static 'example_video'%}/prescreening_2.mp4" type="video/mp4" style="height:270px; width:480px" controls>
-    </video>
-    <p>After watching the short clip, decide which event is the target event according to below criteria.</p>
-    <p>(1) Among all events, the event you need to focus on is dominantly affecting the character's emotion, <b>the boy</b>, in this case.</p>
-    <p>(2) The event should be happening right now in the video. It can be related to the past, but should happening right now.</p>
+  <div id='vue_app' style="margin-left: 20px;">
+    <div v-bind:class="{hidden_item:step!=0}" class="row" style="display:block; margin: auto;">
+      <h3>Pass the test, and start the $X task</h3>
+      <p>which takes about ~ min</p>
+      <p>You will be given 2 test problems and if you pass them, you will be able to start the main task of <strong>labeling the emotional factors of a character</strong> while watching a video.</p>
+      <p>The purpose of this test is to help you understand the answer criteria of the main task.</p>
+      <h4>First Test: Expression Detection</h4>
+      <p>In this test, you will be asked to decide expressions and the physiological traits of a character.</p>
+      <p>Keep belows in your mind when labeling:</p>
+      <p>(1) When labeling expressions, you need to focus on the <font color="red">objective evidence</font> from the video.</p>
+      <p>(2) You need to decide expressions of the character <font color="red">compared to when the character is in emotionally neutral state</font>.</p>
+      <p>(3) If the video lacks information or you are not sure about the expression, select <font color="red">'Not sure'</font> option, and provide the <font color="red">reason why it lacks the information</font>.</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp;for example, you should mark 'Not sure' and provide the reason "Cannot see the face" if you were asked to label whether the character is smiling or not, but the character was turned around.</p>
+      <br>
+      <p>In this test, you will watch 2 short clips and decide expressional states of a character.</p>
+      <p>These problems will be very similar to what you are going to do in the main task.</p>
+      <br/>
+    </div>
+
+    <div v-bind:class="{hidden_item:step!=1}">
+      <h5>Watch short clips and decide expressional states of a character in each clips according to criteria below.</h5>
+      <p>(1) When labeling expressions, you need to focus on the <font color="red">objective evidence</font> from the video.</p>
+      <p>(2) You need to decide expressions of the character <font color="red">compared to when the character is in emotionally neutral state</font>.</p>
+      <p>(3) If the video lacks information or you are not sure about the expression, select <font color="red">'Not sure'</font> option, and provide the <font color="red">reason why it lacks the information</font>.</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp;for example, you should mark 'Not sure' and provide the reason "Cannot see the face" if you were asked to label whether the character is smiling or not, but the character was turned around.</p>
+      <br/>
+      <hr>
+      <h5>1. Clip 1</h5>
+      <div class="row">
+        <div class="col s6">
+          <video id="expression_video1" class="video-js" src="{%static 'example_video'%}/prescreening_0.mp4" type="video/mp4" style="height:270px; width:480px" controls>
+          </video>
+        </div>
+        <div class="col s6">
+          <br><br><br>
+          <p>The character's mouth is...</p>
+          <div>
+            <span>Opened</span>
+            <input name='expression1' type='radio' value='1' id="expression_1">
+            <label for='expression_1'></label>
+            <input name='expression1' type='radio' value='2' id="expression_2">
+            <label for='expression_2'></label>
+            <input name='expression1' type='radio' value='3' id="expression_3">
+            <label for='expression_3'></label>
+            <input name='expression1' type='radio' value='4' id="expression_4">
+            <label for='expression_4'></label>
+            <input name='expression1' type='radio' value='5' id="expression_5">
+            <label for='expression_5'></label>
+            <span>Closed</span>
+          </div>
+          <div>
+            <input name='expression1' type='radio' value='6' id="expression_6">
+            <label for='expression_6'>Not sure / Lack information</label>
+            <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
+            <br/>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <h5>2. Clip 2</h5>
+      <div class="row">
+        <div class="col s6">
+          <video id="expression_video2" class="video-js" src="{%static 'example_video'%}/prescreening_1.mp4" type="video/mp4" style="height:270px; width:480px" controls>
+          </video>
+        </div>
+        <div class="col s6">
+          <br><br><br>
+          <p>The woman is smiling.</p>
+          <div>
+            <span>Not at all</span>
+            <input name='expression2' type='radio' value='1' id="expression2_1">
+            <label for='expression2_1'></label>
+            <input name='expression2' type='radio' value='2' id="expression2_2">
+            <label for='expression2_2'></label>
+            <input name='expression2' type='radio' value='3' id="expression2_3">
+            <label for='expression2_3'></label>
+            <input name='expression2' type='radio' value='4' id="expression2_4">
+            <label for='expression2_4'></label>
+            <input name='expression2' type='radio' value='5' id="expression2_5">
+            <label for='expression2_5'></label>
+            <span>Definitely</span>
+          </div>
+          <div>
+            <input name='expression2' type='radio' value='6' id="expression2_6">
+            <label for='expression2_6'>Not sure / Lack information</label>
+            <input type='text' id='reason' style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
+            <br/>
+          </div>
+        </div>
+      </div>
+      <br/>
+    </div>
+
+    <div v-bind:class="{hidden_item:step!=2}">
+      <p><strong>You did a good job!</strong></p>
+      <br>
+      <p>In the first video, because the character is continuously talking, it is hard to tell if the mouse is opened or closed in the given clip.</p>
+      <p>In these cases, you should mark "Not sure" and provide the reason, e.g., "the man is keep talking."</p>
+      <br>
+      <p>In the second video, because the character is hiding behind a car, and you cannot see her face, it is not clear if she is smiling or not.</p>
+      <p>In these cases, you should mark "Not sure" and provide the reason, e.g., "I cannot see her face." </p>
+      <br><br>
+    </div>
+
+    <div v-bind:class="{hidden_item:step!=3}">
+      <h4>Second Test: Event Appraisal</h4>
+      <p>In this test, you will be asked to appraise the event that is <font color="red">related to the emotional status of a character</font>.</p>
+      <p>In many cases, multiple events can happen simultaneously, and deciding and focusing on a single event might be difficult.</p>
+      <p>If that is the case, apply following criteria and decide <strong>one target event</strong> to focus on.</p>
+      <p>(1) The target event is the one <font color="red">dominantly affecting the character's emotion</font>.</p>
+      <p>(2) The target event should be <font color="red">happening right now</font> in the video. It can be related to the past, but should be happening right now, like 'remembering past memory'.</p>
+      <br>
+      <p> In the test, you will watch a short clip and choose which event is the target event according to the above criteria.</p>
+      <p> In the actual task, you will appraise the chosen event in various aspects. For example, its positiveness or negativeness to the character.</p>
+      <br/>
+    </div>
+
+    <div v-bind:class="{hidden_item:step!=4}">
+      <br>
+      <h5>Situation: The boy's father passed away and he thinks that his father is in heaven. One day he meets an alien and they are having a conversation.</h5>
+      <br>
+      <p>After watching the short clip, choose which event is the target event according to the below criteria.</p>
+      <p>(1) Among all events, the target event you need to focus on is the one dominantly affecting the character's emotion, <b>the boy</b>, in this case.</p>
+      <p>(2) The event should be happening right now in the video. It can be related to the past, but should be happening right now.</p>
+      <br>
+      <hr>
+      <div class="row">
+        <div class="col s6">
+          <video id="event_video" class="video-js" src="{%static 'example_video'%}/prescreening_2.mp4" type="video/mp4" style="height:270px; width:480px" controls>
+          </video>
+        </div>
+        <div class="col s6">
+          <br><br><br>
+          <p>What is the target event that is related to the emotional status (sadness) of the boy?</p>
+          <div>
+            <input name='event' type='radio' value='1' id="event_1">
+            <label for='event_1'>Missing his father</label>
+            <input name='event' type='radio' value='2' id="event_2">
+            <label for='event_2'>His father passing away</label>
+            <input name='event' type='radio' value='3' id="event_3">
+            <label for='event_3'>Disappearance of the alien</label>
+          </div>
+        </div>
+      </div>
+      <br>
+    </div>
+
+    <div v-bind:class="{hidden_item:step!=5}">
+      <p><strong>You did a good job!</strong></p>
+      <br>
+      <p>The boy is currently in a sad emotion missing his father.</p>
+      <p>The event "His father passing away" cannot be the answer because it's an event happened <strong>in the past</strong>.</p>
+      <p>The event "Disappearance of the alien" cannot be the answer because it is not related to the boy's current dominant emotion.</p>
+      <br><br>
+    </div>
+
+    <div v-if="step==6" style="margin-bottom: 10px;">
+      <br><br>
+      <h3>Good job! Please go to the main task :-)</h3>
+      <br>
+      <button id='submit' v-if="step==6" type='submit' class='btn'>To the main task</button>
+    </div>
 
     <div>
-      <input name='event' type='radio' value='1' id="event_1">
-      <label for='event_1'>Remembering father</label>
-      <input name='event' type='radio' value='2' id="event_2">
-      <label for='event_2'>Father going into space</label>
-      <input name='event' type='radio' value='3' id="event_3">
-      <label for='event_3'>Disappearance of alien</label>
+      <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=4" v-bind:class="{hidden_item:step==6}" v-on:click="next_step()" class='btn'>Next</span> <span v-if="step==4" v-on:click="enable_task()" class='btn'>Next</span>
     </div>
   </div>
-  <div v-if="step==4" style="margin-bottom: 10px;">
-    <button id='submit' v-if="step==4" type='submit' class='btn'>To the main task</button>
-  </div>
-  <div>
-    <span v-if="step!=0" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=3" v-bind:class="{hidden_item:step==4}" v-on:click="next_step()" class='btn'>Next</span> <span v-if="step==3" v-on:click="enable_task()" class='btn'>Next</span>
-  </div>
-</div>
-<script>
+
+  <script>
   var vue_app = new Vue({
     el: "#vue_app",
     delimiters: ['[[', ']]'],
@@ -122,7 +189,7 @@
           alert("Please select your answer!")
           return;
         }else if($("input[name='event']:checked").val()!="1"){
-          alert("You got wrong on this problem. Think again and decide.")
+          alert("You got wrong on the answer. Think again and decide.")
           return
         }else{
           this.step++;
@@ -135,7 +202,7 @@
             alert("Please select your answer!")
             return;
           }else if($("input[name='expression1']:checked").val()!="6" || $("input[name='expression2']:checked").val()!="6"){
-            alert("You got wrong on this problem. Think again and decide.")
+            alert("You got wrong on one of the answers. Think again and decide.")
             return;
           }
         }
@@ -148,9 +215,9 @@
       },
     }
   })
-$("input[name='event']").on('click', function(){
-  $("#submit").removeClass('disabled')
-})
+  $("input[name='event']").on('click', function(){
+    $("#submit").removeClass('disabled')
+  })
 
-</script>
-{% endblock %}
+  </script>
+  {% endblock %}
