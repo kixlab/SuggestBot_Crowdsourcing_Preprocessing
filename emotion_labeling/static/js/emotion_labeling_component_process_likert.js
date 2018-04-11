@@ -24,7 +24,7 @@ for(var key in prompt_time){
 }
 times.sort(function(a, b){return a-b;})
 if(condition.includes("experiment")){
-  video_url = primitive_video_url.replace(/&#39;/g, "'");//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  video_url = unescape(primitive_video_url);//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 // Below part is for vue app
