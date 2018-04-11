@@ -15,7 +15,8 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 def search_and_accumulate_url(request):
-    #send_url("dorothy")
+    print("holla!")
+    #send_url("https://www.youtube.com/watch?v=LO-imM-8Ymg")
     if request.method=="POST":
         print("!")
         form = SearchKeyword(request.POST)
@@ -28,6 +29,7 @@ def search_and_accumulate_url(request):
     return render(request, "search_and_accumulate_url.html", {})
 
 def video_quality_inspection(request, wid, aid):
+    isp_remove_outdated_tasks()
     if request.method=="POST":
         print("heyheyhey")
         form = InspectionResult(request.POST)
@@ -37,7 +39,7 @@ def video_quality_inspection(request, wid, aid):
             token = {'token': token}
             return render(request, "token_return.html", token)
 
-    isp_remove_outdated_tasks()
+
     task_to_throw = isp_select_field(wid, aid)
 
     return render(request, "video_quality_inspection.html", task_to_throw)
@@ -64,7 +66,7 @@ def receive_facial_result(request):
         print("heh")
         data = request.FILES['media']
         #need to decide where to store the file...
-        path = default_storage.save('img.png', ContentFile(data.read()))
+        path = default_storage.save('./facialclustering_result_images/img.png', ContentFile(data.read()))
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
 
     return render(request, 'search_and_accumulate_url.html')
