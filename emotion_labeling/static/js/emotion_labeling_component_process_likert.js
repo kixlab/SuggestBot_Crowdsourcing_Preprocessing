@@ -310,7 +310,7 @@ document.getElementById('main_video').onloadedmetadata = function(){
 }
 var player = videojs('main_video', vjs_options)
 
-player.src(video_url)
+player.src(primitive_video_url)
   // when seeking for unseen video parts, return to current point
 player.on('seeking', function(){
   //make workers unable to see futher the seen range
