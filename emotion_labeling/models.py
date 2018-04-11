@@ -3,7 +3,7 @@ import datetime
 # Create your models here.
 class Experiment_Video(models.Model):
     video_title = models.CharField(max_length = 200, default = "")
-    video_url = models.CharField(max_length = 200, default = "")
+    video_url = models.CharField(max_length = 2000, default = "")
     video_img = models.CharField(max_length = 200, default = "")
     video_prompt_time = models.CharField(max_length=10000, default = "")
     def __str__(self):
