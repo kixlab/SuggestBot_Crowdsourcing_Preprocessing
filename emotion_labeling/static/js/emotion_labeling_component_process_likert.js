@@ -24,7 +24,7 @@ for(var key in prompt_time){
 }
 times.sort(function(a, b){return a-b;})
 if(condition.includes("experiment")){
-  video_url = "https://github.com/kixlab/suggestbotData/blob/master/experiment/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  video_url = primitive_video_url//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 // Below part is for vue app
@@ -218,8 +218,7 @@ var vue_app = new Vue({
       var min_max = this.get_q_range_for_index(index)
       var min = min_max[0]
       var max = min_max[1]
-      console.log(min)
-      console.log(max)
+
       if(this.tagging_phase<this.question_page){
       if(index>=min && index<max){
         return true;

@@ -19,6 +19,7 @@
     // 'data_collection', 'experiment'
   var condition = "{{condition}}"
   var primitive_video_url = "{{video_url}}"
+  var video_img = "{{video_img}}"
   var step = "{{step}}"
 </script>
 {% endblock %}
@@ -31,7 +32,7 @@
   <div class="col s7">
     <div class="row">
       <div class="col s2">
-        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png" style="width:100%; margin-top:20px">
+        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_img}}{{character}}.png" style="width:100%; margin-top:20px">
       </div>
       <div class="col s10" id="instruction">
         <div v-if="step=='label_and_reason'">

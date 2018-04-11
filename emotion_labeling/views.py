@@ -67,6 +67,7 @@ def experiment1_cp(request, video_title, wid, aid):
     # which video?
         'video_title': exp_video.video_title,
         'video_url': exp_video.video_url,
+        'video_img': exp_video.video_img,
     # which character?
         'character': "",
     # in which condition?  --> condition should be 'experiment_reasoning' or 'experiment_baseline'
@@ -110,6 +111,7 @@ def experiment1_cp_likert(request, video_title, wid, aid):
     # which video?
         'video_title': exp_video.video_title,
         'video_url': exp_video.video_url,
+        'video_img': exp_video.video_img,
     # which character?
         'character': "",
     # in which condition?  --> condition should be 'experiment_reasoning' or 'experiment_baseline'
