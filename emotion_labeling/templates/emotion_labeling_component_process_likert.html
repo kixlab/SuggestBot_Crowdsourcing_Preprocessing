@@ -38,6 +38,7 @@
         <div v-if="step=='label_and_reason'">
           <div v-if="state!='tagging'">
             <p>Please watch the video. Concentrate when the the video is blinking.</p>
+            <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try reloading.</p>
           </div>
           <div v-if="tagging_step_A()">
             <p>Please answer questions about the character's expressions or physiological traits.</p>

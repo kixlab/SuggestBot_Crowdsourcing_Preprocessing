@@ -48,6 +48,7 @@ var vue_app = new Vue({
     cur_physio_exp: [],
     cur_cog_motiv_exp: "",
     state_string: 'Video Watching',
+    video_started: false,
     questions: [
         {name:'smiling', question: 'The character is smiling.', positive: 'Definitely', negative: 'Not at all', image: true, not_sure: true},
         {name:'mouth_close_open', question: 'The mouth is...', positive: 'Opening', negative: 'Closing', not_sure: true},
@@ -323,6 +324,12 @@ player.on('seeking', function(){
   if(this.currentTime()>maximal_time){
     this.currentTime(cur_time)
     alert("You cannot seek to unseen video time.")
+  }
+})
+
+player.on('play', function(){
+  if(!vue_app.video_started){
+    vue_app.video_started = true;
   }
 })
 
