@@ -524,13 +524,14 @@
     <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
   </div>
   <div class='modal-footer'>
+    <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
     <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
     <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
     <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
   </div>
 </div>
 <script>
-var max_tuto = 1
+var max_tuto = 13
 </script>
 
 <script src="{% static 'js/emotion_labeling_component_process_likert.js' %}"></script>
