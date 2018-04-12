@@ -142,7 +142,7 @@
           </table>
           <div v-if="questions[index]['not_sure']" style='display:block;'>
             <input v-bind:name="questions[index]['name']" type='radio' value='-1' v-bind:id="questions[index]['name']+'_n'">
-            <label v-bind:for="questions[index]['name']+'_n'">Not sure / The video lacks information.</label>
+            <label v-bind:for="questions[index]['name']+'_n'">Not sure</label>
             <input v-bind:name="questions[index]['name']" type="text" v-bind:id="questions[index]['name']+'_n_t'" style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason"></input>
           </div>
         </div>
