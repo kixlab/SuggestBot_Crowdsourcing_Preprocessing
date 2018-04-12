@@ -40,6 +40,7 @@ var vue_app = new Vue({
     tagging_max_time: -1,
     collected_data: {},
     submittable: false,
+    micro_browser:0,
     condition: condition,
     video_url: video_url,
     proceed_action: "ADD",
@@ -292,7 +293,9 @@ var vue_app = new Vue({
       return (this.tagging_phase<7) && (this.tagging_phase>=4) &&(this.state=="tagging")
     },
     jump_to_exact_frame: function(){
-      player.currentTime(this.current_marker+0.5)
+
+      player.currentTime(this.current_marker+this.micro_browser/10);
+      this.micro_browser= (this.micro_browser+1)%10;
     }
   }
 })
@@ -359,6 +362,7 @@ function after_replay(){
   }
   player.pause()
   player.controls(true)
+  vue_app.micro_browser = 0;
   vue_app.state = "tagging";
   vue_app.state_string="Labeling Step A"
   $('#replay_btn').css("visibility", "visible")
