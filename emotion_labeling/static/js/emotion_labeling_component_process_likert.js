@@ -290,6 +290,9 @@ var vue_app = new Vue({
     },
     tagging_step_B: function(){
       return (this.tagging_phase<7) && (this.tagging_phase>=4) &&(this.state=="tagging")
+    },
+    jump_to_exact_frame: function(){
+      player.currentTime(this.current_marker+0.5)
     }
   }
 })
