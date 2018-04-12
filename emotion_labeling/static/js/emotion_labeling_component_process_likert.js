@@ -64,7 +64,7 @@ var vue_app = new Vue({
         //below special case
         {name:'voice_volume', question: 'The voice volume is....', positive: 'Increased', negative: 'Decreased', not_sure: true, silent_related: true},
         {name:'voice_trembling', question: 'The voice is trembling.', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
-        {name:'voice_assertive', question: 'The voice is assertive', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
+        {name:'voice_assertive', question: 'The voice is assertive', positive: 'Assertive', negative: 'Timid', not_sure: true, silent_related: true},
         {name:'against', question: 'The character is moving against people or things.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'shiver', question: 'The character is feeling cold shivers.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'pale', question: 'The character is getting pale.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
