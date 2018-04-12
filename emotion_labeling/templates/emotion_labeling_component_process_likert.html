@@ -96,6 +96,7 @@
               </td>
               <td>
                 <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Silent</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
                 <div class="likert_item">
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='1' v-bind:id="questions[index]['name']+'_1'">
@@ -105,6 +106,7 @@
               </td>
               <td>
                 <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Short Utterance</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
                 <div class="likert_item">
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='2' v-bind:id="questions[index]['name']+'_2'">
@@ -115,6 +117,7 @@
               </td>
               <td>
                 <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; visibility: hidden; text-align:center;">ph</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px;">Neutral Value</div>
                 <div class="likert_item">
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='3' v-bind:id="questions[index]['name']+'_3'">
@@ -124,6 +127,7 @@
               </td>
               <td>
                 <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
                 <div class="likert_item">
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='4' v-bind:id="questions[index]['name']+'_4'">
@@ -133,6 +137,7 @@
               </td>
               <td>
                 <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Long Utterance</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
                 <div class="likert_item">
                   <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
                   <input v-bind:name="questions[index]['name']" type='radio' value='5' v-bind:id="questions[index]['name']+'_5'">
