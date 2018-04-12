@@ -49,6 +49,7 @@ var vue_app = new Vue({
     cur_cog_motiv_exp: "",
     state_string: 'Video Watching',
     video_started: false,
+    silent_checked:{},
     questions: [
         {name:'smiling', question: 'The character is smiling.', positive: 'Definitely', negative: 'Not at all', image: true, not_sure: true},
         {name:'mouth_close_open', question: 'The mouth is...', positive: 'Opening', negative: 'Closing', not_sure: true},
@@ -56,20 +57,20 @@ var vue_app = new Vue({
         {name:'frowning', question: 'The character is frowning.', positive: 'Definitely', negative: 'Not at all', image:true, not_sure: true},
         {name:'tear', question: 'The tear is coming out from the character.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'eyes_close_open', question: 'The eyes are....', positive: 'Opened', negative: 'Closed', not_sure: true},
-        {name:'voice_volume', question: 'The voice volume is....', positive: 'Increased', negative: 'Decreased', not_sure: true},
-        {name:'voice_trembling', question: 'The voice is trembling.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'voice_assertive', question: 'The voice is assertive', positive: 'Definitely', negative: 'Not at all', not_sure: true},
+        {name:'utterance_length', question: 'The character is silent / having short utterance / having long utterance.', positive: 'Having long utterance', negative: 'Silent', not_sure: true},
         {name:'body_abrupt', question: 'The body is abruptly moving.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'towards', question: 'The character is moving towards people or things.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'withdrawing', question: 'The character is withdrawing from people or things.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'against', question: 'The character is moving against people or things.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         //below special case
-        {name:'utterance_length', question: 'The character is silent / having short utterance / having long utterance.', positive: 'Having long utterance', negative: 'Silent', not_sure: true},
-        {name:'speech_melody', question: 'The speech melody is changing.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'speech_disturbed', question: 'The speech is being disturbed.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
-        {name:'speech_tempo', question: 'The speech tempo is...', positive: 'Fast', negative: 'Slow', not_sure: true},
+        {name:'voice_volume', question: 'The voice volume is....', positive: 'Increased', negative: 'Decreased', not_sure: true, silent_related: true},
+        {name:'voice_trembling', question: 'The voice is trembling.', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
+        {name:'voice_assertive', question: 'The voice is assertive', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
+        {name:'against', question: 'The character is moving against people or things.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'shiver', question: 'The character is feeling cold shivers.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'pale', question: 'The character is getting pale.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
+        {name:'speech_melody', question: 'The speech melody is changing.', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
+        {name:'speech_disturbed', question: 'The speech is being disturbed.', positive: 'Definitely', negative: 'Not at all', not_sure: true, silent_related: true},
+        {name:'speech_tempo', question: 'The speech tempo is...', positive: 'Fast', negative: 'Slow', not_sure: true, silent_related: true},
         {name:'breathing', question: 'The character breathing is...', positive: 'Fast', negative: 'Slow', not_sure: true},
         {name:'sweating', question: 'The character is sweating.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
         {name:'blushing', question: 'The character is blushing.', positive: 'Definitely', negative: 'Not at all', not_sure: true},
@@ -217,6 +218,10 @@ var vue_app = new Vue({
       return [min, max]
     },
     question_hidden: function(index){
+      if(this.silent_checked[this.current_marker]!=undefined&&this.questions[index]['silent_related']!=undefined){
+        return false
+      }
+
       var min_max = this.get_q_range_for_index(index)
       var min = min_max[0]
       var max = min_max[1]
@@ -297,7 +302,7 @@ var vue_app = new Vue({
 
       player.currentTime(this.current_marker+this.micro_browser/10);
       this.micro_browser= (this.micro_browser+1)%10;
-    }
+    },
   }
 })
 
@@ -554,4 +559,17 @@ $("a").on('mouseover', function(){
   $(this).css("color", "#d50000")
 }).on('mouseout', function(){
   $(this).css("color","")
+})
+
+$("input[name='utterance_length']").on('click', function(){
+  if($("input[name='utterance_length']:checked").val()=="1"){
+    vue_app.silent_checked[vue_app.current_marker] = true
+    $(".silent_not_sure").prop('checked', true)
+    $(".silent_not_sure_r").val("silence")
+  }else{
+    vue_app.silent_checked[vue_app.current_marker] = undefined
+    $(".silent_not_sure").prop('checked', false)
+    $(".silent_not_sure_r").val("")
+  }
+
 })
