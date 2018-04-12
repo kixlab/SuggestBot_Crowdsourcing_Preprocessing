@@ -84,6 +84,7 @@ def experiment1_cp(request, video_title, wid, aid):
     return render(request, "emotion_labeling_component_process.html", task_to_throw)
 
 def experiment1_cp_prescreening(request, video_title, wid, aid):
+    exp_video = Experiment_Video.objects.filter(video_title = video_title)[0]
     if request.method=="POST":
         # test
         #if request.POST['expression']=='3' and request.POST['event']=='1':
@@ -92,7 +93,11 @@ def experiment1_cp_prescreening(request, video_title, wid, aid):
         #else:
         #    token = {'token': str(uuid.uuid4().hex.upper()[0:6])}
         #    return render(request, "prescreen_fail_token_return.html", token)
-    return render(request, 'emotion_labeling_component_process_prescreening.html',{})
+    time_work = {
+        'video_total_time': exp_video.video_total_time,
+        'video_prompt_num': exp_video.video_prompt_num,
+    }
+    return render(request, 'emotion_labeling_component_process_prescreening.html',time_work)
 
 def experiment1_cp_likert(request, video_title, wid, aid):
     exp_video = Experiment_Video.objects.filter(video_title = video_title)[0]

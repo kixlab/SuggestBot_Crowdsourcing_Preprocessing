@@ -6,6 +6,8 @@ class Experiment_Video(models.Model):
     video_url = models.CharField(max_length = 2000, default = "")
     video_img = models.CharField(max_length = 200, default = "")
     video_prompt_time = models.CharField(max_length=10000, default = "")
+    video_total_time = models.IntegerField(default = 0)
+    video_prompt_num = models.IntegerField(default = 0)
     def __str__(self):
         return self.video_title
 

@@ -8,8 +8,8 @@
   {% csrf_token %}
   <div id='vue_app' style="margin-left: 20px;">
     <div v-bind:class="{hidden_item:step!=0}" class="row" style="display:block; margin: auto;">
-      <h3>Pass the test, and start the $X task</h3>
-      <p>which takes about ~ min</p>
+      <h3>Pass the test, and start the $[[payment]] task</h3>
+      <p>which takes about [[work_time]] min</p>
       <p>You will be given 2 test problems and if you pass them, you will be able to start the main task of <strong>labeling the emotional factors of a character</strong> while watching a video.</p>
       <p>The purpose of this test is to help you understand the answer criteria of the main task.</p>
       <h4>First Test: Expression Detection</h4>
@@ -175,6 +175,8 @@
   </div>
 
   <script>
+  var video_sec = {{video_total_time}}
+  var video_prompt_num = {{video_prompt_num}}
   var vue_app = new Vue({
     el: "#vue_app",
     delimiters: ['[[', ']]'],
@@ -182,6 +184,8 @@
       step: 0,
       prob_1: -1,
       prob_2: -1,
+      work_time: parseInt((video_sec+video_prompt_num*120+300)/60),
+      payment: ((video_sec+video_prompt_num*120+300)/3600 * 8).toFixed(2),
     },
     methods:{
       enable_task: function(){
