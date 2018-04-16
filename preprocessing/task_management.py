@@ -10,7 +10,7 @@ import random
 # if every fields are filled, it will marked as fully inspected
 
 #below is the number of videos given to single worker
-batch_number = 5
+batch_number = 20
 
 #below is the number of votes for each tasks
 vote_number = 3
