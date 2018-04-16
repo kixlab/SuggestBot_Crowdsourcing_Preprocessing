@@ -5,7 +5,7 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-var must_see_sec = 1000
+var must_see_sec = 10000
 
 var good_url, bad_url, instruction_title, instruction, good_example_text, bad_example_text, good_example_title, bad_example_title;
 
