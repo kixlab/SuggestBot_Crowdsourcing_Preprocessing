@@ -50,6 +50,7 @@ var vue_app = new Vue({
     state_string: 'Video Watching',
     video_started: false,
     silent_checked:{},
+    playPromise: undefined,
     questions: [
         {name:'smiling', question: 'The character is smiling.', positive: 'Definitely', negative: 'Not at all', image: true, not_sure: true},
         {name:'mouth_close_open', question: 'The mouth is...', positive: 'Opening', negative: 'Closing', not_sure: true},
@@ -144,8 +145,11 @@ var vue_app = new Vue({
         for(i in this.questions){
           if($("input[name='"+this.questions[i]['name']+"']:checked").val()=="-1"){
             component_process[this.questions[i]['name']] = $("#"+this.questions[i]['name']+"_n_t").val();
-          }else{
+          }else if($("input[name='"+this.questions[i]['name']+"']:checked").val() != undefined){
             component_process[this.questions[i]['name']] = $("input[name='"+this.questions[i]['name']+"']:checked").val();
+          }else if($("input[name='"+this.questions[i]['name']+"']:checked").val() == undefined){
+            alert("There are unmarked questions, based on your changed selection. Please find them and select answers.")
+            return
           }
 
         }
@@ -197,13 +201,13 @@ var vue_app = new Vue({
         // reset current marker variable
         this.current_marker = -1;
         // when all the necessary markers are done, enable submit function
-        if(Object.keys(this.collected_data).length==Object.keys(prompt_time).length){
+        if(Object.keys(this.collected_data).length==Object.keys(prompt_time).length && vue_app.submittable==false){
           alert("Now you labeled character's emotion for all required moments. If you do not think revision is necessary, return with submit button below.")
           vue_app.submittable = true;
         }
         vue_app.current_action_add()
         // play the video
-        player.play()
+        this.playPromise = player.play()
 
     },
     get_q_range_for_index: function(index){
@@ -303,6 +307,29 @@ var vue_app = new Vue({
       player.currentTime(this.current_marker+this.micro_browser/10);
       this.micro_browser= (this.micro_browser+1)%10;
     },
+    tagging_done_button_activated: function(){
+      if(this.question_page == this.tagging_phase || this.collected_data[this.current_marker]!=undefined){
+        return true;
+      }else{
+        return false;
+      }
+    },
+    revision_description_enabled: function(){
+      if(this.proceed_action=="REVISE"){
+        if(!this.submittable){
+          return "proceed"
+        }else{
+          return "submit"
+        }
+      }
+    },
+    is_submittable: function(){
+      if(this.submittable && this.state=='watching'){
+        return true;
+      }else{
+        return false;
+      }
+    }
   }
 })
 
@@ -318,7 +345,7 @@ var vjs_options = {
   },
 }
 document.getElementById('main_video').onloadedmetadata = function(){
-    load_markers()
+//    load_markers()
 }
 var player = videojs('main_video', vjs_options)
 
@@ -366,7 +393,7 @@ $(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 
   //generate the data structure for markers
 var markers=[];
 
-
+load_markers()
 // after rewatching
 function after_replay(){
   if(vue_app.step=="sanity_check"){
@@ -382,7 +409,16 @@ function after_replay(){
 
 //recast data to the input field, for emotion labeling and reasoning
 function recast_data(marker_time){
-  player.pause()
+  if (vue_app.playPromise !== undefined) {
+  vue_app.playPromise.then(_ => {
+    video.pause();
+    vue_app.playPromise = undefined
+  })
+  .catch(error => {
+    player.pause();
+    vue_app.playPromise = undefined
+  });
+}
   vue_app.state="tagging";
   vue_app.state_string="Labeling Step A"
   $('#replay_btn').css("visibility","hidden")
@@ -397,7 +433,13 @@ function recast_data(marker_time){
   }
   var stopper_percentage = (1-vue_app.tagging_max_time/player.duration())*100
   $("#maxBar").css("width", stopper_percentage.toString()+"%")
-  $(".emotion_marker").addClass("HiddenMarker")
+  $(".emotion_marker").addClass(function(){
+      if(!$(this).hasClass("doneMarker")){
+        return "HiddenMarker"
+      }else{
+        return "HiddenMarker" // TODO decide whether to make this return "" or "HiddenMarker"
+      }
+  })
   $("#stop_marker_"+marker_time).removeClass('doneMarker').removeClass("HiddenMarker").addClass('currentMarker')
   if(vue_app.step=='label_and_reason'){
     if(vue_app.collected_data[marker_time]!= 'no_figure'){
@@ -405,7 +447,6 @@ function recast_data(marker_time){
     }
   }
   vue_app.current_action_revise()
-
 }
 
 function posting_data(dict, marker_time){
@@ -544,8 +585,11 @@ function load_markers(){
       }
     },
     onMarkerClick: function(marker){
-      if(vue_app.state=="watching"){
+      if(vue_app.state=="watching" || vue_app.state=="tagging"){
         if($("[data-marker-key='"+marker['key']+"']").hasClass("doneMarker")){
+          if(vue_app.state=="tagging"){
+            vue_app.add_data();
+          }
           recast_data(marker['time'])
         }
       }

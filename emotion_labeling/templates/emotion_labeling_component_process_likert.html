@@ -68,8 +68,10 @@
         </div>
       </div>
     </div>
+    <span v-if="revision_description_enabled()=='proceed'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to next time point, please click REVISE LABEL AND PROCEED button.</span>
+    <span v-if="revision_description_enabled()=='submit'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow; top: -20px;">You are in the Revision mode. To revise other time points, or to proceed to SUBMIT, please click REVISE LABEL AND PROCEED button.</span>
     <div>
-      <span v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
+      <span v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:2; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
       <!-- source is decided in the javascript file-->
       <video id="main_video" class="video-js vjs-default-skin vjs-big-play-centered"
       controls preload="auto" width="720" height="405"
@@ -505,7 +507,7 @@
       <div style="float:right">
         <div v-if="step=='label_and_reason'" class='btn light-red darken-1' id="tagging_prev" v-on:click="tagging_phase_substract()" v-bind:class="{hidden_item:tagging_phase==0}">BACK</div>
         <div v-if="step=='label_and_reason'" class='btn light-red darken-1' id="tagging_next" v-on:click="tagging_phase_add()" v-bind:class="{hidden_item:tagging_phase==question_page}">NEXT</div>
-        <div v-if="step=='label_and_reason'" class="btn light-blue darken-1" id="add" v-on:click="add_data" v-bind:class="{hidden_item:tagging_phase!=question_page}">[[proceed_action]] Label and Proceed</div>
+        <div v-if="step=='label_and_reason'" class="btn light-blue darken-1" id="add" v-on:click="add_data" v-bind:class="{hidden_item:tagging_done_button_activated()==false}">[[proceed_action]] Label and Proceed</div>
       </div>
     </div>
   </div>
@@ -517,7 +519,7 @@
 <form method="POST">
 {% csrf_token %}
   <input type="text" name="to_return" id="to_return" style="display:none"/>
-  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!submittable"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!is_submittable()"/>
 </form>
 
 </div>
