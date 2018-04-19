@@ -4,6 +4,7 @@ var tuto_vue = new Vue({
   data: {
     cur_tuto: 0,
     max_tuto: max_tuto,
+    tuto_array: Array.apply(null, Array(max_tuto+1)).map(function (_, i) {return i;}),
     tuto_done: false,
     loaded:true,
   },
@@ -71,6 +72,6 @@ $(document).ready(function(){
   document.getElementById('tuto_img').onload = function(){
     tuto_vue.loaded = true;
   }
-  $(".tooltipped").tooltip({html: true});
+  $(".tooltipped").tooltip({html: true, enterDelay: 50,});
 
 })

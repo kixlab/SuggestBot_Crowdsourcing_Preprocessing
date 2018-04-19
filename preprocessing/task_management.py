@@ -10,7 +10,7 @@ import random
 # if every fields are filled, it will marked as fully inspected
 
 #below is the number of videos given to single worker
-batch_number = 5
+batch_number = 20
 
 #below is the number of votes for each tasks
 vote_number = 3
@@ -81,15 +81,15 @@ def isp_store_result(result, wid, aid):
             single_vote.save()
             #if stored batch data, then see if vote_number of votes are collected
             if criteria == "video_quality":
-                accumulated_votes = Video_quality_inspection_vote.objects.filter(video = subject_video)
+                accumulated_votes = Video_quality_inspection_vote.objects.filter(video = subject_video, end_time__gte = F('start_time'))
             elif criteria == "sound_quality":
-                accumulated_votes = Sound_quality_inspection_vote.objects.filter(video = subject_video)
+                accumulated_votes = Sound_quality_inspection_vote.objects.filter(video = subject_video, end_time__gte = F('start_time'))
             elif criteria == "language":
-                accumulated_votes = Language_inspection_vote.objects.filter(video = subject_video)
+                accumulated_votes = Language_inspection_vote.objects.filter(video = subject_video, end_time__gte = F('start_time'))
             elif criteria == "conversation":
-                accumulated_votes = Conversation_inspection_vote.objects.filter(video = subject_video)
+                accumulated_votes = Conversation_inspection_vote.objects.filter(video = subject_video, end_time__gte = F('start_time'))
             elif criteria == "scene":
-                accumulated_votes = Scene_inspection_vote.objects.filter(video = subject_video)
+                accumulated_votes = Scene_inspection_vote.objects.filter(video = subject_video, end_time__gte = F('start_time'))
             accumulated_votes_count = accumulated_votes.count()
             if accumulated_votes_count >=vote_number:
                 #if so, mark the result

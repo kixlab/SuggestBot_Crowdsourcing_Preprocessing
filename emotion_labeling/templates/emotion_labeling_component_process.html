@@ -1,0 +1,684 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
+<link href="{%static 'css/videojs.markers.css' %}" rel='stylesheet'>
+<script src="{% static 'js/videojs-markers.js' %}"></script>
+<script>
+//prompt time should be dictionary, key with time and value with whether the task is done on the time or not
+var prompt_time = '{{prompt_time}}'
+prompt_time = JSON.parse(prompt_time.replace(/&quot;/g,'"'))
+//label to check is only used in sanity check step
+var label_to_check = '{{label_to_check}}'
+label_to_check = JSON.parse(label_to_check.replace(/&quot;/g,'"'))
+// condition is about whether it is data colleciton or experiment
+  // for current stage, in the data collection condition, workers can pick 'no figure'.
+  // 'data_collection', 'experiment'
+var condition = "{{condition}}"
+var primitive_video_url = "{{video_url}}"
+var step = "{{step}}"
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="vue_app" class="row" style="visibility: hidden">
+  <div class="row" style="margin-bottom: 0px">
+  <!-- Video Viewer -->
+  <div class="col s7">
+    <div class="row">
+      <div class="col s2">
+        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png" style="width:100%; margin-top:20px">
+      </div>
+      <div class="col s10" id="instruction">
+        <div v-if="step=='label_and_reason'">
+          <div v-if="state!='tagging'">
+            <p>Please watch the video. Concentrate when the the video is blinking.</p>
+          </div>
+          <div v-if="tagging_step_A()">
+            <p>Please answer Expression and Cognitive Component.</p>
+            <p>Hover over the the <a href="#">blue words</a> if you need additional tips and instructions.</p>
+          </div>
+          <div v-bind:class="{hidden_item:tagging_phase!=1}">
+            <p style="margin-bottom:0">
+              Please answer emotion of the character.
+            </p>
+            <p style="margin-bottom:0">
+              You will be asked to annotate <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
+              <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
+              <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
+            </p>
+            <p  style="margin-bottom:0" v-if="condition=='experiment_reasoning'">
+              Please provide an explanation on the link between reasoning in step A and step B.
+            </p>
+          </div>
+        </div>
+        <div v-if="step=='sanity_check'">
+          <p style="margin-bottom:0">
+            You will see how other workers did on labeling the emotion of the character in the left, at the moment when the border of the video player blinks in red.
+          <p>
+          <p style="margin-bottom:0">
+            Emotion label that workers labeled includes <a href="#">Valence</a>, <a href="#">Arousal</a>, and <a href="#">Emotion Class</a>.
+          </p>
+          <p style="margin-bottom:0">
+            You will also read the reason why other crowd workers did labeling like what they did.
+          </p>
+          <p style="margin-bottom:0">
+            Your task is to decide whether that reasoning logically makes sense. Remember, you are not to decide whether the label is 'right' or 'wrong', but to check the plausibility of the label.
+          </p>
+
+        </div>
+      </div>
+    </div>
+    <div>
+      <!-- source is decided in the javascript file-->
+      <video id="main_video" class="video-js vjs-default-skin vjs-big-play-centered"
+      controls preload="auto" width="720" height="405"
+      data-setup='{ "inactivityTimeout": 0 }'
+       style="margin:auto;">
+      </video>
+    </div>
+  </div>
+
+  <!-- labeling interface -->
+  <div class="col s5">
+    <div>
+    <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0%; width: 50%;">Tutorial</a>
+    </div>
+    <div v-bind:class="{disabled_task : state!='tagging'}">
+      <div id="component_process_task" class="row" v-bind:class="{hidden_item : tagging_phase!=0}">
+        <div id="motor_physio_expression" class="row" style="margin-bottom:0">
+          <h6>Expression</h6>
+          <table>
+            <tr>
+              <th colspan='6'>
+                Facial Expression
+              </th>
+            </tr>
+            <tr>
+              <td colspan='6'>
+                <input name="motor" id="smiling" type="checkbox" value="smiling"/>
+                <label for="smiling" class="component_label">Smiling</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="mouth_opening" type="checkbox" value="mouth_opening"/>
+                <label for="mouth_opening" class="component_label">Mouth Opening</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="mouth_closing" type="checkbox" value="mouth_closing"/>
+                <label for="mouth_closing" class="component_label">Mouth Closing</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="mouth_tensing" type="checkbox" value="mouth_tensing"/>
+                <label for="mouth_tensing" class="component_label">Mouth Tensing</label>
+              </td>
+            </tr>
+            <tr>
+
+              <td colspan='6'>
+                <input name="motor" id="frown" type="checkbox" value="frown"/>
+                <label for="frown" class="component_label">Frown</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="tears" type="checkbox" value="tears"/>
+                <label for="tears" class="component_label">Tears</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="eyes_opening" type="checkbox" value="eyes_opening"/>
+                <label for="eyes_opening" class="component_label">Eyes Opening</label>
+              </td>
+              <td colspan='6'>
+                <input name="motor" id="eyes_closing" type="checkbox" value="eyes_closing"/>
+                <label for="eyes_closing" class="component_label">Eyes Closing</label>
+              </td>
+            </tr>
+            <tr>
+              <th>Vocal Expression</th>
+            </tr>
+            <tr>
+              <td colspan='12'>
+                <input name="motor" id="volume_increasing" type="checkbox" value="volume_increasing"/>
+                <label for="volume_increasing" class="component_label">Volume Increasing</label>
+              </td>
+              <td colspan='12'>
+                <input name="motor" id="volume_decreasing" type="checkbox" value="volume_decreasing"/>
+                <label for="volume_decreasing" class="component_label">Volume Decreasing</label>
+              </td>
+            </tr>
+            <tr>
+              <td colspan='12'>
+                <input name="motor" id="v_trembling" type="checkbox" value="v_trembling"/>
+                <label for="v_trembling" class="component_label">Voice Trembling</label>
+              </td>
+              <td colspan='12'>
+                <input name="motor" id="v_assertive" type="checkbox" value="v_assertive"/>
+                <label for="v_assertive" class="component_label">Voice Being Assertive</label>
+              </td>
+            </tr>
+            <tr>
+              <th>Gesture Expression</th>
+            </tr>
+            <tr>
+              <td colspan='12'>
+                <input name="motor" id="g_abrupt" type="checkbox" value="g_abrupt"/>
+                <label for="g_abrupt" class="component_label">Abrupt Bodily Movements</label>
+              </td>
+              <td colspan='12'>
+                <input name="motor" id="moving_towards" type="checkbox" value="moving_towards"/>
+                <label for="moving_towards" class="component_label">Moving Towards People or Things</label>
+              </td>
+            </tr>
+            <tr>
+              <td colspan='12'>
+                <input name="motor" id="withdrawing" type="checkbox" value="withdrawing"/>
+                <label for="withdrawing" class="component_label">Withdrawing From People or Things</label>
+              </td>
+              <td colspan='12'>
+                <input name="motor" id="against" type="checkbox" value="against"/>
+                <label for="against" class="component_label">Moving Against People or Things</label>
+              </td>
+            </tr>
+            <tr>
+              <th>Speech Expression</th>
+            </tr>
+            <tr>
+              <td colspan='8'>
+                <input name="motor" id="silence" type="checkbox" value="silence"/>
+                <label for="silence" class="component_label">Silence</label>
+              </td>
+              <td colspan='8'>
+                <input name="motor" id="short_utterance" type="checkbox" value="short_utterance"/>
+                <label for="short_utterance" class="component_label">Short Utterance</label>
+              </td>
+              <td colspan='8'>
+                <input name="motor" id="long_utterance" type="checkbox" value="long_utterance"/>
+                <label for="long_utterance" class="component_label">Long Utterance</label>
+              </td>
+            </tr>
+            <tr>
+              <td colspan='8'>
+                <input name="motor" id="s_melody" type="checkbox" value="s_melody"/>
+                <label for="s_melody" class="component_label">Speech Melody Change</label>
+              </td>
+              <td colspan='8'>
+                <input name="motor" id="s_disturbance" type="checkbox" value="s_disturbance"/>
+                <label for="s_disturbance" class="component_label">Speech Disturbance</label>
+              </td>
+              <td colspan='8'>
+                <input name="motor" id="s_tempo" type="checkbox" value="s_tempo"/>
+                <label for="s_tempo" class="component_label">Speech Tempo Change</label>
+              </td>
+            </tr>
+            <tr>
+              <th>Physiological Response</th>
+            </tr>
+            <tr>
+              <td colspan='8'>
+                <input name="physio" id="shiver" type="checkbox" value="shiver"/>
+                <label for="shiver" class="component_label">Feeling Cold Shivers</label>
+              </td>
+              <td colspan='8'>
+                <input name="physio" id="pale" type="checkbox" value="pale"/>
+                <label for="pale" class="component_label">Getting Pale</label>
+              </td>
+              <td colspan='8'>
+                <input name="physio" id="breathing_slow" type="checkbox" value="breathing_slow"/>
+                <label for="breathing_slow" class="component_label">Breathing Slowing Down</label>
+              </td>
+            </tr>
+            <tr>
+              <td colspan='8'>
+                <input name="physio" id="breathing_faster" type="checkbox" value="breathing_faster"/>
+                <label for="breathing_faster" class="component_label">Breathing Getting Faster</label>
+              </td>
+              <td colspan='8'>
+                <input name="physio" id="sweating" type="checkbox" value="sweating"/>
+                <label for="sweating" class="component_label">Sweating</label>
+              </td>
+              <td colspan='8'>
+                <input name="physio" id="blushing" type="checkbox" value="blushing"/>
+                <label for="blushing" class="component_label">Blushing</label>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div id="cog_motiv_component" class="row" style="margin-bottom:0">
+          <h6>Describe 1) the event the character is in,
+            2) <a href='#' class="tooltipped" data-tooltip="How suddenly and abruptly did the event occur?
+            <br>How probable is the occurrence of the event in general?
+            <br>How pleasant/unpleasant is the event in general, independently of the current situation?
+            <br>How likely is that the event was mostly caused by chance or natural causes?
+            <br>How likely is it that the event was mostly caused by the person’s own behavior?
+            <br>How likely is it that the event was mostly caused by someone else’s behavior?
+            <br>If the event is caused by a behavior, how likely is it that the event was caused intentionally?
+            <br>How likely is it that the event violated laws or social norms?" style='font-weight: bold'>
+              the nature of the event</a>,
+            3) <a href='#' class="tooltipped" data-tooltip="How familiar was the person with the event?
+            <br>How important/relevant is the event to the person’s current goals or needs?
+            <br>How different is the event from what the person expected at this moment?
+            <br>How likely is it that the event would not be consistent with the person’s image of him/herself?
+            <br>Are the potential consequences of the event clearly envisaged and may they occur in the near future?" style='font-weight: bold'>
+              the way the character appraise the event</a>
+            , 4) <a href='#' class="tooltipped" data-tooltip="How likely will the consequences of the event bring positive/negative, desirable/undesirable outcomes to the person?
+            <br>Did the event require the person to react immediately?
+            <br>Would the consequences of event be ineluctable or still be avoidable and modifiable?
+            <br>Could the consequences of event still be avoided or modified to the person’s advantage?
+            <br>Would the person be able to live with, and adjust to, the consequences of the event?" style='font-weight: bold'>
+              possible consequences of the event</a>,
+            and 5) <a href='#' class="tooltipped" data-tooltip="Moving attention towards the event
+            <br>Moving attention away from the event
+            <br>Information search
+            <br>Attention self-centered
+            <br>Attention directed towards others
+            <br>Physically moving towards the event
+            <br>Physically moving away from the event" style='font-weight: bold'>
+              the action tendency of the character toward the event</a>.</h6>
+          <textarea name="cog_motiv" id="cog_motiv" class="materialize-textarea" style="padding:0;margin:0;"></textarea>
+          <label for='cog_motiv'></label>
+
+        </div>
+        <!--below for the case when motivational component is added in-->
+        <!--<div id="motivational_component" class="row" style="margin-bottom:0; display:none">
+          <h6>Motivational Component</h6>
+          <h6>Please write about the action tendency and the attitude of the character towards the event.</h6>
+          <textarea name="motivational" id="motivational" class="materialize-textarea" style="padding:0;margin:0;"></textarea>
+          <label for='motivational'></label>
+        </div>-->
+        <span class='btn blue' v-on:click="tagging_phase_add">Proceed</span>
+      </div>
+      <div v-bind:class="{hidden_item : tagging_phase != 1}">
+        <!--selected values-->
+        <div>
+          <h6 >Below are component values that you analyzed</h6>
+          <div v-bind:class="{hidden_item:expression_existence()}">
+            <h6 style="text-decoration: underline">Expression</h6>
+            <table id="motor_display">
+            </table>
+            <table id="physiological_display">
+            </table>
+          </div>
+          <h6 style="text-decoration: underline">Event</h6>
+          <p id="cog_motiv_display" style='margin:0'></p>
+          <!--<h6 style="text-decoration: underline">Motivational Component</h6>
+          <p id="motivational_display" style='margin:0'></p>-->
+        </div>
+      <hr>
+      <!-- Descriptions for valence and arousal labeling -->
+        <div v-if="step=='label_and_reason'">
+          <h6 style="margin-bottom: 0px;">Considering your answer in step A, choose the best emotion of the character.</h6>
+        </div>
+        <!-- images to support valence labeling -->
+        <div style="text-align: center; text-decoration: underline">Valence</div>
+        <div id="valence_image" class="row" style="margin-bottom: 0px">
+          <div id="valance_images" class="col s10 push-s1">
+            <table>
+              <tbody>
+                <tr>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/valence_1.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/valence_2.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/valence_3.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/valence_4.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/valence_5.png'%}"></image>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- radio buttons for valence labeling -->
+        <div id="valence_radios" class="row" style="margin-bottom: 0px; border-bottom: 1px solid #cccccc">
+          <div id="valence_nagative" class="table_radios col s1">
+            Negative
+          </div>
+          <div id="valance_images" class="col s10">
+            <table>
+              <tbody>
+                <tr>
+                  <!--<td class="table_radios radios_padding"></td>-->
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_1" value="1" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_1" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_2" value="2" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_2" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_3" value="3" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_3" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_4" value="4" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_4" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_5" value="5" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_5" class="radio_without_label"></label>
+                  </td>
+                  <!--<td class="table_radios">
+                    <input name="valence" type="radio" id="valence_6" value="6" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_6" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_7" value="7" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_7" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_8" value="8" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_8" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="valence" type="radio" id="valence_9" value="9" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_9" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios radios_padding"></td>-->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="valence_positive" class="table_radios col s1">
+            Positive
+          </div>
+        </div>
+        <!-- images to support arousal labeling -->
+        <div style="text-align: center; text-decoration: underline">Arousal</div>
+        <div id="arousal_image" class="row" style="margin-bottom: 0px">
+          <div id="arousal_images" class="col s10 push-s1">
+            <table>
+              <tbody>
+                <tr>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/arousal_1.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/arousal_2.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/arousal_3.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/arousal_4.png'%}"></image>
+                  </td>
+                  <td class="table_image_containers">
+                    <image class="table_images" src="{%static 'img/valence_arousal/arousal_5.png'%}"></image>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- radio buttons for arousal labeling -->
+        <div id="arousal_radios" class="row" style="margin-bottom: 0px; border-bottom: 1px solid #cccccc">
+          <div id="arousal_low" class="table_radios col s1">
+            Calm
+          </div>
+          <div id="valance_images" class="col s10">
+            <table>
+              <tbody>
+                <tr>
+                  <!--<td class="table_radios radios_padding"></td>-->
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_1" value="1" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_1" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_2" value="2" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_2" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_3" value="3" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_3" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_4" value="4" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_4" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_5" value="5" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_5" class="radio_without_label"></label>
+                  </td>
+                  <!--<td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_6" value="6" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_6" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_7" value="7" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_7" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_8" value="8" :disabled="step=='sanity_check'"/>
+                    <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_8" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios">
+                    <input name="arousal" type="radio" id="arousal_9" value="9" :disabled="step=='sanity_check'"/>
+                    <label for="arousal_9" class="radio_without_label"></label>
+                  </td>
+                  <td class="table_radios radios_padding"></td>-->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="arousal_high" class="table_radios col s1">
+            Excited
+          </div>
+        </div>
+        <!-- emotion category description -->
+        <div v-if="step=='label_and_reason'" style="text-align:center; text-decoration:underline">
+          Emotion Category
+        </div>
+        <!-- emotion category radios -->
+        <div v-if="step=='label_and_reason'" id="emotion_cateogries" class="row" style="margin-bottom: 0px">
+          <table class="col s12">
+            <tbody>
+              <tr>
+                <th>major</th>
+                <th>minor</th>
+                <th>emotion</th>
+                <th>major</th>
+                <th>minor</th>
+                <th>emotion</th>
+                <th>major</th>
+                <th>minor</th>
+                <th>emotion</th>
+                <th>major</th>
+                <th>minor</th>
+                <th>emotion</th>
+              </tr>
+              <tr>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="fearful"/>
+                  <label for="fearful" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="fearful_mul" value="fearful"/>
+                  <label for="fearful_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Fearful
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="angry"/>
+                  <label for="angry" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="angry_mul" value="angry"/>
+                  <label for="angry_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Angry
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="sad"/>
+                  <label for="sad" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="sad_mul" value="sad"/>
+                  <label for="sad_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Sad
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="disgusted"/>
+                  <label for="disgusted" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="disgusted_mul" value="disgusted"/>
+                  <label for="disgusted_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Disgusted
+                </td>
+              </tr>
+              <tr>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="happy"/>
+                  <label for="happy" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="happy_mul" value="happy"/>
+                  <label for="happy_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Happy
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="surprised"/>
+                  <label for="surprised" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="surprised_mul" value="surprised"/>
+                  <label for="surprised_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Surprised
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="frustrated"/>
+                  <label for="frustrated" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="frustrated_mul" value="frustrated"/>
+                  <label for="frustrated_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Frustrated
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="depressed"/>
+                  <label for="depressed" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="depressed_mul" value="depressed"/>
+                  <label for="depressed_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Depressed
+                </td>
+              </tr>
+              <tr>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="excited"/>
+                  <label for="excited" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="excited_mul" value="excited"/>
+                  <label for="excited_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Excited
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="neutral"/>
+                  <label for="neutral" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="neutral_mul" value="neutral"/>
+                  <label for="neutral_mul" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td emotion_td_label">
+                  Neutral
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman" type="radio" id="other"/>
+                  <label for="other" class="ekman_label"></label>
+                </td>
+                <td class="emotion_td">
+                  <input name="ekman_mul" type="checkbox" id="other_mul" value="other"/>
+                  <label for="other_mul" class="ekman_label"></label>
+                </td>
+                <td colspan='4'class="emotion_td emotion_td_label">
+                  Other
+                  <input name="for_other" type='text' id="for_other" style="width: 100px; height: 25px; margin-bottom: 0; border: 0.5px solid #9e9e9e; border-radius: 0;"/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+
+        <!-- Description for reasoning -->
+        <div v-if="step=='label_and_reason'" v-bind:class="{hidden_item: condition!='experiment_reasoning'}">
+          <h6>Describe why you choose this emotion, using the information you generated in the step A. </h6>
+        </div>
+        <!-- input box for reasoning -->
+        <div v-if="step=='label_and_reason'" id="reasoning_box" v-bind:class="{hidden_item: condition!='experiment_reasoning'}" class="row" style="margin-bottom:0px">
+          <textarea class='materialize-textarea' type="text" id="reasoning" style="padding:0"></textarea>
+          <label for="reasoning">Your reasoning</label>
+        </div>
+        <div v-if="no_figure_option()">
+          <h6>If the figure's voice or image of body does not exist in the moment, click below to proceed.</h6>
+          <div class="btn red darken-1" id="no_figure" v-on:click="add_data('no_figure')">No Figure</div>
+        </div>
+        <div style="float:right">
+          <div v-if="step=='label_and_reason'" class='btn light-red darken-1' id="tagging_prev" v-on:click="tagging_phase_substract">BACK</div>
+          <div v-if="step=='label_and_reason'" class="btn light-blue darken-1" id="add" v-on:click="add_data">[[proceed_action]] Label and Proceed</div>
+        </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<hr>
+<form method="POST">
+{% csrf_token %}
+  <input type="text" name="to_return" id="to_return" style="display:none"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!submittable"/>
+</form>
+
+</div>
+
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+    <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+    <h5 v-if="!loaded">Tutorial - image is being loaded...</h5></div>
+    <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+    <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+  </div>
+  <div class='modal-footer'>
+    <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+  </div>
+</div>
+<script>
+var max_tuto = 1
+</script>
+
+<script src="{% static 'js/emotion_labeling_component_process.js' %}"></script>
+<script src="{% static 'js/tutorial.js' %}"></script>
+{% endblock %}

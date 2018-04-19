@@ -44,7 +44,7 @@ var vue_app_video = new Vue({
   el: "#vueapp-video",
   delimiters: ['[[', ']]'],
   data: {
-    url: "eKwAib6LosM"
+    url: "W6yXonvwRVs"
   },
 })
 
@@ -52,9 +52,9 @@ var vue_app_video = new Vue({
 $(document).ready(function(){
 
   // read all image files from the pointed directory
-  for (var i=1; i<max_num_img_loaded; i++){
+  for (var i=0; i<max_num_img_loaded; i++){
     actual_num_img_loaded++;
-    url = directory + "" + i + ".png"; // pointed directory
+    url = directory + "frame" + i + ".jpg"; // pointed directory
     var img = new Image();
     img.onerror = function(){
       this.remove();
@@ -67,25 +67,25 @@ $(document).ready(function(){
 
   // create onclick function for each face image
   for (var i=0; i<actual_num_img_loaded; i++){
-    var img_id = "face" + (i+1);
+    var img_id = "face" + i;
     document.getElementById(img_id).onclick = function() {
       var selected_img = this.id;
       selected_img = selected_img.replace(/^face/, '');
       if (flag_nametag != undefined){
-        if (grouping_array[cur_name][selected_img-1] == false) {
-          grouping_array[cur_name][selected_img-1] = true;
+        if (grouping_array[cur_name][selected_img] == false) {
+          grouping_array[cur_name][selected_img] = true;
           console.log("grouping_array[cur_name]", cur_name, grouping_array[cur_name]);
           this.style.border = "10px solid yellow";
         }
-        else if (grouping_array[cur_name][selected_img-1] == true) {
-          grouping_array[cur_name][selected_img-1] = false;
+        else if (grouping_array[cur_name][selected_img] == true) {
+          grouping_array[cur_name][selected_img] = false;
           this.style.border = "10px solid white";
         }
-        for (var i=0; i<num_name+1; i++){
-          if (i!=cur_name){
-            if (grouping_array[i][selected_img-1] == true) {
-              grouping_array[i][selected_img-1] = false;
-              if (i == cur_name){
+        for (var j=0; j<num_name+1; j++){
+          if (j!=cur_name){
+            if (grouping_array[j][selected_img] == true) {
+              grouping_array[j][selected_img] = false;
+              if (j == cur_name){
                 this.style.border = "10px solid white";
               }
             }
@@ -93,13 +93,13 @@ $(document).ready(function(){
         }
       }
       else {
-        if (grouping_array[num_name][selected_img-1] == false) {
-          grouping_array[num_name][selected_img-1] = true;
+        if (grouping_array[num_name][selected_img] == false) {
+          grouping_array[num_name][selected_img] = true;
           console.log("grouping_array[num_name]", num_name, grouping_array[num_name]);
           this.style.border = "10px solid yellow";
         }
-        else if (grouping_array[num_name][selected_img-1] == true) {
-          grouping_array[num_name][selected_img-1] = false;
+        else if (grouping_array[num_name][selected_img] == true) {
+          grouping_array[num_name][selected_img] = false;
           this.style.border = "10px solid white";
         }
       }
@@ -232,7 +232,7 @@ function create_nametag(){
         }
       }
       for (var i=0; i<actual_num_img_loaded; i++){
-        var img_id = "face" + (i+1);
+        var img_id = "face" + i;
         document.getElementById(img_id).style.opacity = "1";
         document.getElementById(img_id).style.pointerEvents = "auto";
         document.getElementById(img_id).style.border = "10px solid white";

@@ -22,7 +22,7 @@ def video_search_and_accumulate(keywords, number_of_items):
             if next_page_tokens[idx] == None:
                 search_response = youtube.search().list(
                     q = keywords[idx],
-                    maxResults = 10,
+                    maxResults = 50,
                     part = "id, snippet",
                     order = "relevance",
                     videoEmbeddable = 'true',
@@ -32,7 +32,7 @@ def video_search_and_accumulate(keywords, number_of_items):
             else:
                 search_response = youtube.search().list(
                     q = keywords[idx],
-                    maxResults = 10,
+                    maxResults = 50,
                     part = "id, snippet",
                     order = "relevance",
                     videoEmbeddable = 'true',
@@ -40,7 +40,11 @@ def video_search_and_accumulate(keywords, number_of_items):
                     pageToken = next_page_tokens[idx],
                     relevanceLanguage = 'en',
                     ).execute()
+            print("search done for "+keywords[idx])
+            print(next_page_tokens[idx])
             next_page_tokens[idx] = search_response.get("nextPageToken")
+            if next_page_tokens[idx]==None:
+                return collected_videos_num
             for search_result in search_response.get("items", []):
                 vtitle = search_result['snippet']['title']
                 vid = search_result['id']['videoId']
