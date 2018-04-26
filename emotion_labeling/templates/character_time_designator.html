@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/character_time_designator.css' %}" rel='stylesheet'>
+
+{% endblock %}
+
+
+{% block content %}
+<script>
+var url_id = '{{url}}';
+</script>
+<div id='vue_app' class="row">
+  <!--cross origin : need to set cors for firebase storage. one domain at a time-->
+  <video id="main_video" class="video-js" crossorigin="anonymous"
+  controls preload="auto"
+  src = "{{url}}"
+   style="margin:auto; width: 800px; height: 450px;">
+  </video>
+  <div id='bar_container' style="display:block; margin:auto; width:800px; position:relative;">
+    <div style="position:absolute; left: 810px; top: -100px; width: 100px;">
+      <span style="font-size:10px;">Browse Interval (browse with arrows)</span>
+      <input id="browse_interval" type="number" name="quantity" min="0" max="10" value="0.5"></input>
+    </div>
+    <div id="time_indicator" style="z-index:2;position:absolute; border: 1px solid red; height: 100%;"></div>
+    <div v-for="(item, index) in figure_time_data" v-bind:id="'figure_'+index" style="width:800px; height: 35px; border-bottom: solid 2px black; position:relative" v-bind:class="{figure_disabled: figure_disabler(index)==true}" v-bind:style="{'background-color': working_on_figure_color(index)}">
+      <img v-bind:id="'fig_img_'+index" class="magnify_on_hover" style="left: -70px; z-index:2;position:absolute; border: 1px solid transparent; border-bottom: 2px solid transparent; height: 30px; max-width: 30px;" v-bind:src="fig_image_source[index]"></img>
+      <span style="position:absolute; left: -30px; height: 30px; width: 30px;" class="btn-floating" v-on:click="add_time(index)"><i style="position: relative; top: -4px;" class="material-icons">[[return_icon(state)]]</i></span>
+      <span style="position:absolute; right: -30px; height: 30px; width: 30px;" class="btn-floating" v-on:click="delete_figure(index)"><i style="position: relative; top: -4px;" class="material-icons">delete</i></span>
+      <div v-for="(item2, index2) in item"
+      class="tooltipped"
+      style="height: 30px; position: absolute; border: solid 0.5px grey; top: 2px; bottom: 2px;"
+      v-bind:style="{left: return_left(item2), width: return_right(item2), 'background-color': time_block_color(index, index2)}"
+      v-on:click="revise(index, index2)"
+      >
+        <div style="position:relative; top: 13px; width: 16px; height: 15px; background-color: red; border: solid 1px white" v-on:click="delete_time(index, index2)">
+          <i class="material-icons" style="font-size: 15px; position: relative; top: -2px; margin: 0px; padding: 0px;">delete</i></div>
+      </div>
+    </div>
+  </div>
+  <div style="width:480px; displa:block; margin: auto;">
+    <span class='btn' style="font-size:12px; width:480px;" v-on:click="add_figure()" v-bind:class="{disabled: state=='adding'}">Add New Figure with Profile Image From the Current Frame</span>
+
+  </div>
+  <form method="POST">{% csrf_token %}
+    <input id="return_json" name='to_return' type='text' style="display:none"></input>
+    <input type='submit' name='submit' class="btn" v-on:click="submit()" style="display:block; margin:auto; margin-top: 10px;"></input>
+  </form>
+
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <canvas id="canvas" width="480" height="270" style="display:none"></canvas>
+      <div id="modal_img" style="position: relative; width: 480px; height: 270px" class="unselectable">
+        <div id="modal_img_cont"></div>
+        <span id="bbox_handle_1" class="btn-floating handle" style="position:absolute; z-index:2; width:14px; height:14px; left:193px; top: 93px;"><i></i></span>
+        <span id="bbox_handle_2" class="btn-floating handle" style="position:absolute; z-index:2; width:14px; height:14px; left:393px; top: 193px;"><i></i></span>
+        <div id="bounding_box" style="border: dotted 2px red; position:absolute; z-index:1; height:100px; width: 200px; top: 100px; left: 200px"></div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" v-on:click="add_figure2()">Done</a>
+    </div>
+  </div>
+
+</div>
+<script src="{% static 'js/character_time_designator.js' %}"></script>
+{% endblock %}

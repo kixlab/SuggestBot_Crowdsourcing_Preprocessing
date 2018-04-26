@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     url(r'^in_lab/(?P<video_title>[\w\-]+)/$', views.in_lab),
+    url(r'^character_time_designator/(?P<title>[\w\-]+)/$', views.character_time_designator),
     #label and reason
     url(r'^experiment1/(?P<condition>[\w\-]+)/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1),
     #for component_process condition

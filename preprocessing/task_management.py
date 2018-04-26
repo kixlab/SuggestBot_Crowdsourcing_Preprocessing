@@ -4,13 +4,15 @@ import uuid
 import datetime
 import json
 import random
+from .socket_management import *
+from multiprocessing import Process
 # task will be assigned based on current status of whole available works
 # in the order of
 # conversation -> language -> visual quality -> audio quality -> scene
 # if every fields are filled, it will marked as fully inspected
 
 #below is the number of videos given to single worker
-batch_number = 20
+batch_number = 2
 
 #below is the number of votes for each tasks
 vote_number = 3
@@ -123,6 +125,8 @@ def isp_store_result(result, wid, aid):
                     if qualification_result:
                         subject_video.scene_passed = True
                         subject_video.fully_inspected = True
+
+                        send_url("https://www.youtube.com/watch?v="+subject_video.video_url)
                     else:
                         subject_video.fully_inspected = True
                 subject_video.save()

@@ -1,6 +1,12 @@
 from django.db import models
 import datetime
 # Create your models here.
+class Video_Before_Processing(models.Model):
+    video_title = models.CharField(max_length = 200, default = "")
+    video_url = models.CharField(max_length = 2000, default = "")
+    def __str__(self):
+        return self.video_title
+
 class Experiment_Video(models.Model):
     video_title = models.CharField(max_length = 200, default = "")
     video_url = models.CharField(max_length = 2000, default = "")

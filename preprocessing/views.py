@@ -16,7 +16,7 @@ from django.conf import settings
 
 def search_and_accumulate_url(request):
     print("holla!")
-    #send_url("https://www.youtube.com/watch?v=LO-imM-8Ymg")
+    #send_url("LO-imM-8Ymg")
     if request.method=="POST":
         print("!")
         form = SearchKeyword(request.POST)
@@ -65,8 +65,10 @@ def receive_facial_result(request):
     if request.method=="POST":
         print("heh")
         data = request.FILES['media']
+        url = request.POST['url']
+        i = request.POST['i']
         #need to decide where to store the file...
-        path = default_storage.save('./facialclustering_result_images/img.png', ContentFile(data.read()))
+        path = default_storage.save('./preprocessing/static/img/face_clusters/'+url+'/'+str(i)+'.png', ContentFile(data.read()))
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
 
     return render(request, 'search_and_accumulate_url.html')

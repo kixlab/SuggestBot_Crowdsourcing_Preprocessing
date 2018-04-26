@@ -337,9 +337,10 @@ var maximal_time = 0;
 var maximal_percentage;
 var cur_time = 0;
 
+var player;
 // below is for setting up video functionalities
   //getting the video
-var vjs_options = {
+/*var vjs_options = {
   controlBar: {
     volumePanel: {inline: false}
   },
@@ -347,7 +348,7 @@ var vjs_options = {
 document.getElementById('main_video').onloadedmetadata = function(){
 //    load_markers()
 }
-var player = videojs('main_video', vjs_options)
+player = videojs('main_video', vjs_options)
 
 player.src(video_url)
   // when seeking for unseen video parts, return to current point
@@ -381,8 +382,50 @@ player.on('timeupdate', function(){
       this.currentTime(vue_app.tagging_max_time-replay_padding)
     }
   }
-})
+})*/
+$(document).ready(function(){
+  // below is for setting up video functionalities
+    //getting the video
+  document.getElementById('main_video').onloadedmetadata = function(){
+  //    load_markers()
+  }
+  player = videojs('main_video')
 
+  player.src(video_url)
+    // when seeking for unseen video parts, return to current point
+  player.on('seeking', function(){
+    //make workers unable to see futher the seen range
+    if(this.currentTime()>maximal_time){
+      this.currentTime(cur_time)
+      alert("You cannot seek to unseen video time.")
+    }
+  })
+
+  player.on('play', function(){
+    if(!vue_app.video_started){
+      vue_app.video_started = true;
+    }
+  })
+
+  player.on('timeupdate', function(){
+      // when maximal point is updated, update the value
+    if(this.seeking()==false){
+      cur_time = this.currentTime()
+      if(cur_time > maximal_time){
+        maximal_time = cur_time;
+        $("#playedBar").css("width", (maximal_time/player.duration()*100).toString()+"%")
+      }
+    }
+    // while doing the task, limit the range of the video time that workers can check
+    if(vue_app.state == "tagging"){
+      if(this.currentTime()>vue_app.tagging_max_time-replay_padding){
+        this.pause();
+        this.currentTime(vue_app.tagging_max_time-replay_padding)
+      }
+    }
+  })
+  load_markers()
+})
 
 // make div for signify how much a worker has seen, replay button, etc
 $(".vjs-control-bar").append("<button id='replay_btn' class='vjs-control vjs-button' onclick='replay()'></button>")
@@ -393,7 +436,7 @@ $(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 
   //generate the data structure for markers
 var markers=[];
 
-load_markers()
+//load_markers()
 // after rewatching
 function after_replay(){
   if(vue_app.step=="sanity_check"){

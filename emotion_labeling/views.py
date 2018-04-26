@@ -7,6 +7,8 @@ from .emotion_label_management import *
 import uuid
 from boto.mturk.connection import MTurkConnection
 from boto.mturk.price import Price
+import base64
+from .character_time_designate import *
 # Create your views here.
 
 #mtc = MTurkConnection(aws_access_key_id='fake', aws_secret_access_key='fake', host='mechanicalturk.sandbox.amazonaws.com')
@@ -176,6 +178,21 @@ def experiment2(request, video_title, wid, aid):
         'step': "sanity_check",
     }
     return render(request, "emotion_labeling_task.html", task_to_throw)
+
+def character_time_designator(request, title):
+    video = Video_Before_Processing.objects.filter(video_title = title)[0]
+    if request.method=="POST":
+        form = EmotionResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+
+        save_character_time_data(to_return, title, video.video_url)
+
+
+    task_to_throw ={
+        'url': video.video_url,
+    }
+    return render(request, "character_time_designator.html", task_to_throw)
 
 # run this function only once unless you will pay bonus multiple times for a worker
 def bonus_for_hits(request, hit):
