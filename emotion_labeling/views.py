@@ -187,6 +187,7 @@ def character_time_designator(request, title):
         to_return = json.loads(form.cleaned_data['to_return'])
 
         save_character_time_data(to_return, title, video.video_url)
+        return HttpResponse("Successfully returned")
 
 
     task_to_throw ={

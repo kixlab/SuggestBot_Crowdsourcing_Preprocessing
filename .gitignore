@@ -3,3 +3,4 @@
 *.cpython-36.pyc
 **/__pycache__/*.pyc
 db.sqlite3
+**/img/figures/experiment/*.png
