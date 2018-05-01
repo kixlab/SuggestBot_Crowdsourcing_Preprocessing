@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/character_time_designator.css' %}" rel='stylesheet'>
+
+{% endblock %}
+
+
+{% block content %}
+<script>
+var url_id = '{{url}}';
+</script>
+<div style="margin-left: 20px">
+  {% for el in task_list %}
+  <p>
+
+    <input type="checkbox" name="video" id="{{el.video_title}}" value="{{el.video_title}}"/>
+
+  <label for="{{el.video_title}}">{{el.video_title}}</label>
+  </p>
+  {% endfor %}
+  <form method="POST">
+    {% csrf_token %}
+    <input type="submit" name="submit" onclick="return_data()"/>
+    <input id="to_return" name="to_return" type="text" style="display:none"/>
+  </form>
+</div>
+<script>
+function return_data(){
+  li = []
+  $("input[name='video']:checked").map(function(_, e){
+    li.push($(e).val())
+  })
+  $("#to_return").val(JSON.stringify(li))
+}
+</script>
+{% endblock %}
