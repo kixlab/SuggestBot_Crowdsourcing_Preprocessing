@@ -90,6 +90,7 @@ class Emotion_Label_Component_Process(Emotion_label_Meta):
     cog_motiv = models.CharField(max_length=10000, default="")
     #motivational = models.CharField(max_length=10000, default="")
 
+#for pre data collection
 class Emotion_Label_Component_Process_Likert(Emotion_label_Meta):
     experiment_video = models.ForeignKey(Experiment_Video, on_delete=models.CASCADE, null=True, blank=True)
     smiling = models.IntegerField(default = 1)
@@ -136,6 +137,10 @@ class Emotion_Label_Component_Process_Likert(Emotion_label_Meta):
     attention_people = models.IntegerField(default = 1)
     physical_event = models.IntegerField(default = 1)
     not_sure_reasoning = models.CharField(default="", max_length=1000)
+
+#data structure for baseline condition
+class Emotion_Label_Baseline(Emotion_label_Meta):
+    experiment_video = models.ForeignKey(Experiment_Video, on_delete=models.CASCADE, null=True, blank=True)
 
 class Emotion_check_experiment(Emotion_check_Meta):
     emotion_label = models.ForeignKey(Emotion_label_experiment, on_delete=models.CASCADE, null=True, blank=True)

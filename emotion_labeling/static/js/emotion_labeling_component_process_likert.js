@@ -32,7 +32,6 @@ var vue_app = new Vue({
   el: "#vue_app",
   delimiters: ['[[', ']]'],
   data:{
-    step: step,
     state: "watching", // watching, enforced_replay, tagging
     tagging_phase: 0,
     current_marker: -1,
@@ -105,8 +104,7 @@ var vue_app = new Vue({
   methods:{
     //add label data to the colleted data-- for label and reason condition!
     add_data: function(message="add"){
-      // for the labeling condition
-      if(this.step=="label_and_reason"){
+
         //retrieve values from the interface
         var valence = $("input[name='valence']:checked").val()
         var arousal = $("input[name='arousal']:checked").val()
@@ -176,11 +174,11 @@ var vue_app = new Vue({
           }
         }
 
-      }
+
       // reset input fields
       $("input[name='valence']").prop('checked', false)
       $("input[name='arousal']").prop('checked', false)
-      if(this.step=='label_and_reason'){
+
         $("input[name='ekman']").prop('checked', false)
         $("input[name='ekman_mul']").prop('checked', false)
         $("input[name='for_other']").val("")
@@ -188,7 +186,7 @@ var vue_app = new Vue({
           $("input[name='"+this.questions[i]['name']+"']").prop('checked', false);
           $("#"+this.questions[i]['name']+"_n_t").val("")
         }
-      }
+
         //change the state to 'watching' state
         this.state='watching'
         this.state_string="Watching Video"
@@ -248,7 +246,7 @@ var vue_app = new Vue({
       $("#to_return").val(JSON.stringify(to_return))
     },
     no_figure_option: function(){
-      return (this.step=='label_and_reason' && this.condition=='data_collection')
+      return (this.condition=='data_collection')
     },
     current_action_add: function(){
       this.proceed_action = "ADD"
@@ -439,9 +437,6 @@ var markers=[];
 //load_markers()
 // after rewatching
 function after_replay(){
-  if(vue_app.step=="sanity_check"){
-    posting_data(label_to_check, vue_app.current_marker)
-  }
   player.pause()
   player.controls(true)
   vue_app.micro_browser = 0;
@@ -454,7 +449,7 @@ function after_replay(){
 function recast_data(marker_time){
   if (vue_app.playPromise !== undefined) {
   vue_app.playPromise.then(_ => {
-    video.pause();
+    player.pause();
     vue_app.playPromise = undefined
   })
   .catch(error => {
@@ -484,11 +479,10 @@ function recast_data(marker_time){
       }
   })
   $("#stop_marker_"+marker_time).removeClass('doneMarker').removeClass("HiddenMarker").addClass('currentMarker')
-  if(vue_app.step=='label_and_reason'){
     if(vue_app.collected_data[marker_time]!= 'no_figure'){
       posting_data(vue_app.collected_data, marker_time)
     }
-  }
+
   vue_app.current_action_revise()
 }
 
@@ -500,7 +494,6 @@ function posting_data(dict, marker_time){
   var component_process = dict[marker_time]['component_process']
   $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
   $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
-  if(vue_app.step=="label_and_reason"){
     if(emotion_category.indexOf(ekman_val)==-1){
       $("#other").prop('checked', true);
       $("#for_other").val(ekman_val)
@@ -524,7 +517,7 @@ function posting_data(dict, marker_time){
         $("#"+cp+"_"+component_process[cp]).prop('checked', true)
       }
     }
-  }
+
 
 }
 

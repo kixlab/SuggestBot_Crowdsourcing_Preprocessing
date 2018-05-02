@@ -9,13 +9,13 @@ TASK_TIME_LIMIT = 30
 EMOTION_CATEGORY = [
   'fearful', 'angry', 'sad', 'disgusted', 'happy', 'surprised', 'frustrated', 'depressed', 'excited', 'neutral'
 ]
-def Experiment_Label_Store(exp_video, result, w_id, a_id, condition):
+def Experiment_Label_Baseline_Store(exp_video, result, w_id, a_id):
     labels = result['labels']
     token = str(uuid.uuid4().hex.upper()[0:6])
     for time in labels:
         label = labels[time]
         print(label)
-        label_ds = Emotion_label_experiment(experiment_video = exp_video, time=float(time), valence=int(label['valence']), arousal=int(label['arousal']), category = label['category'], reasoning = label['reasoning'], wid= w_id, aid= a_id, condition=condition)
+        label_ds = Emotion_Label_Baseline(experiment_video = exp_video, time=float(time), valence=int(label['valence']), arousal=int(label['arousal']), category = label['category'], reasoning = label['reasoning'], wid= w_id, aid= a_id)
         for emotion in label['minor_category']:
             if emotion in EMOTION_CATEGORY:
                 if emotion == 'fearful':

@@ -11,7 +11,7 @@ for(var key in prompt_time){
 }
 times.sort(function(a, b){return a-b;})
 if(condition.includes("experiment")){
-  video_url = "https://github.com/kixlab/suggestbotData/blob/master/experiment/"+primitive_video_url+".mp4?raw=true"//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
 }
 
 // Below part is for vue app
@@ -19,7 +19,6 @@ var vue_app = new Vue({
   el: "#vue_app",
   delimiters: ['[[', ']]'],
   data:{
-    step: step,
     state: "watching", // watching, enforced_replay, tagging
     tagging_phase: 0,
     current_marker: -1,
@@ -30,12 +29,14 @@ var vue_app = new Vue({
     condition: condition,
     video_url: video_url,
     proceed_action: "ADD",
+    state_string: 'Video Watching',
+    video_started: false,
+    micro_browser: 0,
   },
   methods:{
     //add label data to the colleted data-- for label and reason condition!
     add_data: function(message="add"){
-      // for the labeling condition
-      if(this.step=="label_and_reason"){
+
         // to prefill the field
         if(condition == "experiment_baseline"){
           $("#reasoning").val("No Reasoning")
@@ -84,37 +85,14 @@ var vue_app = new Vue({
           }
         }
 
-      }else if(this.step=='sanity_check'){
-        // for the sanity check step
-        var check_result = $("input[name='check']").prop('checked')
-        if(check_result ==undefined){
-          alert("Please check whether the reasoning makes sense")
-          return
-        }else{
-          var aid = label_to_check[this.current_marker]['label_aid']
-          var wid = label_to_check[this.current_marker]['label_wid']
-          var dict = {
-            'qualified' : check_result,
-            'label_aid' : aid,
-            'label_wid' : wid,
-          }
-          this.collected_data[this.current_marker] = dict
-
-        }
-      }
       // reset input fields
       $("input[name='valence']").prop('checked', false)
       $("input[name='arousal']").prop('checked', false)
-      if(this.step=='label_and_reason'){
         $("input[name='ekman']").prop('checked', false)
         $("input[name='ekman_mul']").prop('checked', false)
         $("input[name='for_other']").val("")
         $("#reasoning").val("")
-      }else if(this.step=='sanity_check'){
-        $(".emotion_word_check").removeClass('emotion_word_check_highlighted')
-        $("#current_reasoning").text("")
-        $("input[name='check']").prop('checked', false)
-      }
+
 
 
 
@@ -145,7 +123,7 @@ var vue_app = new Vue({
       $("#to_return").val(JSON.stringify(to_return))
     },
     no_figure_option: function(){
-      return (this.step=='label_and_reason' && this.condition=='data_collection')
+      return (this.condition=='data_collection')
     },
     current_action_add: function(){
       this.proceed_action = "ADD"
@@ -153,6 +131,27 @@ var vue_app = new Vue({
     current_action_revise: function(){
       this.proceed_action = "REVISE"
     },
+    jump_to_exact_frame: function(){
+
+      player.currentTime(this.current_marker+this.micro_browser/10);
+      this.micro_browser= (this.micro_browser+1)%10;
+    },
+    revision_description_enabled: function(){
+      if(this.proceed_action=="REVISE"){
+        if(!this.submittable){
+          return "proceed"
+        }else{
+          return "submit"
+        }
+      }
+    },
+    is_submittable: function(){
+      if(this.submittable && this.state=='watching'){
+        return true;
+      }else{
+        return false;
+      }
+    }
   }
 })
 
@@ -160,46 +159,51 @@ var maximal_time = 0;
 var maximal_percentage;
 var cur_time = 0;
 
+var player;
 // below is for setting up video functionalities
   //getting the video
-var vjs_options = {
-  controlBar: {
-    volumePanel: {inline: false}
-  },
-}
-document.getElementById('main_video').onloadedmetadata = function(){
-    load_markers()
-}
-var player = videojs('main_video', vjs_options)
 
-player.src(video_url)
-  // when seeking for unseen video parts, return to current point
-player.on('seeking', function(){
-  //make workers unable to see futher the seen range
-  if(this.currentTime()>maximal_time){
-    this.currentTime(cur_time)
-    alert("You cannot seek to unseen video time.")
+$(document).ready(function(){
+  document.getElementById('main_video').onloadedmetadata = function(){
+      //load_markers()
   }
-})
+  player = videojs('main_video')
 
-player.on('timeupdate', function(){
-    // when maximal point is updated, update the value
-  if(this.seeking()==false){
-    cur_time = this.currentTime()
-    if(cur_time > maximal_time){
-      maximal_time = cur_time;
-      $("#playedBar").css("width", (maximal_time/player.duration()*100).toString()+"%")
+  player.src(video_url)
+    // when seeking for unseen video parts, return to current point
+  player.on('seeking', function(){
+    //make workers unable to see futher the seen range
+    if(this.currentTime()>maximal_time){
+      this.currentTime(cur_time)
+      alert("You cannot seek to unseen video time.")
     }
-  }
-  // while doing the task, limit the range of the video time that workers can check
-  if(vue_app.state == "tagging"){
-    if(this.currentTime()>vue_app.tagging_max_time-replay_padding){
-      this.pause();
-      this.currentTime(vue_app.tagging_max_time-replay_padding)
+  })
+  player.on('play', function(){
+    if(!vue_app.video_started){
+      vue_app.video_started = true;
     }
-  }
-})
+  })
 
+  player.on('timeupdate', function(){
+      // when maximal point is updated, update the value
+    if(this.seeking()==false){
+      cur_time = this.currentTime()
+      if(cur_time > maximal_time){
+        maximal_time = cur_time;
+        $("#playedBar").css("width", (maximal_time/player.duration()*100).toString()+"%")
+      }
+    }
+    // while doing the task, limit the range of the video time that workers can check
+    if(vue_app.state == "tagging"){
+      if(this.currentTime()>vue_app.tagging_max_time-replay_padding){
+        this.pause();
+        this.currentTime(vue_app.tagging_max_time-replay_padding)
+      }
+    }
+  })
+  load_markers()
+
+})
 
 // make div for signify how much a worker has seen, replay button, etc
 $(".vjs-control-bar").append("<button id='replay_btn' class='vjs-control vjs-button' onclick='replay()'></button>")
@@ -210,15 +214,13 @@ $(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 
   //generate the data structure for markers
 var markers=[];
 
-
 // after rewatching
 function after_replay(){
-  if(vue_app.step=="sanity_check"){
-    posting_data(label_to_check, vue_app.current_marker)
-  }
   player.pause()
   player.controls(true)
+  vue_app.micro_browser = 0;
   vue_app.state = "tagging";
+  vue_app.state_string = "Labeling Emotion"
   $('#replay_btn').css("visibility","hidden")
 }
 
@@ -240,20 +242,11 @@ function recast_data(marker_time){
   $("#maxBar").css("width", stopper_percentage.toString()+"%")
   $(".emotion_marker").addClass("HiddenMarker")
   $("#stop_marker_"+marker_time).removeClass('doneMarker').removeClass("HiddenMarker").addClass('currentMarker')
-  if(vue_app.step=='label_and_reason'){
+
     if(vue_app.collected_data[marker_time]!= 'no_figure'){
       posting_data(vue_app.collected_data, marker_time)
     }
-  }else if(vue_app.step=='sanity_check'){
-    posting_data(label_to_check, marker_time)
-    var checked = vue_app.collected_data[marker_time]
-    if(checked){
-      checked = "check_yes"
-    }else{
-      checked = "check_no"
-    }
-    $("#"+checked).prop('checked', true)
-  }
+
   vue_app.current_action_revise()
 
 }
@@ -267,7 +260,6 @@ function posting_data(dict, marker_time){
 
   $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
   $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
-  if(vue_app.step=="label_and_reason"){
     if(emotion_category.indexOf(ekman_val)==-1){
       $("#other").prop('checked', true);
       $("#for_other").val(ekman_val)
@@ -284,11 +276,7 @@ function posting_data(dict, marker_time){
         $("#for_other").val(ekman_mul_val[ek_m_v])
       }
     }
-  }else if(vue_app.step=="sanity_check"){
-    $("#"+ekman_val+"_check").addClass("emotion_word_check_highlighted")
-    $("#current_reasoning").text(reasoning_val)
 
-  }
 
 }
 
@@ -404,3 +392,9 @@ function load_markers(){
     markers: markers,
   })
 }
+
+$("a").on('mouseover', function(){
+  $(this).css("color", "#d50000")
+}).on('mouseout', function(){
+  $(this).css("color","")
+})

@@ -18,7 +18,8 @@ label_to_check = JSON.parse(label_to_check.replace(/&quot;/g,'"'))
   // 'data_collection', 'experiment'
 var condition = "{{condition}}"
 var primitive_video_url = "{{video_url}}"
-var step = "{{step}}"
+var video_img = "{{video_img}}"
+
 </script>
 {% endblock %}
 
@@ -27,63 +28,54 @@ var step = "{{step}}"
 <div id="vue_app" class="row" style="visibility: hidden">
   <div class="row" style="margin-bottom: 0px">
   <!-- Video Viewer -->
-  <div class="col s8">
+  <div class="col s7">
     <div class="row">
       <div class="col s2">
-        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_url}}/{{video_url}}{{character}}.png" style="width:100%; margin-top:20px">
+        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_img}}.png" style="width:100%; margin-top:20px">
       </div>
       <div class="col s10" id="instruction">
-        <div v-if="step=='label_and_reason'">
-          <p style="margin-bottom:0">
-            You will label the emotion of the character in the left, at the moment when the border of the video player blinks in red.
-          </p>
-          <p style="margin-bottom:0">
-            Emotion label includes <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
-            <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
-            <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
-          </p>
-          <p  style="margin-bottom:0" v-if="condition=='experiment_reasoning'">
-            You will also give the reason why you labeled the emotion of the character like you did.
-          </p>
-        </div>
-        <div v-if="step=='sanity_check'">
-          <p style="margin-bottom:0">
-            You will see how other workers did on labeling the emotion of the character in the left, at the moment when the border of the video player blinks in red.
-          <p>
-          <p style="margin-bottom:0">
-            Emotion label that workers labeled includes <a href="#">Valence</a>, <a href="#">Arousal</a>, and <a href="#">Emotion Class</a>.
-          </p>
-          <p style="margin-bottom:0">
-            You will also read the reason why other crowd workers did labeling like what they did.
-          </p>
-          <p style="margin-bottom:0">
-            Your task is to decide whether that reasoning logically makes sense. Remember, you are not to decide whether the label is 'right' or 'wrong', but to check the plausibility of the label.
-          </p>
-
+        <div>
+          <div v-if="state!='tagging'">
+            <p>Please watch the video. Concentrate when the the video is blinking.</p>
+            <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try reloading.</p>
+          </div>
+          <div v-else>
+            <p style="margin-bottom:0">
+              Please answer emotion of the character.
+            </p>
+            <p style="margin-bottom:0">
+              You will be asked to annotate <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
+              <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
+              <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
+            </p>
+          </div>
         </div>
       </div>
     </div>
+    <span v-if="revision_description_enabled()=='proceed'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to next time point, please click REVISE LABEL AND PROCEED button.</span>
+    <span v-if="revision_description_enabled()=='submit'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to SUBMIT, please click REVISE LABEL AND PROCEED button.</span>
     <div>
+      <span v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:2; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
       <!-- source is decided in the javascript file-->
       <video id="main_video" class="video-js vjs-default-skin vjs-big-play-centered"
-      controls preload="auto" width="800" height="450"
-      data-setup='{ "inactivityTimeout": 0 }'
+      controls preload="auto" width="720" height="405"
+      data-setup='{ "inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }'
        style="margin:auto;">
       </video>
     </div>
   </div>
 
   <!-- labeling interface -->
-  <div class="col s4">
-    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:block; float:right; margin: 10px 0% 10px 50%; width: 50%;">Tutorial</a>
-  <div v-bind:class="{disabled_task : state!='tagging'}">
-
-    <!-- Descriptions for sanity check -->
-    <div v-if="step=='sanity_check'">
-      <h6 style="margin-bottom: 0px">See how other crowd worker did labeling on the character's emotion, and read the reasoning.</h6>
+  <div class="col s5">
+    <div>
+    <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 50%;">Tutorial</a>
     </div>
+    <div v-bind:class="{disabled_task : state!='tagging'}">
+
+
     <!-- Descriptions for valence and arousal labeling -->
-    <div v-if="step=='label_and_reason'">
+    <div>
       <h6 style="margin-bottom: 0px;">Decide current valence and arousal value of the character.</h6>
     </div>
     <!-- images to support valence labeling -->
@@ -124,24 +116,24 @@ var step = "{{step}}"
             <tr>
               <!--<td class="table_radios radios_padding"></td>-->
               <td class="table_radios">
-                <input name="valence" type="radio" id="valence_1" value="1" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_1" class="radio_without_label"></label>
+                <input name="valence" type="radio" id="valence_1" value="1"/>
+                <label for="valence_1" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="valence" type="radio" id="valence_2" value="2" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_2" class="radio_without_label"></label>
+                <input name="valence" type="radio" id="valence_2" value="2"/>
+                <label for="valence_2" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="valence" type="radio" id="valence_3" value="3" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_3" class="radio_without_label"></label>
+                <input name="valence" type="radio" id="valence_3" value="3"/>
+                <label for="valence_3" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="valence" type="radio" id="valence_4" value="4" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_4" class="radio_without_label"></label>
+                <input name="valence" type="radio" id="valence_4" value="4"/>
+                <label for="valence_4" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="valence" type="radio" id="valence_5" value="5" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_5" class="radio_without_label"></label>
+                <input name="valence" type="radio" id="valence_5" value="5"/>
+                <label for="valence_5" class="radio_without_label"></label>
               </td>
               <!--<td class="table_radios">
                 <input name="valence" type="radio" id="valence_6" value="6" :disabled="step=='sanity_check'"/>
@@ -206,24 +198,24 @@ var step = "{{step}}"
             <tr>
               <!--<td class="table_radios radios_padding"></td>-->
               <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_1" value="1" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_1" class="radio_without_label"></label>
+                <input name="arousal" type="radio" id="arousal_1" value="1"/>
+                <label for="arousal_1" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_2" value="2" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_2" class="radio_without_label"></label>
+                <input name="arousal" type="radio" id="arousal_2" value="2"/>
+                <label for="arousal_2" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_3" value="3" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_3" class="radio_without_label"></label>
+                <input name="arousal" type="radio" id="arousal_3" value="3"/>
+                <label for="arousal_3" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_4" value="4" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_4" class="radio_without_label"></label>
+                <input name="arousal" type="radio" id="arousal_4" value="4"/>
+                <label for="arousal_4" class="radio_without_label"></label>
               </td>
               <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_5" value="5" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_5" class="radio_without_label"></label>
+                <input name="arousal" type="radio" id="arousal_5" value="5"/>
+                <label for="arousal_5" class="radio_without_label"></label>
               </td>
               <!--<td class="table_radios">
                 <input name="arousal" type="radio" id="arousal_6" value="6" :disabled="step=='sanity_check'"/>
@@ -251,11 +243,11 @@ var step = "{{step}}"
       </div>
     </div>
     <!-- emotion category description -->
-    <div v-if="step=='label_and_reason'">
+    <div>
       <h6>Decide which emotion class the character is in now.</h6>
     </div>
     <!-- emotion category radios -->
-    <div v-if="step=='label_and_reason'" id="emotion_cateogries" class="row" style="margin-bottom: 0px">
+    <div id="emotion_cateogries" class="row" style="margin-bottom: 0px">
       <table class="col s12">
         <tbody>
           <tr>
@@ -403,48 +395,15 @@ var step = "{{step}}"
         </tbody>
       </table>
     </div>
-    <!-- checking other's emotion label -->
-    <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
-      <div style="text-align:center; text-decoration: underline;">Emotion Class</div>
-      <table>
-        <tbody>
-          <tr>
-            <td id="fearful_check" class="emotion_word_check">Fearful</td>
-            <td id="angry_check" class="emotion_word_check">Angry</td>
-            <td id="sad_check" class="emotion_word_check">Sad</td>
-            <td id="disgusted_check" class="emotion_word_check">Disgusted</td>
-            <td id="happy_check" class="emotion_word_check">Happy</td>
-            <td id="surprised_check" class="emotion_word_check">Surprised</td>
-            <td id="frustrated_check" class="emotion_word_check">Frustrated</td>
-            <td id="depressed_check" class="emotion_word_check">Depressed</td>
-            <td id="excited_check" class="emotion_word_check">Excited</td>
-            <td id="neutral_check" class="emotion_word_check">Neutral</td>
-            <td id="other_check" class="emotion_word_check">Other</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+
 
     <!-- Description for reasoning -->
-    <div v-if="step=='label_and_reason'" v-bind:class="{hidden_item: condition!='experiment_reasoning'}">
+    <div v-bind:class="{hidden_item: condition!='experiment_reasoning'}">
       <h6>Write the reason why you labeled like the above.</h6>
-    </div>
-    <!-- checking other's reasoning -->
-    <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
-      <div style="text-align:center; text-decoration: underline;">Reasoning for the emotion label</div>
-      <p id="current_reasoning"></p>
-    </div>
-    <!-- inputting checked result -->
-    <div v-if="step=='sanity_check'" class="row" style="margin-bottom: 0px;">
-      <h6 style="margin-bottom:0">Are the label and the reasoning plausible considering the context of the video?</h6>
-      <input name="check" type="radio" id="check_yes" val='true'/>
-      <label for="check_yes" class="ekman_label">Yes</label>
-      <input name="check" type="radio" id="check_no" val='false'/>
-      <label for="check_no" class="ekman_label" style="border: none">No</label>
     </div>
 
     <!-- input box for reasoning -->
-    <div v-if="step=='label_and_reason'" id="reasoning_box" v-bind:class="{hidden_item: condition!='experiment_reasoning'}" class="row" style="margin-bottom:0px">
+    <div id="reasoning_box" v-bind:class="{hidden_item: condition!='experiment_reasoning'}" class="row" style="margin-bottom:0px">
       <textarea class='materialize-textarea' type="text" id="reasoning" style="padding:0"></textarea>
       <label for="reasoning">Your reasoning</label>
     </div>
@@ -452,8 +411,7 @@ var step = "{{step}}"
       <h6>If the figure's voice or image of body does not exist in the moment, click below to proceed.</h6>
       <div class="btn red darken-1" id="no_figure" v-on:click="add_data('no_figure')">No Figure</div>
     </div>
-    <div v-if="step=='label_and_reason'" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data">[[proceed_action]] Label and Proceed</div>
-    <div v-if="step=='sanity_check'" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data">Proceed</div>
+    <div class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data">[[proceed_action]] Label and Proceed</div>
   </div>
 
 </div>
@@ -462,7 +420,7 @@ var step = "{{step}}"
 <form method="POST">
 {% csrf_token %}
   <input type="text" name="to_return" id="to_return" style="display:none"/>
-  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!submittable"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!is_submittable()"/>
 </form>
 
 </div>
@@ -473,18 +431,19 @@ var step = "{{step}}"
     <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
     <h5 v-if="!loaded">Tutorial - image is being loaded...</h5></div>
     <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
-    <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{step}}_{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+    <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
   </div>
   <div class='modal-footer'>
+    <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
     <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
     <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
     <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
   </div>
 </div>
 <script>
-var max_tuto = 12
+var max_tuto = 10
 </script>
 
-<script src="{% static 'js/emotion_labeling_task.js' %}"></script>
+<script src="{% static 'js/emotion_labeling_baseline.js' %}"></script>
 <script src="{% static 'js/tutorial.js' %}"></script>
 {% endblock %}
