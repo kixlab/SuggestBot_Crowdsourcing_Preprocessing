@@ -44,6 +44,109 @@ def Experiment_Label_Baseline_Store(exp_video, result, w_id, a_id):
 
     return token
 
+def Experiment_Label_Component_Process_Store_Only(exp_video, result, w_id, a_id):
+    labels = result['labels']
+    token = str(uuid.uuid4().hex.upper()[0:6])
+    for time in labels:
+        label = labels[time]
+        print(label)
+        label_ds = Emotion_Label_Component_Process_Only(experiment_video = exp_video, time=float(time), wid= w_id, aid= a_id)
+        reason_dict = {}
+        for cp in label['component_process']:
+            if len(label['component_process'][cp])> 4:
+                reason_dict[cp] = label['component_process'][cp]
+            else:
+                if cp == 'smiling':
+                    label_ds.smiling = int(label['component_process'][cp])
+                elif cp == 'mouth_close_open':
+                    label_ds.mouth_close_open = int(label['component_process'][cp])
+                elif cp == 'mouth_tensing':
+                    label_ds.mouth_tensing = int(label['component_process'][cp])
+                elif cp == 'frowning':
+                    label_ds.frowning = int(label['component_process'][cp])
+                elif cp == 'tear':
+                    label_ds.tear = int(label['component_process'][cp])
+                elif cp == 'eyes_close_open':
+                    label_ds.eyes_close_open = int(label['component_process'][cp])
+                elif cp == 'voice_volume':
+                    label_ds.voice_volume = int(label['component_process'][cp])
+                elif cp == 'voice_trembling':
+                    label_ds.voice_trembling = int(label['component_process'][cp])
+                elif cp == 'voice_assertive':
+                    label_ds.voice_assertive = int(label['component_process'][cp])
+                elif cp == 'body_abrupt':
+                    label_ds.body_abrupt = int(label['component_process'][cp])
+                elif cp == 'towards':
+                    label_ds.towards = int(label['component_process'][cp])
+                elif cp == 'withdrawing':
+                    label_ds.withdrawing = int(label['component_process'][cp])
+                elif cp == 'against':
+                    label_ds.against = int(label['component_process'][cp])
+                elif cp == 'utterance_length':
+                    label_ds.utterance_length = int(label['component_process'][cp])
+                elif cp == 'speech_melody':
+                    label_ds.speech_melody = int(label['component_process'][cp])
+                elif cp == 'speech_disturbed':
+                    label_ds.speech_disturbed = int(label['component_process'][cp])
+                elif cp == 'speech_tempo':
+                    label_ds.speech_tempo = int(label['component_process'][cp])
+                elif cp == 'shiver':
+                    label_ds.shiver = int(label['component_process'][cp])
+                elif cp == 'pale':
+                    label_ds.pale = int(label['component_process'][cp])
+                elif cp == 'breathing':
+                    label_ds.breathing = int(label['component_process'][cp])
+                elif cp == 'sweating':
+                    label_ds.sweating = int(label['component_process'][cp])
+                elif cp == 'blushing':
+                    label_ds.blushing = int(label['component_process'][cp])
+                elif cp == 'sudden':
+                    label_ds.sudden = int(label['component_process'][cp])
+                elif cp == 'probable':
+                    label_ds.probable = int(label['component_process'][cp])
+                elif cp == 'pleasant':
+                    label_ds.pleasant = int(label['component_process'][cp])
+                elif cp == 'chance':
+                    label_ds.chance = int(label['component_process'][cp])
+                elif cp == 'own':
+                    label_ds.own = int(label['component_process'][cp])
+                elif cp == 'other':
+                    label_ds.other = int(label['component_process'][cp])
+                elif cp == 'intentionally':
+                    label_ds.intentionally = int(label['component_process'][cp])
+                elif cp == 'norm':
+                    label_ds.norm = int(label['component_process'][cp])
+                elif cp == 'goal':
+                    label_ds.goal = int(label['component_process'][cp])
+                elif cp == 'expected':
+                    label_ds.expected = int(label['component_process'][cp])
+                elif cp == 'consistency':
+                    label_ds.consistency = int(label['component_process'][cp])
+                elif cp == 'envisaged':
+                    label_ds.envisaged = int(label['component_process'][cp])
+                elif cp == 'consequence':
+                    label_ds.consequence = int(label['component_process'][cp])
+                elif cp == 'immediate':
+                    label_ds.immediate = int(label['component_process'][cp])
+                elif cp == 'avoidable':
+                    label_ds.avoidable = int(label['component_process'][cp])
+                elif cp == 'adjustable':
+                    label_ds.adjustable = int(label['component_process'][cp])
+                elif cp == 'attention_event':
+                    label_ds.attention_event = int(label['component_process'][cp])
+                elif cp == 'searching_info':
+                    label_ds.searching_info = int(label['component_process'][cp])
+                elif cp == 'attention_people':
+                    label_ds.attention_people = int(label['component_process'][cp])
+                elif cp == 'physical_event':
+                    label_ds.physical_event = int(label['component_process'][cp])
+        print(label_ds)
+        print(reason_dict)
+        label_ds.not_sure_reasoning = json.dumps(reason_dict)
+        label_ds.save()
+
+    return token
+
 def Experiment_Label_Component_Process_Store(exp_video, result, w_id, a_id):
     labels = result['labels']
     token = str(uuid.uuid4().hex.upper()[0:6])

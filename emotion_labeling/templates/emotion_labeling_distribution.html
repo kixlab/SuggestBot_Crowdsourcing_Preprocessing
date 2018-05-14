@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="preload" as="style">
+<link href="{%static 'css/videojs.markers.css' %}" rel="preload" as="style">
+<link href="{%static 'css/emotion_distribution.css'%}" rel="preload" as="style">
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
+<link href="{%static 'css/videojs.markers.css' %}" rel='stylesheet'>
+<link href="{%static 'css/emotion_distribution.css' %}" rel='stylesheet'>
+<link href="{% static 'js/videojs-markers.js' %}" rel="preload" as="script">
+<script src="{% static 'js/videojs-markers.js' %}"></script>
+<script>
+//prompt time should be dictionary, key with time and value with whether the task is done on the time or not
+var prompt_time = '{{prompt_time}}'
+prompt_time = JSON.parse(prompt_time.replace(/&quot;/g,'"'))
+//label to check is only used in sanity check step
+var label_to_check = '{{label_to_check}}'
+label_to_check = JSON.parse(label_to_check.replace(/&quot;/g,'"'))
+// condition is about whether it is data colleciton or experiment
+// for current stage, in the data collection condition, workers can pick 'no figure'.
+// 'data_collection', 'experiment'
+var condition = "{{condition}}"
+var primitive_video_url = "{{video_url}}"
+var video_img = "{{video_img}}"
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="vue_app" class="row" style="visibility: hidden; margin-bottom: 0px;">
+  <div class="row" style="margin-bottom: 0px">
+    <!-- Video Viewer -->
+    <div class="col s6">
+      <div class="row">
+        <div class="col s2">
+          <img src="{% static 'img/figures/experiment/' %}{{video_img}}.png" style="width:100%; margin-top:20px">
+        </div>
+        <div class="col s10" id="instruction">
+          <div>
+            <div v-if="state!='tagging'">
+              <p>Please watch the video. Concentrate when the the video is blinking.</p>
+              <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try clicking <a href="#" onclick="reinitialize_main_video()">here</a> or reloading.</p>
+            </div>
+            <div v-else>
+              <p style="margin-bottom:0">
+                Please answer the distribution of emotion of the character.
+              </p>
+              <p style="margin-bottom:0">
+                You will be asked to annotate <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
+                <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
+                <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span v-if="revision_description_enabled()=='proceed'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to next time point, please click REVISE LABEL AND PROCEED button.</span>
+      <span v-if="revision_description_enabled()=='submit'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to SUBMIT, please click REVISE LABEL AND PROCEED button.</span>
+      <div id="main_video_container">
+        <span id="micro_browser" v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:2; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
+        <!-- source is decided in the javascript file-->
+        <video id="main_video" class="video-js"
+        data-setup='{ "width": 560, "height": 315, "controls": true, "preload": "auto","inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }'
+        style="margin:auto;">
+        </video>
+    </div>
+  </div>
+
+  <!-- labeling interface -->
+  <div class="col s6">
+    <div>
+      <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+      <a v-if="state!='enforced_replay'" class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 30%;" onclick="player.pause();">Tutorial</a>
+      {% block example_button %}
+      {% endblock %}
+    </div>
+    <div v-bind:class="{disabled_task : state!='tagging'}">
+
+
+      <!-- Descriptions for valence and arousal labeling -->
+      <div>
+        <h6 style="margin-bottom: 0px;">Decide current valence and arousal value of the character.</h6>
+      </div>
+      <!-- images to support valence labeling -->
+
+      <!-- radio buttons for valence labeling -->
+      <div class="row" style="margin-bottom: 0;">
+        <div class="col s8" style="padding: 0;">
+          <div id="valence_radios" class="row" style="margin-bottom: 0px;">
+            <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+              <span style="display:block; margin: auto;">Excited</span>
+              <img id='excited_img' src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block;"></img>
+            </div>
+            <div class="row" style="display:block; margin:auto" id="table_row">
+              <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+                <span style="display:block; margin: auto;">Negative</span>
+                <img src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" v-bind:style="{height: a_v_pic_width()}" style="display:block; margin: auto;"></img>
+              </div>
+              <div id="distribution_table" class="col s10" style="position: relative; padding:0;">
+                <div id="horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 1;"></div>
+                <div id="vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 1;"></div>
+                <table>
+                  <tbody>
+                    <tr v-for="i in likert_range1">
+                      <!--<td class="table_radios radios_padding"></td>-->
+                      <td v-for="j in likert_range2" class="table_radios distribution_input_case" style="position: relative;">
+                        <input style="position:relative; z-index: 2; color: transparent;text-shadow: 0 0 0 black;" class="distribution_input" v-bind:style="{height: Math.round(313/likert_scale)+'px'}" type="number" v-bind:id="'a'+(8-i)+'_v'+j" value="0" min="0" v-bind:max="total_distribution_token" onkeydown="return false"/>
+                        <div v-bind:id="'ex_a'+(8-i)+'_v'+j" class="distribution_ex_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: Math.round(313/likert_scale)+'px'}"></div>
+                        <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+                <span style="display:block; margin: auto;">Positive</span>
+                <img src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="width: 100%; display:block; margin: auto;"></img>
+              </div>
+            </div>
+            <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+              <span style="display:block; margin: auto;">Calm</span>
+              <img src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block;"></img>
+            </div>
+            <div class="row" style="display:block; margin:auto; text-align: center;">
+              <p style="margin:2px 0px;">Assigned tokens for distribution : <span v-bind:style="{'background-color': distribution_token_num_color()}" style="padding: 2px; color: white;">[[current_distribution_token]]</span>/[[total_distribution_token]]</p>
+              <p style="margin: 2px 0px" v-if="total_distribution_token!=current_distribution_token">[[total_distribution_token-current_distribution_token]] more tokens need to be assigned!</p>
+              <p style="margin: 2px 0px" v-if="total_distribution_token==current_distribution_token">All tokens are assigned!</p>
+            </div>
+
+          </div>
+        </div>
+        <div class="col s4" style="position: relative; top: 65px;">
+          <canvas id="color_legend" height="313" width="40"></canvas>
+          {% block example_pane %}
+          {% endblock %}
+        </div>
+      </div>
+      <div class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data">[[proceed_action]] Label and Proceed</div>
+
+
+
+    </div>
+
+  </div>
+</div>
+<hr>
+<form method="POST">
+  {% csrf_token %}
+  <input type="text" name="to_return" id="to_return" style="display:none"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto; margin-bottom: 0px;" v-on:click="return_data" :disabled="!is_submittable()"/>
+</form>
+
+</div>
+
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+      <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+      <h5 v-if="!loaded">Tutorial - image is being loaded...</h5></div>
+      <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+      <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+    </div>
+    <div class='modal-footer'>
+      <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
+      <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+      <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+      <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+    </div>
+  </div>
+
+  <script>
+  var max_tuto = 10
+  var likert_scale = 7;
+  var additive_vue_app = {}
+  var video_url;
+  if(condition.includes("experiment")){
+    video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
+  }
+
+  </script>
+  <link href="{% static 'js/color_mapper.js' %}" rel="preload" as="script">
+  <link href="{% static 'js/emotion_labeling_distribution.js' %}" rel="preload" as="script">
+  <link href="{% static 'js/tutorial.js' %}" rel="preload" as="script">
+  <script src="{% static 'js/color_mapper.js' %}"></script>
+  <!-- Below block is to extend to tutorial-like example condition-->
+    <script src="{% static 'js/emotion_labeling_distribution.js' %}"></script>
+    <script src="{% static 'js/tutorial.js' %}"></script>
+    {% block example_modal %}
+    {% endblock %}
+    {% block script %}
+    {% endblock %}
+
+
+  {% endblock %}

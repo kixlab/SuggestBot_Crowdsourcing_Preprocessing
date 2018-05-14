@@ -69,7 +69,7 @@ var video_img = "{{video_img}}"
   <div class="col s5">
     <div>
     <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
-    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 50%;">Tutorial</a>
+    <a v-if="state!='enforced_replay'" class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 50%;" onclick="player.pause()">Tutorial</a>
     </div>
     <div v-bind:class="{disabled_task : state!='tagging'}">
 
@@ -115,43 +115,10 @@ var video_img = "{{video_img}}"
           <tbody>
             <tr>
               <!--<td class="table_radios radios_padding"></td>-->
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_1" value="1"/>
-                <label for="valence_1" class="radio_without_label"></label>
+              <td v-for="i in likert_range" class="table_radios">
+                <input name="valence" type="radio" v-bind:id="'valence_'+i" v-bind:value="i"/>
+                <label v-bind:for="'valence_'+i" class="radio_without_label"></label>
               </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_2" value="2"/>
-                <label for="valence_2" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_3" value="3"/>
-                <label for="valence_3" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_4" value="4"/>
-                <label for="valence_4" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_5" value="5"/>
-                <label for="valence_5" class="radio_without_label"></label>
-              </td>
-              <!--<td class="table_radios">
-                <input name="valence" type="radio" id="valence_6" value="6" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_6" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_7" value="7" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_7" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_8" value="8" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_8" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="valence" type="radio" id="valence_9" value="9" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="valence_9" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios radios_padding"></td>-->
             </tr>
           </tbody>
         </table>
@@ -192,48 +159,15 @@ var video_img = "{{video_img}}"
       <div id="arousal_low" class="table_radios col s1">
         Calm
       </div>
-      <div id="valance_images" class="col s10">
+      <div id="arousal_images" class="col s10">
         <table>
           <tbody>
             <tr>
               <!--<td class="table_radios radios_padding"></td>-->
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_1" value="1"/>
-                <label for="arousal_1" class="radio_without_label"></label>
+              <td v-for="i in likert_range" class="table_radios">
+                <input name="arousal" type="radio" v-bind:id="'arousal_'+i" v-bind:value="i"/>
+                <label v-bind:for="'arousal_'+i" class="radio_without_label"></label>
               </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_2" value="2"/>
-                <label for="arousal_2" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_3" value="3"/>
-                <label for="arousal_3" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_4" value="4"/>
-                <label for="arousal_4" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_5" value="5"/>
-                <label for="arousal_5" class="radio_without_label"></label>
-              </td>
-              <!--<td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_6" value="6" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_6" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_7" value="7" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_7" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_8" value="8" :disabled="step=='sanity_check'"/>
-                <label v-bind:class="{cursor_none: step=='sanity_check'}" for="arousal_8" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios">
-                <input name="arousal" type="radio" id="arousal_9" value="9" :disabled="step=='sanity_check'"/>
-                <label for="arousal_9" class="radio_without_label"></label>
-              </td>
-              <td class="table_radios radios_padding"></td>-->
             </tr>
           </tbody>
         </table>

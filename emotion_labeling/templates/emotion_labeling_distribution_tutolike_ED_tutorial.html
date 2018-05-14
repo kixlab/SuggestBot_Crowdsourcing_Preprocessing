@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
+<link href="{%static 'css/emotion_distribution.css' %}" rel='stylesheet'>
+<form method="POST">
+  {% csrf_token %}
+  <div id='vue_app' style="margin-left: 20px;">
+    <div v-bind:class="{hidden_item:step!=-5}" class="row" style="display:block; margin: auto;">
+      <h4>First look through examples, and learn possible variability in emotions.</h4>
+      <p>You are going to do <b>emotion labeling</b> while watching a video.</p>
+      <p>However, how people perceive emotion can diverge, leading to a <b>distribution of emotion</b>, rather than a single emotion label.</p>
+      <p>We want you to retrieve that 'distribution' by considering possible diverse perspectives for a moment and an event.</p>
+      <p>To let you grasp how to infer distribution better, we propose some of examples, [[what_to_show]].</p>
+      <p>Press NEXT to proceed to examples.</p>
+      <br/>
+    </div>
+    <div v-bind:class="{hidden_item:tuto_in_tuto()}" class="row" style="display:block; margin: auto;">
+      <h4>Tutorial before looking through examples</h4>
+      <div v-bind:class="{hidden_item:step!=-4}">
+        <!-- put an image here -->
+        <p>While you are playing the video, at a certain time point, it will blink in red.</p>
+        <p>It is a 'moment' that is in the interest, where people did emotion labeling.</p>
+        <p>Later, you will also label emotion for time points when the video player is blinking.</p>
+      </div>
+      <div v-bind:class="{hidden_item:step!=-3}">
+        <!-- put an image here -->
+        <p>To know how to analyze and how to assign distribution, you first need to learn about the <b>emotion plane</b></p>
+        <p>It is consisted of two axis, the arousal, which is vertical axis, and the valence, which is horizontal axis.</p>
+      </div>
+      <div v-bind:class="{hidden_item:step!=-2}">
+        <p>Arousal is excited / calm aspect of the emotiona.</p>
+        <p>For instance, alrarm and surprise are close to high arousal(excited).</p>
+        <p>Boredom and relaxation are close to low arousal(calm).</p>
+        <p>Grids in the same vertical levels are meant to have same arousal values.</p>
+      </div>
+      <div v-bind:class="{hidden_item:step!=-1}">
+        <p>Valence is positive / negative aspect of the emotiona.</p>
+        <p>For instance, joy is close to positive valence.</p>
+        <p>Anger and fear are close to negative valence.</p>
+        <p>Grids in the same horizontal levels are meant to have same valence values.</p>
+      </div>
+      <div v-bind:class="{hidden_item:step!=0}">
+        <p>How many people labeled on a certain arousal / valence value is expressed in a color.</p>
+        <p>Example distributions will be given with color map, on which you can map color to how many people labeled on the emotion value, expressed in rate.</p>
+        <p>For instance, in the figure above, ~~~</p>
+      </div>
+      <div></div>
+      <div></div>
+      <p></p>
+      <br/>
+    </div>
+
+    <div v-bind:class="{hidden_item:hide_videos()}" class="row">
+      <div style="display: block;">
+        <p v-for="text in what_to_explain">[[text]]</p>
+      </div>
+      <div class="col s6" style="padding:0">
+        <video id='vd' class="video-js vjs-default-skin vjs-big-play-centered" v-bind:src="video_source()" type="video/mp4" v-bind:style="{top: bar_video_top()}" style="height:305px; width:560px; position:relative;"></video>
+        <span class='btn' v-on:click="play()" v-bind:style="{top: bar_video_top()}" style="position: relative">
+          <span v-if="!playing">Play</span>
+          <span v-if="playing">Pause</span>
+        </span>
+        <span class='btn' v-on:click="tobeginning()" v-bind:style="{top: bar_video_top()}" style="position: relative; background-color: red;">
+          To Beginning
+        </span>
+      </div>
+
+      <!--distribution-->
+      <div class="col s6" style="padding: 0;">
+        <div class="col s11" style="padding: 0;">
+        <div id="valence_radios" class="row" style="margin-bottom: 0px;">
+          <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+            <span style="display:block; margin: auto;">Excited</span>
+            <img id='excited_img' src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block;  margin: auto;"></img>
+          </div>
+          <div class="row" style="display:block; margin:auto" id="table_row">
+            <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+              <span style="display:block; margin: auto;">Negative</span>
+              <img src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" v-bind:style="{height: a_v_pic_width()}" style="display:block; margin: auto;"></img>
+            </div>
+            <div id="valance_images" class="col s10"  style="position: relative; padding:0;">
+              <div id="horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 1;"></div>
+              <div id="vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 1;"></div>
+              <table>
+                <tbody>
+                  <tr v-for="i in likert_range1">
+                    <!--<td class="table_radios radios_padding"></td>-->
+                    <td v-for="j in likert_range2" class="table_radios distribution_input_case" style="position: static;">
+                      <div style="position:relative; z-index: 2;" class="distribution_ex" v-bind:style="{height: 313/likert_scale+'px'}" v-bind:id="'a'+(8-i)+'_v'+j"></div>
+                      <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+              <span style="display:block; margin: auto;">Positive</span>
+              <img src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="width: 100%; display:block; margin: auto;"></img>
+            </div>
+          </div>
+          <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+            <span style="display:block; margin: auto;">Calm</span>
+            <img src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block; margin: auto;"></img>
+          </div>
+        </div>
+      </div>
+      <div class="col s1" style="padding:0">
+        <p style="font-size: 8pt; position: fixed; top: 90px;">Rate of labels</p>
+        <canvas v-bind:style="{top: bar_video_top()}" id="color_legend" height="313" width="30" style="position:relative; display: block; margin: auto"></canvas>
+      </div>
+    </div>
+
+    </div>
+
+    <div v-if="step==6" style="margin-bottom: 10px;">
+      <br><br>
+      <h3>Good job! Please go to the main task :-)</h3>
+      <br>
+      <button id='submit' v-if="step==total_example+1" type='submit' class='btn'>To the main task</button>
+    </div>
+
+    <div>
+      <span v-if="step>-5" v-on:click="prev_step()" class='btn'>Prev</span> <span v-if="step!=total_example+1" v-bind:class="{hidden_item:step==total_example+1, disabled: !nextable}" v-on:click="next_step()" class='btn' >Next</span>
+    </div>
+  </div>
+  <script src="{% static 'js/example_module.js' %}"></script>
+  <script src="{% static 'js/color_mapper.js' %}"></script>
+  <script>
+  var video_sec = {{video_total_time}}
+  var video_prompt_num = {{video_prompt_num}}
+  var condition= '{{condition}}'
+  var likert_scale = 7
+  var target_second=[10,15,20,25,30]
+  var target_video_source=Array.apply(null, Array(5)).map(function (_, i) {return 'https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262-5fad49191ecf';})
+  var target_video_distribution = Array.apply(null, Array(5)).map(function (_, k) {return Array.apply(null, Array(likert_scale)).map(function (_, i) {return Array.apply(null, Array(likert_scale)).map(function (_, j) {return Math.random()*i*j*i*i*j*j;});});})
+  var what_to_show
+  var what_to_explain
+
+  if(condition=='tutolike_ED'){
+      what_to_show = 'videos and their distribution of emotion labels, which are collected from around 50 other crowd workers'
+      what_to_explain = [
+        'As you can see from the video and the distribution, emotional status can be interpreted in different ways.',
+        'Based on how subtlely or ambiguously emotions are expressed, the range of distribution can vary a lot.',
+      ]
+  }
+  var video
+  var time_for_each_prompt = 300
+  var tutorial_time = 300
+  var hourly_payment = 8
+  var vue_app = new Vue({
+    el: "#vue_app",
+    delimiters: ['[[', ']]'],
+    data:{
+      step: -5,
+      total_example: 5,
+      max_visited:-5,
+      condition: condition,
+      what_to_show: what_to_show,
+      what_to_explain: what_to_explain,
+      target_second: target_second,
+      target_video_source: target_video_source,
+      nextable: true,
+      work_time: parseInt((video_sec+video_prompt_num*time_for_each_prompt+tutorial_time)/60),
+      payment: ((video_sec+video_prompt_num*time_for_each_prompt+tutorial_time)/3600 * hourly_payment).toFixed(2),
+      likert_range1: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+      likert_range2: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+      likert_scale: likert_scale,
+      playing: false,
+    },
+    methods:{
+      video_source: function(){
+        if(this.step>0 && this.step != this.total_example+1){
+          return this.target_video_source[this.step-1]
+        }else{
+          return this.target_video_source[0]
+        }
+      },
+      hide_videos: function(){
+        return !(this.total_example+1!=this.step && this.step>0)
+      },
+      next_step: function(){
+        this.step++;
+        this.playing=false;
+        $("video").each(function () { this.pause() });
+        if(this.step>0 && this.step != this.total_example+1){
+          this.color_distribution(target_video_distribution[this.step-1])
+          // set video
+          video = video_update_blinking_and_stop("vd", this.target_second[this.step-1], true)
+        }
+        if((this.step>0 && this.step!=this.total_example+1) && this.max_visited < this.step){
+          this.nextable = false;
+        }else{
+          this.nextable = true;
+          if(this.max_visited <= this.step){
+            this.max_visited = this.step;
+          }
+        }
+
+      },
+      play: function(){
+        if(video.paused){
+          this.playing=true;
+          video.play()
+        }else{
+          this.playing=false;
+          video.pause()
+        }
+
+      },
+      tobeginning: function(){
+        video.currentTime = target_second[vue_app.step-1]-5;
+      },
+      prev_step: function(){
+        this.step--;
+        playing=false;
+        vue_app.nextable = true;
+        $("video").each(function () { this.pause() });
+        if(this.step>0 && this.step != this.total_example+1){
+          this.color_distribution(target_video_distribution[this.step-1])
+          // set video
+          video = video_update_blinking_and_stop("vd", this.target_second[this.step-1])
+        }
+      },
+      h_axis_border: function(i, j){
+        if(i==(this.likert_scale+1)/2 && j!=(this.likert_scale+1)/2){
+          return true;
+        }else{
+          return false;
+        }
+      },
+      v_axis_border: function(i, j){
+        if(j==(this.likert_scale+1)/2 && i!=(this.likert_scale+1)/2){
+          return true;
+        }else{
+          return false;
+        }
+      },
+      color_distribution: function(av_array, grid_class='.distribution_input'){
+        if(av_array==false){
+          $(grid_class).css('background-color', 'transparent')
+        }else{
+        var tot = 0;
+        for(i in av_array){
+          for(j in av_array[i]){
+            tot += av_array[i][j]
+          }
+        }
+        //console.log(tot)
+        for(i in av_array){
+          for(j in av_array[i]){
+            //console.log(av_array[i][j]/tot)
+            $("#a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).parent().css('background-color', mapAColor(av_array[i][j]/tot))
+          }
+        }
+      }
+      },
+      a_v_pic_width: function(){
+        return ($("#vue_app").width()/3/12).toString()+'px';
+      },
+      bar_video_top: function(){
+        return ($("#vue_app").width()/3/6).toString()+'px';
+      },
+      a_v_pic_top: function(){
+        return (313/2 - $("#vue_app").width()/3/24).toString() + 'px';
+      },
+      tuto_in_tuto: function(){
+        return (this.step<-4 || this.step>0)
+      },
+    }
+  })
+  $("input[name='event']").on('click', function(){
+    $("#submit").removeClass('disabled')
+  })
+
+  color_mapper_gradient_color('color_legend')
+  </script>
+  {% endblock %}

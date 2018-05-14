@@ -1,0 +1,44 @@
+.distribution_input{
+  margin-bottom: 0px !important;
+  border: solid 1px transparent !important;
+  text-align: center !important;
+}
+
+.distribution_input_case{
+  border: solid 0px transparent;
+  border-radius: 0;
+  position:relative;
+}
+.distribution_input_case:after{
+  content: "";
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  z-index: 3;
+  width: 80%;
+}
+
+.h_axis{
+  border-top: solid 2px black !important;
+  border-bottom: solid 2px black !important;
+}
+
+.v_axis{
+  border-right: solid 2px black !important;
+  border-left: solid 2px black !important;
+}
+
+.guide_img:hover{
+  transform: scale(3.0);
+  z-index: 100;
+}
+
+.distribution_input:hover{
+  border: solid 1px #cccccc !important;
+}
+
+input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
+}

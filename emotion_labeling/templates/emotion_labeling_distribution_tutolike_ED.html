@@ -1,0 +1,161 @@
+{% extends 'emotion_labeling_distribution_example.html' %}
+
+{% load staticfiles %}
+
+{% block example_button %}
+  <a v-if="state!='enforced_replay'" class='btn blue-grey darken-2 modal-trigger' href="#example" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 30%;" onclick="player.pause(); vue_exa_modal.access_example(0);">
+    Examples
+  </a>
+{% endblock %}
+
+{% block example_modal %}
+
+<div id="example" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content row' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <h4>Example [[cur_ex+1]]</h4>
+    <div class="col s6" style="padding:0">
+      <video id='vd' class="video-js vjs-default-skin vjs-big-play-centered" v-bind:src="target_video_source[cur_ex]" type="video/mp4" v-bind:style="{top: bar_video_top()}" style="height:305px; width:560px; position:relative;"></video>
+      <span class='btn' v-on:click="play_pause()" v-bind:style="{top: bar_video_top()}" style="position: relative">
+        <span v-if="!playing">Play</span>
+      <span v-if="playing">Pause</span></span>
+      <span class='btn red' v-on:click="to_beginning()" v-bind:style="{top: bar_video_top()}" style="position: relative">To beginning</span>
+    </div>
+    <div class="col s6" style="padding: 0;">
+      <div class="col s11" style="padding: 0;">
+      <div id="valence_radios" class="row" style="margin-bottom: 0px;">
+        <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+          <span style="display:block; margin: auto;">Excited</span>
+          <img id='excited_img' src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block;  margin: auto;"></img>
+        </div>
+        <div class="row" style="display:block; margin:auto" id="table_row">
+          <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+            <span style="display:block; margin: auto;">Negative</span>
+            <img src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" v-bind:style="{height: a_v_pic_width()}" style="display:block; margin: auto;"></img>
+          </div>
+          <div id="valance_images" class="col s10" style="position: relative; padding:0;">
+            <div id="horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #222222; top: 50%; z-index: 2;"></div>
+            <div id="vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #222222; right: 50%; z-index: 2;"></div>
+            <table>
+              <tbody>
+                <tr v-for="i in likert_range1">
+                  <!--<td class="table_radios radios_padding"></td>-->
+                  <td v-for="j in likert_range2" class="table_radios distribution_input_case">
+                    <div class="distribution_ex" v-bind:style="{height: 313/likert_scale+'px'}" v-bind:id="'ex_a'+(8-i)+'_v'+j"></div>
+                    <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table_radios col s1" style="position: relative;" v-bind:style="{top: a_v_pic_top()}">
+            <span style="display:block; margin: auto;">Positive</span>
+            <img src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="width: 100%; display:block; margin: auto;"></img>
+          </div>
+        </div>
+        <div class="table_radios row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+          <span style="display:block; margin: auto;">Calm</span>
+          <img src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" v-bind:style="{width: a_v_pic_width()}" style="display:block; margin: auto;"></img>
+        </div>
+      </div>
+    </div>
+    <div class="col s1" style="padding:0">
+      <p style="font-size: 8pt; position: fixed; top: 90px;">Intensity of labels</p>
+      <canvas v-bind:style="{top: bar_video_top()}" id="color_legend_ex" height="313" width="30" style="position:relative; display: block; margin: auto"></canvas>
+    </div>
+  </div>
+  </div>
+    <div class='modal-footer'>
+    <div style="display:inline-block;">
+      <span v-for="second, index in target_second" class="btn-floating" style="text-align: center" v-on:click="access_example(index)" v-bind:style="{'background-color': selected_color(index)}">[[index+1]]</span>
+    </div>
+    <span class='btn modal-action modal-close blue darken-2' v-on:click="escape_example()">To the task</span>
+  </div>
+</div>
+{% endblock%}
+
+{% block add_script%}
+<script src="{% static 'js/example_module.js' %}"></script>
+  <!-- TODO get example information -->
+<script>
+  var target_second=[10,15,20,25,30]
+  var target_video_source=Array.apply(null, Array(likert_scale)).map(function (_, i) {return 'https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262-5fad49191ecf';})
+  var target_video_distribution = Array.apply(null, Array(5)).map(function (_, k) {return Array.apply(null, Array(likert_scale)).map(function (_, i) {return Array.apply(null, Array(likert_scale)).map(function (_, j) {return Math.random()*i*j*i*i*j*j;});});})
+  var ex_video_m;
+  var vue_exa_modal = new Vue({
+    el: "#example",
+    delimiters: ['[[', ']]'],
+    data: {
+      likert_scale: likert_scale,
+      likert_range1: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+      likert_range2: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+      cur_ex:0,
+      target_second: target_second,
+      target_video_source: target_video_source,
+      target_video_distribution: target_video_distribution,
+      playing: false,
+    },
+    methods: {
+      play_pause: function(){
+        if(!ex_video_m.paused){
+          this.playing = false;
+          ex_video_m.pause()
+        }else{
+          this.playing = true;
+          ex_video_m.play()
+        }
+
+      },
+      to_beginning: function(){
+        ex_video_m.currentTime = this.target_second[this.cur_ex]-5;
+
+      },
+      access_example: function(idx){
+        this.cur_ex =idx;
+        ex_video_m = video_update_blinking_and_stop("vd", this.target_second[this.cur_ex])
+        ex_video_m.onpause=function(){
+          vue_exa_modal.playing = false;
+        }
+        vue_app.color_distribution(av_array=this.target_video_distribution[this.cur_ex], grid_class='.distribution_ex', prepend="ex_")
+        ex_video_m.pause();
+        playing = false;
+      },
+      escape_example: function(){
+        ex_video_m.pause()
+      },
+      h_axis_border: function(i, j){
+        if(i==(this.likert_scale+1)/2 && j!=(this.likert_scale+1)/2){
+          return true;
+        }else{
+          return false;
+        }
+      },
+      v_axis_border: function(i, j){
+        if(j==(this.likert_scale+1)/2 && i!=(this.likert_scale+1)/2){
+          return true;
+        }else{
+          return false;
+        }
+      },
+      a_v_pic_width: function(){
+        return ($("#example").width()/3/12).toString()+'px';
+      },
+      bar_video_top: function(){
+        return ($("#example").width()/3/6).toString()+'px';
+      },
+      a_v_pic_top: function(){
+        return (313/2 - $("#example").width()/3/24).toString() + 'px';
+      },
+      selected_color: function(idx){
+        if(idx==this.cur_ex){
+          return "red"
+        }else{
+          return "teal"
+        }
+
+      },
+    },
+  })
+
+  color_mapper_gradient_color('color_legend_ex')
+</script>
+{% endblock %}

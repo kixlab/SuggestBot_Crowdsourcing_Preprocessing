@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="preload" as="style">
+<link href="{%static 'css/emotion_labeling_task_likert.css'%}" rel="preload" as="style">
+<link href="{%static 'css/videojs.markers.css' %}" rel="preload" as="style">
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
+<link href="{%static 'css/emotion_labeling_task_likert.css'%}" rel="stylesheet">
+<link href="{%static 'css/videojs.markers.css' %}" rel='stylesheet'>
+<link href="{% static 'js/videojs-markers.js' %}" rel="preload" as="script">
+<script src="{% static 'js/videojs-markers.js' %}"></script>
+<script>
+  //prompt time should be dictionary, key with time and value with whether the task is done on the time or not
+  var prompt_time = '{{prompt_time}}'
+  prompt_time = JSON.parse(prompt_time.replace(/&quot;/g,'"'))
+  //label to check is only used in sanity check step
+  var label_to_check = '{{label_to_check}}'
+  label_to_check = JSON.parse(label_to_check.replace(/&quot;/g,'"'))
+  // condition is about whether it is data colleciton or experiment
+    // for current stage, in the data collection condition, workers can pick 'no figure'.
+    // 'data_collection', 'experiment'
+  var condition = "{{condition}}"
+  var primitive_video_url = "{{video_url}}"
+  var video_img = "{{video_img}}"
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="vue_app" class="row" style="visibility: hidden; margin-bottom: 0px;">
+  <div class="row" style="margin-bottom: 0px">
+  <!-- Video Viewer -->
+  <div class="col s7">
+    <div class="row">
+      <div class="col s2">
+        <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}{{video_img}}.png" style="width:100%; margin-top:20px">
+      </div>
+      <div class="col s10" id="instruction">
+        <div>
+          <div v-if="state!='tagging'">
+            <p>Please watch the video. Concentrate when the the video is blinking.</p>
+            <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try reloading.</p>
+          </div>
+          <div v-if="tagging_step_A()">
+            <p>Please answer questions about the character's expressions or physiological traits.</p>
+            <p>You should answer questions based on the <span style="color:red">objective evidence</span> from the video. Compare the current expression with the character's expression in the emotionally neutral status.</p>
+            <p>If the video lacks information, or you are not sure about the expression, please select 'Not sure' option, and provide the reason why it lacks the information.</p>
+          </div>
+          <div v-if="tagging_step_B()">
+            <p>Please answer questions about the appraisal of the event and the action tendency of the character.</p>
+            <p>Here, the event in concern is (1) <span style="color: red">happening when the player is blinking</span>, and (2) <span style="color: red">dominantly affecting the character's emotion</span>.</p>
+            <p>Event can be caused by external stimuli, like by other's behavior, or by internal stimuli, like remembering memory.</p>
+            <p>Here, you are not given 'Not sure' option, but should estimate the appraisal of the event, <span style="color: red">from the perspective of the character.</span></p>
+            </div>
+
+        </div>
+      </div>
+    </div>
+    <span v-if="revision_description_enabled()=='proceed'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to next time point, please click REVISE LABEL AND PROCEED button.</span>
+    <span v-if="revision_description_enabled()=='submit'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to SUBMIT, please click REVISE LABEL AND PROCEED button.</span>
+    <div>
+      <span v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:2; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
+      <!-- source is decided in the javascript file-->
+      <video id="main_video" class="video-js vjs-default-skin vjs-big-play-centered"
+      controls preload width="720" height="405"
+      data-setup='{ "inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }'
+       style="margin:auto;">
+      </video>
+    </div>
+  </div>
+
+  <!-- labeling interface -->
+  <div class="col s5">
+    <div>
+    <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+    <a class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 50%;">Tutorial</a>
+    </div>
+    <div v-bind:class="{disabled_task : state!='tagging'}">
+      <div id="component_process_task" class="row">
+        <div v-for="(item, index) in questions" style="border-bottom: 1px solid #9e9e9e" v-bind:class="{hidden_item : question_hidden(index)==false}">
+          <h6 style="font-weight: bold">[[item.question]]</h6>
+          <div v-if="questions[index]['info']" style="color: red; font-size: 11px"><i class="material-icons" style="color: red; font-size:11px">announcement</i>[[item.info]]</div>
+          <table>
+            <tr>
+              <td>[[item.negative]]
+              </td>
+              <td>
+                <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Silent</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div class="likert_item">
+                  <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
+                  <input v-bind:name="questions[index]['name']" type='radio' value='1' v-bind:id="questions[index]['name']+'_1'">
+                  <label v-bind:for="questions[index]['name']+'_1'"></label>
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_1.png'" onerror="$(this).css('display', 'none');">
+                </div>
+              </td>
+              <td>
+                <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Short Utterance</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div class="likert_item">
+                  <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
+                  <input v-bind:name="questions[index]['name']" type='radio' value='2' v-bind:id="questions[index]['name']+'_2'">
+                  <label v-bind:for="questions[index]['name']+'_2'"></label>
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_2.png'" onerror="$(this).css('display', 'none');">
+
+                </div>
+              </td>
+              <td>
+                <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; visibility: hidden; text-align:center;">ph</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px;">Neutral Value</div>
+                <div class="likert_item">
+                  <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
+                  <input v-bind:name="questions[index]['name']" type='radio' value='3' v-bind:id="questions[index]['name']+'_3'">
+                  <label v-bind:for="questions[index]['name']+'_3'"></label>
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_3.png'" onerror="$(this).css('display', 'none');">
+                </div>
+              </td>
+              <td>
+                <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div class="likert_item">
+                  <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
+                  <input v-bind:name="questions[index]['name']" type='radio' value='4' v-bind:id="questions[index]['name']+'_4'">
+                  <label v-bind:for="questions[index]['name']+'_4'"></label>
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_4.png'" onerror="$(this).css('display', 'none');">
+                </div>
+              </td>
+              <td>
+                <div v-if="questions[index]['name']=='utterance_length'" style="font-size:11px; text-align:center;">Long Utterance</div>
+                <div v-if="questions[index]['name']=='voice_assertive'" style="font-size:11px; visibility: hidden;">ph</div>
+                <div class="likert_item">
+                  <i class='tiny material-icons check_indicator hidden_item'>keyboard_arrow_down</i>
+                  <input v-bind:name="questions[index]['name']" type='radio' value='5' v-bind:id="questions[index]['name']+'_5'">
+                  <label v-bind:for="questions[index]['name']+'_5'"></label>
+                  <img v-if="questions[index]['image']" class='likert_icon' v-bind:src="'{% static 'img/component_process_examples/' %}'+questions[index]['name']+'_5.png'" onerror="$(this).css('display', 'none');">
+                </div>
+              </td>
+              <td>
+                [[item.positive]]
+              </td>
+            </tr>
+          </table>
+          <div v-if="questions[index]['not_sure']" style='display:block;'>
+            <input v-bind:name="questions[index]['name']" type='radio' value='-1' v-bind:id="questions[index]['name']+'_n'" v-bind:class="{silent_not_sure: questions[index]['silent_related']}">
+            <label v-bind:for="questions[index]['name']+'_n'" >Not sure</label>
+            <input v-bind:name="questions[index]['name']" type="text" v-bind:id="questions[index]['name']+'_n_t'" style="width: 100px; height: 25px; margin-bottom: 5px; border: 0.5px solid #9e9e9e; border-radius: 0;" placeholder=" Reason" v-bind:class="{silent_not_sure_r: questions[index]['silent_related']}"></input>
+          </div>
+        </div>
+      </div>
+
+    <div>
+      <div style="display: inline-block">page : [[tagging_phase+1]]/[[question_page+1]]</div>
+      <div style="float:right">
+        <div class='btn light-red darken-1' id="tagging_prev" v-on:click="tagging_phase_substract()" v-bind:class="{hidden_item:tagging_phase==0}">BACK</div>
+        <div class='btn light-red darken-1' id="tagging_next" v-on:click="tagging_phase_add()" v-bind:class="{hidden_item:tagging_phase==question_page}">NEXT</div>
+        <div class="btn light-blue darken-1" id="add" v-on:click="add_data" v-bind:class="{hidden_item:tagging_done_button_activated()==false}">[[proceed_action]] Label and Proceed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<hr>
+<form method="POST">
+{% csrf_token %}
+  <input type="text" name="to_return" id="to_return" style="display:none"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto" v-on:click="return_data" :disabled="!is_submittable()"/>
+</form>
+
+</div>
+
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <link v-for="item in tuto_array" v-bind:href="'{% static 'img/tutorial/' %}{{condition}}_'+item+'.png'" rel='prefetch' as='image'>
+
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+    <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+    <h5 v-if="!loaded">Tutorial - image is being loaded...</h5></div>
+    <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+    <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+  </div>
+  <div class='modal-footer'>
+    <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
+    <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+  </div>
+</div>
+<script>
+var max_tuto = 9
+</script>
+<link href="{% static 'js/emotion_labeling_component_process_only.js' %}" rel="preload" as="script">
+<link href="{% static 'js/tutorial.js' %}" rel="preload" as="script">
+<script src="{% static 'js/emotion_labeling_component_process_only.js' %}"></script>
+<script src="{% static 'js/tutorial.js' %}"></script>
+{% endblock %}

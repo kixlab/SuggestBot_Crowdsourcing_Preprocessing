@@ -1,0 +1,54 @@
+{% extends 'emotion_labeling_distribution.html' %}
+
+{% block example_pane %}
+<div id="example_list" class="collection" style="display: inline-block; position: absolute; top: 0;">
+  <a v-for="i, idx in target_second" href="#!" class="collection-item" v-on:mouseover="mouse_over_example(idx)" v-on:mouseout="mouse_out_example()" v-on:click="click_example(idx)">Example [[idx+1]]</a>
+</div>
+
+<div id="single_video" class='modal'>
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block; width: 100%;"><h5>Video</h5>
+      <video id='example_video' class="video-js vjs-default-skin vjs-big-play-centered" v-bind:src="target_video_source[cur_ex]" type="video/mp4" style="height:305px; width:560px; display: block; margin: auto;"></video>
+    </div>
+    <div class='modal-footer'>
+      <span class='btn red darken-1' onclick="example_video_play_button()"><i id='example_icon' class="material-icons">play_arrow</i>
+      /
+      <i class="material-icons">pause</i>
+      </span>
+      <span class='btn blue darken-1' onclick="example_video_replay_button()"><i class="material-icons">replay</i></span>
+      <span class='btn modal-action modal-close blue darken-2' onclick="document.getElementById('example_video').pause()">To the task</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+ {% block add_script %}
+ {% endblock %}
+<script>
+  //target_video_source
+  //target_video_distribution
+  //target_second
+  vue_app.target_second = target_second;
+  vue_app.target_video_source = target_video_source;
+  vue_app.target_video_distribution = target_video_distribution
+
+  function example_video_play_button(){
+    var example_video = document.getElementById('example_video')
+    if(example_video.paused){
+      example_video.play()
+    }else{
+      example_video.pause()
+    }
+  }
+
+  function example_video_replay_button(){
+    var example_video = document.getElementById('example_video')
+    example_video.currentTime = vue_app.target_second[vue_app.cur_ex]-5
+    example_video.play()
+  }
+
+
+</script>
+
+{% endblock %}

@@ -1,7 +1,7 @@
 
 var stop_padding = 5;
 var replay_padding = 3;
-var video_url;
+//var video_url;
 var times=[];
 var emotion_category =[
   'fearful', 'angry', 'sad', 'disgusted', 'happy', 'surprised', 'frustrated', 'depressed', 'excited', 'neutral'
@@ -10,13 +10,14 @@ for(var key in prompt_time){
   times.push(parseFloat(key))
 }
 times.sort(function(a, b){return a-b;})
-if(condition.includes("experiment")){
-  video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
-}
+//if(condition.includes("experiment")){
+//  video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
+//}
 
 // Below part is for vue app
 var vue_app = new Vue({
   el: "#vue_app",
+  mixins: [additive_vue_app],
   delimiters: ['[[', ']]'],
   data:{
     state: "watching", // watching, enforced_replay, tagging
@@ -32,72 +33,50 @@ var vue_app = new Vue({
     state_string: 'Video Watching',
     video_started: false,
     micro_browser: 0,
-    likert_range: Array.apply(null, Array(7)).map(function (_, i) {return i+1;}),
+    likert_scale: likert_scale,
+    likert_range1: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+    likert_range2: Array.apply(null, Array(likert_scale)).map(function (_, i) {return i+1;}),
+    total_distribution_token: 50,
+    current_distribution_token: 0,
+    old_input_value: -1,
+    target_second: [],
+    target_video_source: [],
+    target_video_distribution: [],
+    example_condition: 'distribution_video',// distribution, video, distribution_video
+    cur_ex: 0,
   },
   methods:{
     //add label data to the colleted data-- for label and reason condition!
     add_data: function(message="add"){
+      if(this.current_distribution_token != this.total_distribution_token){
+        // if values are not filled make workers fill the values properly. (Escape)
+        alert("Assign all tokens to the distribution.")
+        return
+      }else{
+        // if values are filled, store them
+        var av_array=[]
+        for(i in this.likert_range1){
+          v_array = []
+          for(j in this.likert_range2){
+            v_array.push(parseInt($("#a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).val()))
+          }
+          av_array.push(v_array)
+        }
+        this.collected_data[this.current_marker] = av_array
+      }
 
-        // to prefill the field
-        if(condition == "experiment_baseline"){
-          $("#reasoning").val("No Reasoning")
-        }
-        //retrieve values from the interface
-        var valence = $("input[name='valence']:checked").val()
-        var arousal = $("input[name='arousal']:checked").val()
-        var category = $("input[name='ekman']:checked").attr("id")
-        var minor_category = []
-        minor_category.push(category)
-        $("input[name='ekman_mul']:checked").map(function(_, e){
-          var topush;
-          if($(e).val() != "other"){
-            topush=$(e).val()
-          }else{
-            topush=$("#for_other").val()
-          }
-          if(minor_category.indexOf(topush)<0){
-            minor_category.push(topush)
-          }
-
-        })
-        if(category == 'other'){
-          category = $("input[name='for_other']").val()
-        }
-        var reasoning = $("#reasoning").val()
-        if(message=="no_figure"){
-          // if worker decided that no character exist, then store string that signify that no figure exists
-          this.collected_data[this.current_marker] = "no_figure"
-        }else{
-          //else,
-          if(valence==undefined || arousal==undefined || category==undefined || reasoning.length<8 || category==""){
-            // if values are not filled make workers fill the values properly. (Escape)
-            alert("Select values, or write proper reasoning to proceed.")
-            return
-          }else{
-            // if values are filled, stor them
-            var dict = {
-              'valence' : valence,
-              'arousal' : arousal,
-              'category' : category,
-              'minor_category': minor_category,
-              'reasoning' : reasoning,
-            }
-            this.collected_data[this.current_marker] = dict
-          }
-        }
 
       // reset input fields
-      $("input[name='valence']").prop('checked', false)
-      $("input[name='arousal']").prop('checked', false)
-        $("input[name='ekman']").prop('checked', false)
-        $("input[name='ekman_mul']").prop('checked', false)
-        $("input[name='for_other']").val("")
-        $("#reasoning").val("")
 
+        $(".distribution_input").val(0)
+        this.current_distribution_token = 0;
+        this.old_input_value = -1;
 
 
 
         //change the state to 'watching' state
+
+        this.calculate_current_distribution_token()
         this.state='watching'
         $('#replay_btn').css("visibility","hidden")
         //change marker to 'done status'
@@ -152,6 +131,98 @@ var vue_app = new Vue({
       }else{
         return false;
       }
+    },
+    grid_height: function(){
+      return 313/likert_range1.length;
+    },
+    distribution_token_num_color: function(){
+      if(this.current_distribution_token==this.total_distribution_token){
+        return 'green'
+      }else{
+        return 'red'
+      }
+    },
+    calculate_current_distribution_token: function(){
+      var addition =0
+      $(".distribution_input").map(function(_, e){
+        addition += parseInt($(this).val())
+        var th_=this
+        $(this).parent().css('background-color', mapAColor($(th_).val()/vue_app.total_distribution_token))
+      })
+      if(addition<=this.total_distribution_token){
+        this.current_distribution_token = addition;
+        return true;
+      }else{
+        return false;
+      }
+
+    },
+    h_axis_border: function(i, j){
+      if(i==(this.likert_scale+1)/2 && j!=(this.likert_scale+1)/2){
+        return true;
+      }else{
+        return false;
+      }
+    },
+    v_axis_border: function(i, j){
+      if(j==(this.likert_scale+1)/2 && i!=(this.likert_scale+1)/2){
+        return true;
+      }else{
+        return false;
+      }
+    },
+    color_distribution: function(av_array, grid_class='.distribution_input', prepend="", number=false){
+      if(av_array==false){
+        $(grid_class).css('background-color', 'transparent')
+      }else{
+      var tot = 0;
+      for(i in av_array){
+        for(j in av_array[i]){
+          tot += av_array[i][j]
+        }
+      }
+      for(i in av_array){
+        for(j in av_array[i]){
+          if(number){
+            if(parseInt(50*av_array[i][j]/tot)!=0){
+                $("#ex_"+prepend+"a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).text(Math.round(50*av_array[i][j]/tot))
+            }
+          }
+          $("#"+prepend+"a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).parent().css('background-color', mapAColor(av_array[i][j]/tot))
+
+        }
+      }
+    }
+    },
+    a_v_pic_width: function(){
+      return ($("#table_row").width()/12).toString()+'px';
+    },
+    a_v_pic_top: function(){
+      return (313/2 - $("#table_row").width()/24).toString() + 'px';
+    },
+    mouse_over_example: function(idx){
+      if(this.example_condition.includes("distribution")){
+          //$(".distribution_input").css("visibility","hidden")
+          $(".distribution_ex_combined").css("display","")
+          this.color_distribution(av_array=this.target_video_distribution[idx], grid_class='.distribution_input_case', prepend="", number=true)
+      }
+    },
+    mouse_out_example: function(){
+      if(this.example_condition.includes("distribution")){
+        //$(".distribution_input").css("visibility","visible")
+        $(".distribution_ex_combined").css("display","none")
+          this.calculate_current_distribution_token()
+      }
+    },
+    click_example: function(idx){
+      if(this.example_condition.includes("video")){
+        this.cur_ex = idx
+        player.pause()
+        //init video
+        //turn on modal
+        video_update_blinking_and_stop('example_video', this.target_second[idx])
+        $("#single_video").modal('open')
+      }
     }
   }
 })
@@ -165,9 +236,27 @@ var player;
   //getting the video
 
 $(document).ready(function(){
-  document.getElementById('main_video').onloadedmetadata = function(){
+//  document.getElementById('main_video').onloadedmetadata = function(){
       //load_markers()
-  }
+//  }
+  initialize_main_video()
+  $(".distribution_input").on('focusin', function(){
+    console.log($(this).val())
+    vue_app.old_input_value = $(this).val()
+  }).on('input', function(){
+    console.log($(this).val())
+    if(vue_app.calculate_current_distribution_token()){
+      vue_app.old_input_value = $(this).val()
+    }else{
+      $(this).val(vue_app.old_input_value);
+    }
+
+  })
+  vue_app.calculate_current_distribution_token()
+
+})
+
+function initialize_main_video(){
   player = videojs('main_video')
 
   player.src(video_url)
@@ -204,13 +293,14 @@ $(document).ready(function(){
   })
   load_markers()
 
-})
+  // make div for signify how much a worker has seen, replay button, etc
+  $(".vjs-control-bar").append("<button id='replay_btn' class='vjs-control vjs-button' onclick='replay()'></button>")
+  $("#replay_btn").append("<i class='small material-icons' style='margin-top: 5px; font-size:20px;'>replay</i>")
+  $(".vjs-progress-holder").prepend("<div id='playedBar' class='cyan lighten-3'></div>");
+  $(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 100%; background-color: black; width: 0%;'></div>");
 
-// make div for signify how much a worker has seen, replay button, etc
-$(".vjs-control-bar").append("<button id='replay_btn' class='vjs-control vjs-button' onclick='replay()'></button>")
-$("#replay_btn").append("<i class='small material-icons' style='margin-top: 5px; font-size:20px;'>replay</i>")
-$(".vjs-progress-holder").prepend("<div id='playedBar' class='cyan lighten-3'></div>");
-$(".vjs-progress-holder").prepend("<div id='maxBar' style='float:right; height: 100%; background-color: black; width: 0%;'></div>");
+}
+
 //generate markers for prompt
   //generate the data structure for markers
 var markers=[];
@@ -222,7 +312,7 @@ function after_replay(){
   vue_app.micro_browser = 0;
   vue_app.state = "tagging";
   vue_app.state_string = "Labeling Emotion"
-  $('#replay_btn').css("visibility","hidden")
+  $('#replay_btn').css("visibility","visible")
 }
 
 //recast data to the input field, for emotion labeling and reasoning
@@ -253,30 +343,14 @@ function recast_data(marker_time){
 }
 
 function posting_data(dict, marker_time){
-  var val_val = dict[marker_time]['valence']
-  var aro_val = dict[marker_time]['arousal']
-  var ekman_val = dict[marker_time]['category']
-  var ekman_mul_val = dict[marker_time]['minor_category']
-  var reasoning_val = dict[marker_time]['reasoning']
+  var av_array = dict[marker_time]
 
-  $("input[name='valence'][value='"+val_val.toString()+"']").prop('checked', true)
-  $("input[name='arousal'][value='"+aro_val.toString()+"']").prop('checked', true)
-    if(emotion_category.indexOf(ekman_val)==-1){
-      $("#other").prop('checked', true);
-      $("#for_other").val(ekman_val)
-    }else{
-      $("#"+ekman_val).prop('checked', true);
+  for(i in av_array){
+    for(j in av_array[i]){
+      $("#a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).val(av_array[i][j])
     }
-    $("#reasoning").val(reasoning_val)
-    for(ek_m_v in ekman_mul_val){
-      console.log(ekman_mul_val[ek_m_v])
-      if(emotion_category.indexOf(ekman_mul_val[ek_m_v])>=0){
-        $("#"+ekman_mul_val[ek_m_v]+"_mul").prop('checked', true);
-      }else{
-        $("#other_mul").prop('checked', true);
-        $("#for_other").val(ekman_mul_val[ek_m_v])
-      }
-    }
+  }
+  vue_app.calculate_current_distribution_token();
 
 
 }
@@ -300,9 +374,6 @@ function load_markers(){
       class: "emotion_marker",
     })
     var t = parseFloat(key) + parseFloat(stop_padding)
-    console.log(t)
-    console.log(player)
-    console.log(player.duration())
     if(t>player.duration()){
       t = player.duration()-1
       console.log('overflow')
@@ -399,3 +470,16 @@ $("a").on('mouseover', function(){
 }).on('mouseout', function(){
   $(this).css("color","")
 })
+
+  color_mapper_gradient_color('color_legend')
+
+
+function reinitialize_main_video(){
+  markers =[]
+  player.markers.destroy()
+  player.dispose()
+  $("#main_video").remove()
+  $("#main_video_container").append('<video id="main_video" class="video-js" style="margin:auto;"></video>')
+  $("#main_video").attr('data-setup', '{ "width": 560, "height": 315, "controls": true, "preload": "auto","inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }')
+  initialize_main_video();
+}
