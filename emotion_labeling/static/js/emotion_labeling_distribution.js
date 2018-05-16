@@ -10,9 +10,9 @@ for(var key in prompt_time){
   times.push(parseFloat(key))
 }
 times.sort(function(a, b){return a-b;})
-//if(condition.includes("experiment")){
-//  video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
-//}
+
+//below is used for adaptive example condition
+var cur_phase = undefined;
 
 // Below part is for vue app
 var vue_app = new Vue({
@@ -93,7 +93,9 @@ var vue_app = new Vue({
         vue_app.current_action_add()
         // play the video
         player.play()
-
+        if(cur_phase!=undefined){
+          clear_example()
+        }
     },
     // return data to the backend-connected input field
     return_data: function(){
@@ -144,12 +146,29 @@ var vue_app = new Vue({
     },
     calculate_current_distribution_token: function(){
       var addition =0
+      var av_array =[]
+      if(cur_phase!=undefined){
+        for(i in this.likert_range1){
+          v_array = []
+          for(j in this.likert_range2){
+            v_array.push(parseInt($("#a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).val()))
+          }
+          av_array.push(v_array)
+        }
+      }
       $(".distribution_input").map(function(_, e){
         addition += parseInt($(this).val())
         var th_=this
         $(this).parent().css('background-color', mapAColor($(th_).val()/vue_app.total_distribution_token))
       })
       if(addition<=this.total_distribution_token){
+        if(cur_phase!=undefined){
+          if(phase_info[cur_phase]==addition && phase_info[cur_phase]!=0){
+            update_example_from_backend(av_array);
+
+          }
+        }
+
         this.current_distribution_token = addition;
         return true;
       }else{
@@ -239,7 +258,7 @@ $(document).ready(function(){
 //  document.getElementById('main_video').onloadedmetadata = function(){
       //load_markers()
 //  }
-  initialize_main_video()
+  //initialize_main_video()
   $(".distribution_input").on('focusin', function(){
     console.log($(this).val())
     vue_app.old_input_value = $(this).val()
@@ -257,6 +276,7 @@ $(document).ready(function(){
 })
 
 function initialize_main_video(){
+  $("#start_time").val(localDateTime)
   player = videojs('main_video')
 
   player.src(video_url)
@@ -313,6 +333,10 @@ function after_replay(){
   vue_app.state = "tagging";
   vue_app.state_string = "Labeling Emotion"
   $('#replay_btn').css("visibility","visible")
+  // for adaptive example
+  if(phase_info[cur_phase]==0){
+    update_example_from_backend()
+  }
 }
 
 //recast data to the input field, for emotion labeling and reasoning
@@ -340,6 +364,10 @@ function recast_data(marker_time){
 
   vue_app.current_action_revise()
 
+  // for adaptive example condition
+  if(cur_phase != undefined){
+    cur_phase = phase_info.length
+  }
 }
 
 function posting_data(dict, marker_time){

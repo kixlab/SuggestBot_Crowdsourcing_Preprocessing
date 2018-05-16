@@ -194,6 +194,23 @@ class Emotion_Label_Component_Process_Only(models.Model):
     physical_event = models.IntegerField(default = 1)
     not_sure_reasoning = models.CharField(default="", max_length=1000)
 
+class Emotion_Distribution_Meta(models.Model):
+    #video_url = models.CharField(max_length=200, default = "")
+    #character = models.CharField(max_length=200, default = "")
+    experiment_video = models.ForeignKey(Experiment_Video, on_delete=models.CASCADE, null=True, blank=True)
+    time = models.IntegerField(default = 0)
+    distribution = models.CharField(max_length = 20000, default="")
+    wid = models.CharField(max_length = 200, default="")
+    aid = models.CharField(max_length = 200, default="")
+    task_start_time = models.DateTimeField(default = datetime.datetime.now)
+    task_end_time = models.DateTimeField(default = datetime.datetime.now)
+    class Meta:
+        abstract = True
+
+class Emotion_Distribution_Collection(Emotion_Distribution_Meta):
+    def __str__(self):
+        return self.experiment_video.video_title + "_" + str(self.time) + "_" + self.wid
+
 class Emotion_check_experiment(Emotion_check_Meta):
     emotion_label = models.ForeignKey(Emotion_label_experiment, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):

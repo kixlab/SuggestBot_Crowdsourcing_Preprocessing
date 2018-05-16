@@ -13,11 +13,15 @@ function video_update_blinking_and_stop(player_id, target_second, param_to_true=
       $("#"+player_id).css("border", "solid 5px black")
     }
     if(video.currentTime > target_second+4){
-      console.log("stopp")
-      if(param_to_true != undefined){
+      if(param_to_true == 'vue_app'){
         vue_app.nextable = true;
         if(vue_app.max_visited < vue_app.step){
           vue_app.max_visited = vue_app.step;
+        }
+      }else if(param_to_true == 'vue_exa_modal'){
+        vue_exa_modal.nextable = true;
+        if(vue_exa_modal.max_visited < vue_exa_modal.cur_ex){
+          vue_exa_modal.max_visited = vue_exa_modal.cur_ex;
         }
       }
       video.pause()

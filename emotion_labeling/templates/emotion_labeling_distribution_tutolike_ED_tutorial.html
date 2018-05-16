@@ -188,7 +188,7 @@
         if(this.step>0 && this.step != this.total_example+1){
           this.color_distribution(target_video_distribution[this.step-1])
           // set video
-          video = video_update_blinking_and_stop("vd", this.target_second[this.step-1], true)
+          video = video_update_blinking_and_stop("vd", this.target_second[this.step-1], 'vue_app')
         }
         if((this.step>0 && this.step!=this.total_example+1) && this.max_visited < this.step){
           this.nextable = false;

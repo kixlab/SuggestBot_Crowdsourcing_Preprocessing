@@ -44,6 +44,15 @@ def Experiment_Label_Baseline_Store(exp_video, result, w_id, a_id):
 
     return token
 
+def Experiment_Distribution_Store(exp_video, result, start_time, w_id, a_id):
+    labels = result['labels']
+    token = str(uuid.uuid4().hex.upper()[0:6])
+    for time in labels:
+        label = json.dumps(labels[time])
+        label_ds = Emotion_Distribution_Collection(experiment_video = exp_video, time=float(time), wid=w_id, aid=a_id, distribution = label, task_start_time = start_time)
+        label_ds.save()
+    return token
+
 def Experiment_Label_Component_Process_Store_Only(exp_video, result, w_id, a_id):
     labels = result['labels']
     token = str(uuid.uuid4().hex.upper()[0:6])

@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^experiment1_distribution/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_distribution),
     url(r'^experiment1_distribution_tutolike_ED_tutorial/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_distribution_tutolike_ED_tutorial),
     url(r'^experiment1_distribution_tutolike_ED/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_distribution_tutolike_ED),
+    url(r'^experiment1_distribution_adaptive_ED/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_distribution_adaptive_ED),
     #for component_process condition
     url(r'^experiment1_cp/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_cp),
     url(r'^experiment1_cp_prescreening/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_cp_prescreening),

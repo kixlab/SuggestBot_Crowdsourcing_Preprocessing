@@ -132,7 +132,8 @@ var video_img = "{{video_img}}"
 
           </div>
         </div>
-        <div class="col s4" style="position: relative; top: 65px;">
+        <div class="col s4" style="position: relative; top: 40px;">
+          <p style="font-size: 7pt; width: 45px;">Intensity of labels</p>
           <canvas id="color_legend" height="313" width="40"></canvas>
           {% block example_pane %}
           {% endblock %}
@@ -149,10 +150,10 @@ var video_img = "{{video_img}}"
 <hr>
 <form method="POST">
   {% csrf_token %}
+  <input type="datetime-local" name="start_time" id="start_time" style="display:none"/>
   <input type="text" name="to_return" id="to_return" style="display:none"/>
   <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto; margin-bottom: 0px;" v-on:click="return_data" :disabled="!is_submittable()"/>
 </form>
-
 </div>
 
 <div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
@@ -167,10 +168,24 @@ var video_img = "{{video_img}}"
       <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
       <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
       <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
-      <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+      <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')" onclick="initialize_main_video()">To the task</span>
     </div>
   </div>
+  <script>
+  Number.prototype.AddZero= function(b,c){
+          var  l= (String(b|| 10).length - String(this).length)+1;
+          return l> 0? new Array(l).join(c|| '0')+this : this;
+       }//to add zero to less than 10,
 
+
+         var d = new Date()
+         localDateTime= [d.getFullYear(),(d.getMonth()+1).AddZero(),
+                  d.getDate().AddZero(),
+                ].join('-') +'T'+
+                 [d.getHours().AddZero(),
+                  d.getMinutes().AddZero()].join(':');
+
+  </script>
   <script>
   var max_tuto = 10
   var likert_scale = 7;
