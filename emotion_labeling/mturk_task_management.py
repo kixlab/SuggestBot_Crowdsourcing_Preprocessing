@@ -2,7 +2,7 @@ import boto3
 from .models import *
 
 MTURK_SANDBOX = 'https://mturk-requester-sandbox.us-east-1.amazonaws.com'
-TIME_FOR_EACH_PROMPT = 300
+TIME_FOR_EACH_PROMPT = 180
 TIME_FOR_TUTORIAL = 300
 HOURLY_PAYMENT =8
 worker_requirements = [{
@@ -102,7 +102,7 @@ for (i in parampairs) {
 if (mturkworkerID == "" && assignmentID == "" ) {
  assignment_id_field.innerHTML = '<tt>The link will appear here only if you accept this HIT.</tt>';
 } else {
- assignment_id_field.innerHTML = '<a target="_blank" href="http://115.68.222.144:3000/emotion_labeling/experiment1_distribution/_video_title_/' + mturkworkerID + '/'+assignmentID+'"><h1><span style="color: rgb(255, 0, 0);"><span style="font-family: Courier New;"><b>Click here to begin taking the task!</b></span></span></h1></a>';
+ assignment_id_field.innerHTML = '<a target="_blank" href="http://115.68.222.144:3000/emotion_labeling/_condition_/_video_title_/' + mturkworkerID + '/'+assignmentID+'"><h1><span style="color: rgb(255, 0, 0);"><span style="font-family: Courier New;"><b>Click here to begin taking the task!</b></span></span></h1></a>';
 }
 </script><!-- End Content for Worker --><!-- Input from Worker -->
 
@@ -159,6 +159,8 @@ def Create_Emotion_Distribution_collection_HIT(title):
     video_total_time = video.video_total_time
     task_time = int((video_total_time+video_prompt_num*TIME_FOR_EACH_PROMPT+TIME_FOR_TUTORIAL)/60)
     reward = format((video_total_time+video_prompt_num*TIME_FOR_EACH_PROMPT+TIME_FOR_TUTORIAL)/3600 * HOURLY_PAYMENT, '.2f')
+    question = html_question.replace('_video_title_', title)
+    question = question.replace('_condition_', "experiment1_distribution")
     new_hit = mturk.create_hit(
         Title = 'Emotion Labeling for a Video -'+title,
         Description = 'Watch a video, and label the emotion of a character in the video. About '+str(task_time)+' minutes task.',
@@ -169,7 +171,7 @@ def Create_Emotion_Distribution_collection_HIT(title):
         LifetimeInSeconds = 7*24*60*60,
         AssignmentDurationInSeconds = 12*60*60,
         AutoApprovalDelayInSeconds = 3*24*60*60,
-        Question = html_question.replace('_video_title_', title),
+        Question = question,
 
     )
     return new_hit

@@ -284,7 +284,7 @@ def character_time_designator(request, title):
     }
     return render(request, "character_time_designator.html", task_to_throw)
 #decide task and deploy
-def emotion_task_deploy(request):
+def emotion_task_deploy_distribution(request):
     if request.method=="POST":
         form = EmotionResult(request.POST)
         print(form)
