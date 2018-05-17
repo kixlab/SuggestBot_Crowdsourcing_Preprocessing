@@ -258,7 +258,7 @@ $(document).ready(function(){
 //  document.getElementById('main_video').onloadedmetadata = function(){
       //load_markers()
 //  }
-  //initialize_main_video()
+  initialize_main_video()
   $(".distribution_input").on('focusin', function(){
     console.log($(this).val())
     vue_app.old_input_value = $(this).val()
@@ -343,7 +343,7 @@ function after_replay(){
 function recast_data(marker_time){
   player.pause()
   vue_app.state="tagging";
-  $('#replay_btn').css("visibility","hidden")
+  $('#replay_btn').css("visibility","visible")
   vue_app.current_marker = parseFloat(marker_time);
   vue_app.replay_start_time = vue_app.current_marker-replay_padding
   var keys = Object.keys(prompt_time);

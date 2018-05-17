@@ -6,6 +6,7 @@
 <script src="{% static 'js/example_module.js' %}"></script>
   <!-- TODO get example information -->
 <script>
+  max_tuto = 11;
   var target_second=[10,15,20,25,30]
   var target_video_source=Array.apply(null, Array(likert_scale)).map(function (_, i) {return 'https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262-5fad49191ecf';})
   var target_video_distribution = Array.apply(null, Array(5)).map(function (_, k) {return Array.apply(null, Array(likert_scale)).map(function (_, i) {return Array.apply(null, Array(likert_scale)).map(function (_, j) {return Math.random()*i*j*i*i*j*j;});});})
