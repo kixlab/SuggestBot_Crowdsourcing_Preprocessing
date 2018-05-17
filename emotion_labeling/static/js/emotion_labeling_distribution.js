@@ -334,8 +334,10 @@ function after_replay(){
   vue_app.state_string = "Labeling Emotion"
   $('#replay_btn').css("visibility","visible")
   // for adaptive example
-  if(phase_info[cur_phase]==0){
-    update_example_from_backend()
+  if(cur_phase != undefined){
+    if(phase_info[cur_phase]==0){
+      update_example_from_backend()
+    }
   }
 }
 
@@ -504,8 +506,13 @@ $("a").on('mouseover', function(){
 
 function reinitialize_main_video(){
   markers =[]
-  player.markers.destroy()
-  player.dispose()
+  if(player!=undefined){
+    if(player.markers!=undefined){
+      player.markers.destroy()
+    }
+    player.dispose()
+  }
+
   $("#main_video").remove()
   $("#main_video_container").append('<video id="main_video" class="video-js" style="margin:auto;"></video>')
   $("#main_video").attr('data-setup', '{ "width": 560, "height": 315, "controls": true, "preload": "auto","inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }')
