@@ -3,7 +3,7 @@ from .models import *
 from .MTURKKEY import *
 
 MTURK_SANDBOX = 'https://mturk-requester-sandbox.us-east-1.amazonaws.com'
-TIME_FOR_EACH_PROMPT = 180
+TIME_FOR_EACH_PROMPT = 120
 TIME_FOR_TUTORIAL = 300
 HOURLY_PAYMENT =8
 worker_requirements = [{
@@ -155,6 +155,7 @@ mturk = boto3.client('mturk', aws_access_key_id = ACCESS_KEY, aws_secret_access_
 
 
 def Create_Emotion_Distribution_collection_HIT(title):
+    print(ACCESS_KEY, SECRET_KEY)
     video = Experiment_Video.objects.filter(video_title = title)[0]
     video_prompt_num = video.video_prompt_num
     video_total_time = video.video_total_time

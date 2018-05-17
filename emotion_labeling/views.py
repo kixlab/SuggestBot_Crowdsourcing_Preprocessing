@@ -10,6 +10,7 @@ from boto.mturk.price import Price
 import base64
 from .character_time_designate import *
 from .mturk_task_management import Create_Emotion_Distribution_collection_HIT, date_handler
+from django.db.models import Q
 # Create your views here.
 
 # pick a single point label
@@ -295,7 +296,8 @@ def emotion_task_deploy_distribution(request):
             video.video_hit_dict = json.dumps(hit, default=date_handler)
             video.save()
         return HttpResponse("Successfully Deployed")
-    task_list = Experiment_Video.objects.filter(video_hit_dict="")
+    print(Experiment_Video.objects.filter(video_title="a_man_like_you0")[0].video_hit_dict)
+    task_list = Experiment_Video.objects.filter(Q(video_hit_dict="")|Q(video_hit_dict=None))
     task_to_throw = {
         'task_list': task_list,
     }

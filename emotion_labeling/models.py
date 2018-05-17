@@ -14,7 +14,7 @@ class Experiment_Video(models.Model):
     video_prompt_time = models.CharField(max_length=10000, default = "")
     video_total_time = models.IntegerField(default = 0)
     video_prompt_num = models.IntegerField(default = 0)
-    video_hit_dict = models.CharField(max_length = 200000, default = "")
+    video_hit_dict = models.CharField(max_length = 200000, default = "", null=True, blank=True)
     def __str__(self):
         return self.video_title
 
