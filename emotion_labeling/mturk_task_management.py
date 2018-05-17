@@ -2,7 +2,7 @@ import boto3
 from .models import *
 from .MTURKKEY import *
 
-MTURK_SANDBOX = 'https://mturk-requester-sandbox.us-east-1.amazonaws.com'
+
 TIME_FOR_EACH_PROMPT = 120
 TIME_FOR_TUTORIAL = 300
 HOURLY_PAYMENT =8
@@ -151,7 +151,7 @@ if (mturkworkerID == "" && assignmentID == "" ) {
 """
 
 
-mturk = boto3.client('mturk', aws_access_key_id = ACCESS_KEY, aws_secret_access_key = SECRET_KEY, region_name='us-east-1', endpoint_url=MTURK_SANDBOX)
+mturk = boto3.client('mturk', aws_access_key_id = ACCESS_KEY, aws_secret_access_key = SECRET_KEY, region_name='us-east-1', endpoint_url=MTURK_URL)
 
 
 def Create_Emotion_Distribution_collection_HIT(title):
