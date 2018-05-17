@@ -9,7 +9,7 @@ from boto.mturk.connection import MTurkConnection
 from boto.mturk.price import Price
 import base64
 from .character_time_designate import *
-from .mturk_task_management import Create_Emotion_CP_HIT, date_handler
+from .mturk_task_management import Create_Emotion_Distribution_collection_HIT, date_handler
 # Create your views here.
 
 # pick a single point label
@@ -68,7 +68,7 @@ def experiment1_distribution(request, video_title, wid, aid):
         'video_url': exp_video.video_url,
         'video_img': exp_video.video_img,
     # in which condition?  --> condition should be 'experiment_reasoning' or 'experiment_baseline'
-        'condition': 'experiment_baseline',
+        'condition': 'experiment_distribution',
     # in which time do the system prompts?
         'prompt_time': exp_video.video_prompt_time,
     # additional info that is sent for sanity check
@@ -284,14 +284,14 @@ def character_time_designator(request, title):
     }
     return render(request, "character_time_designator.html", task_to_throw)
 #decide task and deploy
-def emotion_cp_task_deploy(request):
+def emotion_task_deploy(request):
     if request.method=="POST":
         form = EmotionResult(request.POST)
         print(form)
         to_return = json.loads(form.cleaned_data['to_return'])
         for video_title in to_return:
             video = Experiment_Video.objects.filter(video_title = video_title)[0]
-            hit = Create_Emotion_CP_HIT(video_title)
+            hit = Create_Emotion_Distribution_collection_HIT(video_title)
             video.video_hit_dict = json.dumps(hit, default=date_handler)
             video.save()
         return HttpResponse("Successfully Deployed")
@@ -299,7 +299,7 @@ def emotion_cp_task_deploy(request):
     task_to_throw = {
         'task_list': task_list,
     }
-    return render(request, "emotion_cp_task_deploy.html", task_to_throw)
+    return render(request, "emotion_task_deploy.html", task_to_throw)
 
 # run this function only once unless you will pay bonus multiple times for a worker
 def bonus_for_hits(request, hit):

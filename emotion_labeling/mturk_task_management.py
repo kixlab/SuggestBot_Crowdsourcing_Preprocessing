@@ -102,7 +102,7 @@ for (i in parampairs) {
 if (mturkworkerID == "" && assignmentID == "" ) {
  assignment_id_field.innerHTML = '<tt>The link will appear here only if you accept this HIT.</tt>';
 } else {
- assignment_id_field.innerHTML = '<a target="_blank" href="http://115.68.222.144:3000/emotion_labeling/experiment1_cp_prescreening/_video_title_/' + mturkworkerID + '/'+assignmentID+'"><h1><span style="color: rgb(255, 0, 0);"><span style="font-family: Courier New;"><b>Click here to begin taking the task!</b></span></span></h1></a>';
+ assignment_id_field.innerHTML = '<a target="_blank" href="http://115.68.222.144:3000/emotion_labeling/experiment1_distribution/_video_title_/' + mturkworkerID + '/'+assignmentID+'"><h1><span style="color: rgb(255, 0, 0);"><span style="font-family: Courier New;"><b>Click here to begin taking the task!</b></span></span></h1></a>';
 }
 </script><!-- End Content for Worker --><!-- Input from Worker -->
 
@@ -153,18 +153,18 @@ if (mturkworkerID == "" && assignmentID == "" ) {
 mturk = boto3.client('mturk', aws_access_key_id = '', aws_secret_access_key = '', region_name='us-east-1', endpoint_url=MTURK_SANDBOX)
 
 
-def Create_Emotion_CP_HIT(title):
+def Create_Emotion_Distribution_collection_HIT(title):
     video = Experiment_Video.objects.filter(video_title = title)[0]
     video_prompt_num = video.video_prompt_num
     video_total_time = video.video_total_time
     task_time = int((video_total_time+video_prompt_num*TIME_FOR_EACH_PROMPT+TIME_FOR_TUTORIAL)/60)
     reward = format((video_total_time+video_prompt_num*TIME_FOR_EACH_PROMPT+TIME_FOR_TUTORIAL)/3600 * HOURLY_PAYMENT, '.2f')
     new_hit = mturk.create_hit(
-        Title = 'Emotion Components Labeling for a Video -'+title,
-        Description = 'Watch a video, and label the emotion & other phenomenons of a character in the video. About '+str(task_time)+' minutes task.',
+        Title = 'Emotion Labeling for a Video -'+title,
+        Description = 'Watch a video, and label the emotion of a character in the video. About '+str(task_time)+' minutes task.',
         Keywords = 'video, emotion, labeling',
         Reward = str(reward),
-        MaxAssignments = 5,
+        MaxAssignments = 50,
         QualificationRequirements = worker_requirements,
         LifetimeInSeconds = 7*24*60*60,
         AssignmentDurationInSeconds = 12*60*60,

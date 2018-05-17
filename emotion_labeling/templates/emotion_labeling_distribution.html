@@ -42,16 +42,12 @@ var video_img = "{{video_img}}"
           <div>
             <div v-if="state!='tagging'">
               <p>Please watch the video. Concentrate when the the video is blinking.</p>
-              <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try clicking <a href="#" onclick="reinitialize_main_video()">here</a> or reloading.</p>
+              <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try clicking <a href="#" onclick="reinitialize_main_video()">here</a> and playing again.</p>
+              <p v-if="!video_started" style="font-size:12px">If the video still does not work, try reloading.</p>
             </div>
             <div v-else>
               <p style="margin-bottom:0">
                 Please answer the distribution of emotion of the character.
-              </p>
-              <p style="margin-bottom:0">
-                You will be asked to annotate <a class='modal-trigger tooltipped' data-tooltip="Valence is positive / negative aspect of the emotion.<br>Ex) Joy is close to positive valence.<br>Anger and fear are close to negative valence" href="#tutorial" onclick="tuto_vue.jump_to_page(6)">Valence</a>,
-                <a class='modal-trigger tooltipped' data-tooltip="Arousal is excited / calm aspect of the emotion.<br>Ex) Alarm and surprise are close to high arousal (Excited)<br>Boredom and relaxation are close to low arousal (Calm)" href="#tutorial" onclick="tuto_vue.jump_to_page(7)">Arousal</a>, and
-                <a class='modal-trigger tooltipped' data-tooltip="Fear, Anger, Sadness, Disgust, Joy, Surprise, Neutral" href="#tutorial" onclick="tuto_vue.jump_to_page(8)">Emotion Class</a>.
               </p>
             </div>
           </div>
@@ -157,6 +153,7 @@ var video_img = "{{video_img}}"
 </div>
 
 <div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <link v-for="item in tuto_array" v-bind:href="'{% static 'img/tutorial/' %}{{condition}}_'+item+'.png'" rel='prefetch' as='image'>
   <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
     <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
       <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
@@ -187,7 +184,7 @@ var video_img = "{{video_img}}"
 
   </script>
   <script>
-  var max_tuto = 10
+  var max_tuto = 17
   var likert_scale = 7;
   var additive_vue_app = {}
   var video_url;
