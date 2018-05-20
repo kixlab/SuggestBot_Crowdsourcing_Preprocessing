@@ -25,8 +25,11 @@ html_question = """<HTMLQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSM
   <HTMLContent><![CDATA[
 <!DOCTYPE html>
 <html>
-<head></head>
+<head>
+<script type='text/javascript' src='https://s3.amazonaws.com/mturk-public/externalHIT_v1.js'></script>
+</head>
 <body>
+<form name="mturk_form" method="post" id="mturk_form" action="https://www.mturk.com/mturk/externalSubmit"><input type="hidden" value="" name="assignmentId" id="assignmentId" />
 <meta content="width=device-width,initial-scale=1" name="viewport" />
 <section class="container" id="SurveyLink"><!-- Instructions -->
 <div class="row">
@@ -140,8 +143,8 @@ if (mturkworkerID == "" && assignmentID == "" ) {
 </p>
 
 <p>&nbsp;</p>
-
-<p>&nbsp;</p>
+<p class="text-center"><input type="submit" id="submitButton" class="btn btn-primary" value="Submit" /></p></form>
+<script language="Javascript">turkSetAssignmentID();</script>
 </body>
 </html>
 ]]>
