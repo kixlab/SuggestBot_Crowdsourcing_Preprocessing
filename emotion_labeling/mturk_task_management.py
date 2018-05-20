@@ -3,9 +3,9 @@ from .models import *
 from .MTURKKEY import *
 
 
-TIME_FOR_EACH_PROMPT = 60
+TIME_FOR_EACH_PROMPT = 90
 TIME_FOR_TUTORIAL = 300
-HOURLY_PAYMENT =8
+HOURLY_PAYMENT =7.25
 worker_requirements = [{
     'QualificationTypeId': '000000000000000000L0',
     'Comparator': 'GreaterThan',
@@ -170,7 +170,7 @@ def Create_Emotion_Distribution_collection_HIT(title, hit_num):
         Reward = str(reward),
         MaxAssignments = hit_num,
         QualificationRequirements = worker_requirements,
-        LifetimeInSeconds = 7*24*60*60,
+        LifetimeInSeconds = 14*24*60*60,
         AssignmentDurationInSeconds = 12*60*60,
         AutoApprovalDelayInSeconds = 3*24*60*60,
         Question = question,
