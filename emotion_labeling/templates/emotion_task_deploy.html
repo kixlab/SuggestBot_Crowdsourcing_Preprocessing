@@ -22,6 +22,7 @@ var url_id = '{{url}}';
   {% endfor %}
   <form method="POST">
     {% csrf_token %}
+    <input type="number" name="hit_num"/>
     <input type="submit" name="submit" onclick="return_data()"/>
     <input id="to_return" name="to_return" type="text" style="display:none"/>
   </form>

@@ -11,6 +11,7 @@ import base64
 from .character_time_designate import *
 from .mturk_task_management import Create_Emotion_Distribution_collection_HIT, date_handler
 from django.db.models import Q
+from .MTURKKEY import *
 # Create your views here.
 
 # pick a single point label
@@ -285,14 +286,17 @@ def character_time_designator(request, title):
     }
     return render(request, "character_time_designator.html", task_to_throw)
 #decide task and deploy
-def emotion_task_deploy_distribution(request):
+def emotion_task_deploy_distribution(request, pass_word):
+    if pass_word != PASS_WORD:
+        return HttpResponse("Input appropriate password.")
     if request.method=="POST":
-        form = EmotionResult(request.POST)
+        form = TaskDeployResult(request.POST)
         print(form)
+        hit_num = form.cleaned_data['hit_num']
         to_return = json.loads(form.cleaned_data['to_return'])
         for video_title in to_return:
             video = Experiment_Video.objects.filter(video_title = video_title)[0]
-            hit = Create_Emotion_Distribution_collection_HIT(video_title)
+            hit = Create_Emotion_Distribution_collection_HIT(video_title, hit_num)
             video.video_hit_dict = json.dumps(hit, default=date_handler)
             video.save()
         return HttpResponse("Successfully Deployed")

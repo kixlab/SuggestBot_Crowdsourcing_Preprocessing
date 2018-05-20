@@ -3,7 +3,7 @@ from .models import *
 from .MTURKKEY import *
 
 
-TIME_FOR_EACH_PROMPT = 120
+TIME_FOR_EACH_PROMPT = 60
 TIME_FOR_TUTORIAL = 300
 HOURLY_PAYMENT =8
 worker_requirements = [{
@@ -154,7 +154,7 @@ if (mturkworkerID == "" && assignmentID == "" ) {
 mturk = boto3.client('mturk', aws_access_key_id = ACCESS_KEY, aws_secret_access_key = SECRET_KEY, region_name='us-east-1', endpoint_url=MTURK_URL)
 
 
-def Create_Emotion_Distribution_collection_HIT(title):
+def Create_Emotion_Distribution_collection_HIT(title, hit_num):
     print(ACCESS_KEY, SECRET_KEY)
     video = Experiment_Video.objects.filter(video_title = title)[0]
     video_prompt_num = video.video_prompt_num
@@ -168,7 +168,7 @@ def Create_Emotion_Distribution_collection_HIT(title):
         Description = 'Watch a video, and label the emotion of a character in the video. About '+str(task_time)+' minutes task.',
         Keywords = 'video, emotion, labeling',
         Reward = str(reward),
-        MaxAssignments = 50,
+        MaxAssignments = hit_num,
         QualificationRequirements = worker_requirements,
         LifetimeInSeconds = 7*24*60*60,
         AssignmentDurationInSeconds = 12*60*60,
