@@ -36,9 +36,9 @@ html_question = """<HTMLQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSM
 <div class="col-xs-12 col-md-12">
 <div class="panel panel-primary"><!-- WARNING: the ids "collapseTrigger" and "instructionBody" are being used to enable expand/collapse feature --><a class="panel-heading" href="javascript:void(0);" id="collapseTrigger"><strong>Labeling Task Link Instructions</strong> <span class="collapse-text">(Click to expand)</span> </a>
 <div class="panel-body" id="instructionBody">
-<p>In the task, you will label emotion and related phenomenons, like expressions and appraisal on the event, while watching a video. For it you will first be asked to walk through a test that helps you understand our answer criteria, and you will also read through a short tutorial to do the task. Then we will allow you to do the task, but <b>don’t worry: training times are included in the payment</b>.</p>
+<p>In the task, you will label emotion while watching a video. You will read through a short tutorial to do the task. Then we will allow you to do the task, but <b>don’t worry: training times are included in the payment</b>.</p>
 <p>
- Because we need to check whether your audio is on for this task, please click <b>‘Listen to the Sound’</b> button and dictate the word you heard in the text input next to <b>‘Enter the Sound Code’</b> button. When you dictated, hit <b>‘Enter the Sound Code’</b> button,  and the link will be given. Select the link below to complete the task. At the end of the task, you will receive a code to paste into the box below to receive credit for completing our task.</p>
+ Because we need to check whether your audio is on for this task, please click <b>‘Listen to the Sound’</b> button and dictate the word you heard in the text input next to <b>‘Enter the Sound Code’</b> button (Do not use capitalized characters!). When you dictated, hit <b>‘Enter the Sound Code’</b> button,  and the link will be given. Select the link below to complete the task. At the end of the task, you will receive a code to paste into the box below to receive credit for completing our task.</p>
 
 <p><strong>Make sure to leave this window open as you complete the task. </strong> When you are finished, you will return to this page to paste the code into the box.</p>
 
