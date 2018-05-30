@@ -247,7 +247,10 @@ var vue_app = new Vue({
       }
     },
     video_source: function(){
-      example_video.src = this.target_video_source[this.cur_ex]
+      if(example_video != undefined){
+        example_video.src = this.target_video_source[this.cur_ex]
+      }
+
       return this.target_video_source[this.cur_ex]
     }
   }
