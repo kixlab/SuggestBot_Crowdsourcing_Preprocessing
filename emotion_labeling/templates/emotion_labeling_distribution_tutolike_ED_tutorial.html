@@ -187,13 +187,13 @@
       },
       next_step: function(){
         this.step++;
-        this.video_source()
         this.playing=false;
         $("video").each(function () { this.pause() });
         if(this.step>0 && this.step != this.total_example+1){
           this.color_distribution(target_video_distribution[this.step-1])
           // set video
           video = video_update_blinking_and_stop("vd", this.target_second[this.step-1], 'vue_app')
+          this.video_source()
         }
         if((this.step>0 && this.step!=this.total_example+1) && this.max_visited < this.step){
           this.nextable = false;
@@ -220,7 +220,6 @@
       },
       prev_step: function(){
         this.step--;
-        this.video_source()
         playing=false;
         vue_app.nextable = true;
         $("video").each(function () { this.pause() });
@@ -228,6 +227,7 @@
           this.color_distribution(target_video_distribution[this.step-1])
           // set video
           video = video_update_blinking_and_stop("vd", this.target_second[this.step-1])
+          this.video_source()
         }
       },
       h_axis_border: function(i, j){
