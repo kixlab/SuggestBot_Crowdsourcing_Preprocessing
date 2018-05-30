@@ -242,17 +242,13 @@ var vue_app = new Vue({
         player.pause()
         //init video
         //turn on modal
+        if(example_video != undefined){
+          example_video.src = this.target_video_source[this.cur_ex]
+        }
         video_update_blinking_and_stop('example_video', this.target_second[idx])
         $("#single_video").modal('open')
       }
     },
-    video_source: function(){
-      if(example_video != undefined){
-        example_video.src = this.target_video_source[this.cur_ex]
-      }
-
-      return this.target_video_source[this.cur_ex]
-    }
   }
 })
 
