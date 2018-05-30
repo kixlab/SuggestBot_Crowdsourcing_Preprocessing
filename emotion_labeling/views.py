@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import *
 from .models import *
 from .emotion_label_management import *
@@ -12,6 +12,7 @@ from .character_time_designate import *
 from .mturk_task_management import Create_Emotion_Distribution_collection_HIT, date_handler
 from django.db.models import Q
 from .MTURKKEY import *
+from .emotion_distribution_management import *
 # Create your views here.
 
 # pick a single point label
@@ -88,7 +89,7 @@ def experiment1_distribution_tutolike_ED_tutorial(request, video_title, wid, aid
         # test
         #if request.POST['expression']=='3' and request.POST['event']=='1':
             #mtc.grant_bonus(wid, aid, Price(4.00), "You passed prescreen, so you get this bonus!")
-        return redirect('/emotion_labeling/experiment1_distribution/'+video_title+'/'+wid+'/'+aid)
+        return redirect('/emotion_labeling/experiment1_distribution_tutolike_ED/'+video_title+'/'+wid+'/'+aid)
         #else:
         #    token = {'token': str(uuid.uuid4().hex.upper()[0:6])}
         #    return render(request, "prescreen_fail_token_return.html", token)
@@ -97,6 +98,7 @@ def experiment1_distribution_tutolike_ED_tutorial(request, video_title, wid, aid
         'video_prompt_num': exp_video.video_prompt_num,
         'condition': 'tutolike_ED'
     }
+    time_work = extract_representative_examples(time_work)
     return render(request, 'emotion_labeling_distribution_tutolike_ED_tutorial.html',time_work)
 
 def experiment1_distribution_tutolike_ED(request, video_title, wid, aid):
@@ -128,6 +130,8 @@ def experiment1_distribution_tutolike_ED(request, video_title, wid, aid):
     # *** for images, you should store them in '/static/img/figures/{{condition}}/{{video_url}}/{{video_url}}{{character}}'
     # based on the condition, url will be differently assigned
 
+    #below assigns examples
+    task_to_throw = extract_representative_examples(task_to_throw)
     return render(request, "emotion_labeling_distribution_tutolike_ED.html", task_to_throw)
 
 def experiment1_distribution_adaptive_ED(request, video_title, wid, aid):
@@ -321,3 +325,16 @@ def bonus_for_hits(request, hit):
             # do accept also here?
             passed_num = passed_num+1
     return HttpResponse("Paid bonus to "+str(passed_num)+" workers")
+
+### view for building example
+def build_examples_from_collected_data(request):
+    build_examples()
+    return HttpResponse("Success")
+
+### view for extracting similar examples
+def extract_similar_examples(request):
+    cur_dist = json.loads(request.GET.get("distribution"))
+    print(cur_dist)
+    examples = extract_example_from_preliminary_points(cur_dist)
+
+    return JsonResponse(examples)

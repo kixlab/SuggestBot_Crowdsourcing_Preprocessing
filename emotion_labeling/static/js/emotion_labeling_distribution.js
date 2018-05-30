@@ -200,10 +200,11 @@ var vue_app = new Vue({
           tot += av_array[i][j]
         }
       }
+      console.log(tot)
       for(i in av_array){
         for(j in av_array[i]){
           if(number){
-            if(parseInt(50*av_array[i][j]/tot)!=0){
+            if(Math.round(50*av_array[i][j]/tot)!=0){
                 $("#ex_"+prepend+"a"+(parseInt(i)+1).toString()+"_v"+(parseInt(j)+1).toString()).text(Math.round(50*av_array[i][j]/tot))
             }
           }
@@ -223,6 +224,7 @@ var vue_app = new Vue({
       if(this.example_condition.includes("distribution")){
           //$(".distribution_input").css("visibility","hidden")
           $(".distribution_ex_combined").css("display","")
+          console.log(idx)
           this.color_distribution(av_array=this.target_video_distribution[idx], grid_class='.distribution_input_case', prepend="", number=true)
       }
     },
@@ -230,6 +232,7 @@ var vue_app = new Vue({
       if(this.example_condition.includes("distribution")){
         //$(".distribution_input").css("visibility","visible")
         $(".distribution_ex_combined").css("display","none")
+        $(".distribution_ex_combined").text("")
           this.calculate_current_distribution_token()
       }
     },

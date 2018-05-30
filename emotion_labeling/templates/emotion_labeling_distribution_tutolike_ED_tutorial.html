@@ -115,7 +115,7 @@
 
     </div>
 
-    <div v-if="step==6" style="margin-bottom: 10px;">
+    <div v-if="step==total_example+1" style="margin-bottom: 10px;">
       <br><br>
       <h3>Good job! Please go to the main task :-)</h3>
       <br>
@@ -133,9 +133,9 @@
   var video_prompt_num = {{video_prompt_num}}
   var condition= '{{condition}}'
   var likert_scale = 7
-  var target_second=[10,15,20,25,30]
-  var target_video_source=Array.apply(null, Array(5)).map(function (_, i) {return 'https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262-5fad49191ecf';})
-  var target_video_distribution = Array.apply(null, Array(5)).map(function (_, k) {return Array.apply(null, Array(likert_scale)).map(function (_, i) {return Array.apply(null, Array(likert_scale)).map(function (_, j) {return Math.random()*i*j*i*i*j*j;});});})
+  var target_second=JSON.parse('{{target_second}}');
+  var target_video_source=JSON.parse($.parseHTML('{{target_video_source}}')[0].textContent);
+  var target_video_distribution = JSON.parse($.parseHTML('{{target_video_distribution}}')[0].textContent);
   var what_to_show
   var what_to_explain
 
@@ -155,7 +155,7 @@
     delimiters: ['[[', ']]'],
     data:{
       step: -5,
-      total_example: 5,
+      total_example: target_second.length,
       max_visited:-5,
       condition: condition,
       what_to_show: what_to_show,

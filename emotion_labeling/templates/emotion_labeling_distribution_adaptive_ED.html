@@ -2,6 +2,11 @@
 
 {% load staticfiles %}
 
+{% block max_tuto_assign %}
+<script>
+  max_tuto = 2;
+</script>
+{% endblock %}
 
 {% block example_modal %}
 
@@ -186,24 +191,39 @@
   function update_example_from_backend(av_array){
     console.log(av_array)
     // TODO retrieve examples from the backend
-    target_second = [10]
-    target_video_source = Array.apply(null, Array(5)).map(function (_, i) {return 'https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262-5fad49191ecf';})
-    target_video_distribution = Array.apply(null, Array(5)).map(function (_, k) {return Array.apply(null, Array(likert_scale)).map(function (_, i) {return Array.apply(null, Array(likert_scale)).map(function (_, j) {return Math.random()*i*j*i*i*j*j;});});})
-    vue_app.target_second = target_second;
-    vue_app.target_video_source = target_video_source;
-    vue_app.target_video_distribution = target_video_distribution;
-    vue_exa_modal.target_second = target_second;
-    vue_exa_modal.target_video_source = target_video_source;
-    vue_exa_modal.target_video_distribution = target_video_distribution;
+    $.ajax({
+      type: "GET",
+      url: "/emotion_labeling/extract_similar_examples/",
+      data: {
+          "distribution": JSON.stringify(av_array),
+      },
+      success: function(data){
+          console.log("success");
+          target_second = data['target_second']
+          target_video_source = data['target_video_source']
+          target_video_distribution = data['target_video_distribution']
+          vue_app.target_second = target_second;
+          vue_app.target_video_source = target_video_source;
+          vue_app.target_video_distribution = target_video_distribution;
+          vue_exa_modal.target_second = target_second;
+          vue_exa_modal.target_video_source = target_video_source;
+          vue_exa_modal.target_video_distribution = target_video_distribution;
 
-    // TODO show the modal!
-    vue_exa_modal.nextable = false
-    vue_exa_modal.max_visited = 0
-    vue_exa_modal.cur_ex = 0
-    $("#example").modal('open')
-    //initialize!
-    vue_exa_modal.access_example(0)
-    cur_phase++;
+          // TODO show the modal!
+          vue_exa_modal.nextable = false
+          vue_exa_modal.max_visited = 0
+          vue_exa_modal.cur_ex = 0
+          $("#example").modal('open')
+          //initialize!
+          vue_exa_modal.access_example(0)
+          cur_phase++;
+      },
+      failure: function(data){
+          console.log("failure");
+      },
+    });
+
+
   }
   function clear_example(){
     vue_app.target_second = [];

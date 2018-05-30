@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^experiment1_cp_only/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_cp_only),
     url(r'^emotion_task_deploy_distribution/(?P<pass_word>[\w\-]+)/$', views.emotion_task_deploy_distribution),
     url(r'^bonus_for_hits/(?P<hit>[\w\-]+)/$', views.bonus_for_hits),
+    url(r'^build_examples_from_collected_data/$', views.build_examples_from_collected_data),
+    url(r'^extract_similar_examples/$', views.extract_similar_examples),
 #    url(r'^video_quality_inspection/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.video_quality_inspection),
 
 ]
