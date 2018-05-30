@@ -245,6 +245,10 @@ var vue_app = new Vue({
         video_update_blinking_and_stop('example_video', this.target_second[idx])
         $("#single_video").modal('open')
       }
+    },
+    video_source: function(){
+      example_video.src = this.target_video_source[this.cur_ex]
+      return this.target_video_source[this.cur_ex]
     }
   }
 })

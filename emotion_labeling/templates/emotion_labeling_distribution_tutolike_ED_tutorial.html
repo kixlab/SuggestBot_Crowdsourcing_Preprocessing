@@ -173,8 +173,10 @@
     methods:{
       video_source: function(){
         if(this.step>0 && this.step != this.total_example+1){
+          video.src = this.target_video_source[this.step-1]
           return this.target_video_source[this.step-1]
         }else{
+          video.src = this.target_video_source[0]
           return this.target_video_source[0]
         }
       },
