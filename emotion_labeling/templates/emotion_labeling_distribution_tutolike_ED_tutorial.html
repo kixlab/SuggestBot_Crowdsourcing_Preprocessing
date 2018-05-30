@@ -58,7 +58,7 @@
         <p v-for="text in what_to_explain">[[text]]</p>
       </div>
       <div class="col s6" style="padding:0">
-        <video id='vd' class="video-js vjs-default-skin vjs-big-play-centered" v-bind:src="video_source()" type="video/mp4" v-bind:style="{top: bar_video_top()}" style="height:305px; width:560px; position:relative;"></video>
+        <video id='vd' class="video-js vjs-default-skin vjs-big-play-centered" type="video/mp4" v-bind:style="{top: bar_video_top()}" style="height:305px; width:560px; position:relative;"></video>
         <span class='btn' v-on:click="play()" v-bind:style="{top: bar_video_top()}" style="position: relative">
           <span v-if="!playing">Play</span>
           <span v-if="playing">Pause</span>
@@ -176,13 +176,10 @@
           if(video!=undefined){
             video.src = this.target_video_source[this.step-1]
           }
-
-          return this.target_video_source[this.step-1]
         }else{
           if(video!=undefined){
             video.src = this.target_video_source[0]
           }
-          return this.target_video_source[0]
         }
       },
       hide_videos: function(){
@@ -190,6 +187,7 @@
       },
       next_step: function(){
         this.step++;
+        this.video_source()
         this.playing=false;
         $("video").each(function () { this.pause() });
         if(this.step>0 && this.step != this.total_example+1){
@@ -222,6 +220,7 @@
       },
       prev_step: function(){
         this.step--;
+        this.video_source()
         playing=false;
         vue_app.nextable = true;
         $("video").each(function () { this.pause() });
