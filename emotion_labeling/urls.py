@@ -3,6 +3,11 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^study_frame_checkbox_confidence/(?P<data_name>[\w\-]+)/$', views.study_frame_checkbox_confidence),
+    url(r'^interface_study_arousal_valence/(?P<data_name>[\w\-]+)/$', views.interface_study_arousal_valence),
+    url(r'^interface_study_emotion_word/(?P<data_name>[\w\-]+)/$', views.interface_study_emotion_word),
+    url(r'^interface_study_frame_disambiguation/(?P<data_name>[\w\-]+)/$', views.interface_study_frame_disambiguation),
+    url(r'^interface_study_student_engagement/(?P<data_name>[\w\-]+)/$', views.interface_study_student_engagement),
     url(r'^character_time_designator/(?P<title>[\w\-]+)/$', views.character_time_designator),
     #label and reason
     url(r'^experiment1_baseline/(?P<video_title>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.experiment1_baseline),

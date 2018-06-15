@@ -7,6 +7,15 @@ class Video_Before_Processing(models.Model):
     def __str__(self):
         return self.video_title
 
+#for multi interface study purpose
+class Study_Video(models.Model):
+    video_title = models.CharField(max_length = 200, default = "")
+    video_url = models.CharField(max_length = 2000, default = "")
+    video_img = models.CharField(max_length = 200, default = "")
+    video_prompt_time = models.IntegerField(default = 0)
+    def __str__(self):
+        return self.video_title+"_"+str(self.video_prompt_time)
+
 class Experiment_Video(models.Model):
     video_title = models.CharField(max_length = 200, default = "")
     video_url = models.CharField(max_length = 2000, default = "")

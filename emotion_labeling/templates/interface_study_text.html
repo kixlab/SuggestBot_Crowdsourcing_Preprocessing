@@ -1,0 +1,97 @@
+{% extends 'interface_study_frame.html' %}
+
+{% load staticfiles %}
+
+{% block data %}
+<script src="{% static 'js/example_module.js' %}"></script>
+<script>
+  var max_tuto = 9
+
+  //data source
+  var frame = {{frame|safe}};
+  var target_sentence = frame['target_sentence']
+  var target_word = frame['target_word'];
+  classes = Object.keys(frame['frame_definitions'])
+  var examples = {}
+  classes.map(function(item){
+      examples[item] = frame['frame_definitions'][item].match(/'(.*?)'/g)
+  })
+  classes = classes.map(function(item){
+    return item.replace(/_/g, " ")
+  })
+
+</script>
+
+<div id="text_app">
+  <p style="margin-bottom: 0"><b>Target Sentence :</b></p>
+  <!--fill this in with target sentence-->
+  <p id='target_sentence' style="margin-top: 0; background-color: black; color: rgb(255,255,120)"></p>
+  <p id='target_word'><b>Target Word : </b></p>
+  <div>
+    <p style="margin: 0"><b>Possible Frames : </b></p>
+    <ul style="margin-top: 0" class="collapsible">
+      <li v-for="definition, key in definitions">
+        <div class="collapsible-header">[[key]]</div>
+        <div class="collapsible-body" style="background-color: #eeeeee">
+          <p>[[definition.replace(/'(.*?)'/g, "")]]</p>
+          <p>Examples</p>
+          <ul style="padding-left: 15px;">
+            <li v-for="example in examples[key]">[[example]]</li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<script>
+  $("#target_sentence").html(target_sentence.replace(target_word, "<b style='color: rgb(255,120,120)'>"+target_word+"</b>"))
+  $("#target_word").append(target_word)
+  data_view_done = true
+  var text_app = new Vue({
+    el: "#text_app",
+    delimiters: ['[[', ']]'],
+    data:{
+      definitions: frame['frame_definitions'],
+      examples : examples,
+    },
+    methods: {
+
+    }
+  })
+</script>
+{% endblock %}
+
+{% block tutorial %}
+<script>
+  tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+  tuto_vue.on_load_use = false;
+  tuto_vue.tuto_text=[
+    "<p>You will do a labeling task with various interfaces, which differ in degree of freedom in expressing diverse interpretations, and do surveys on them.</p>"+
+    "<p>To let you understand the labeling task, you will be shown a short tutorial before you proceed.</p>"+
+    "<p>Hit 'NEXT' button to proceed.</p>",
+    "<p>The task you are going to do is 'frame disambiguation', which is selecting high level concepts for a word in a sentence.</p>"+
+    "<p>High level concept should represent the meaning of a word.</p>"+
+    "<p>For the task, you will read a sentence with the word and choose the appropriate frame for the word.</p>"+
+    "<p>Before jumping in to the task, you will first be shown 7 frames that you can choose.</p>"+
+    "<p>Hit 'NEXT' button to proceed.</p>",
+
+  ]
+  for (idx in text_app.definitions){
+    var text_input = "<p>Below is the frame that will be given as an option.</p><h5><b>"+idx+"</b></h5>"
+    var definition = text_app.definitions[idx]
+    text_input = text_input + "<p>" + definition.replace(/'(.*?)'/g, "") + "</p>"
+    text_input = text_input + "<h6><b>Examples</b></h6>"+"<ul>"
+    for (example in examples[idx]){
+      text_input = text_input + "<li>-"+ examples[idx][example] +"</li>"
+    }
+    text_input = text_input + "</ul><p>Hit 'NEXT' button to proceed.</p>"
+    tuto_vue.tuto_text.push(text_input)
+  }
+  last_input = "<p>You can read the explanation whenever you want to. It would be positioned below the target sentence.</p>"+
+              "<p>If you are ready, proceed with 'TO THE TASK' button.</p>"
+  tuto_vue.tuto_text.push(last_input)
+//  Object.keys(frame['frame_definitions'])
+</script>
+{% endblock %}

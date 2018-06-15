@@ -1,0 +1,85 @@
+{% extends 'interface_study_frame.html' %}
+
+{% load staticfiles %}
+
+{% block data %}
+<script src="{% static 'js/example_module.js' %}"></script>
+<script>
+  //data source
+  //var source = {{source}};
+  var video_img = '{{video_img}}'
+  var target_second = {{target_second}};
+  max_tuto = {{max_tuto}}
+</script>
+<div class="row">
+  <div class="col s2">
+    <img v-if="condition!='data_collection'" src="{% static 'img/figures/experiment/' %}a_man_like_you0.png" style="width:100%; margin-top:20px">
+  </div>
+  <div class="cos s10">
+    <p>Try to interpret the emotion of the character in the left image.</p>
+    <p>Try to interpret the emotion of the character when the border of the player blinks in red.</p>
+  </div>
+</div>
+<video id="player" width="480" height="270" style="margin:auto; display:block; margin-top:10px;" src="{{source}}">
+</video>
+<div style="width:480px; height: 10px; margin: auto; display:block; background-color:grey">
+  <div id="play_bar" style="height:10px; float:left; background-color: cyan"></div>
+  <div id="marker_bar" style="position:relative; height: 10px; background-color: red"></div>
+</div>
+<div style="margin:auto; display:block; width: 480px;">
+  <div id="play_btn" class="btn" onclick="play_pause()">Play / Pause</div>
+  <div id="replay_btn" class="btn" onclick="replay()">Replay</div>
+</div>
+<script>
+  var player = document.getElementById("player")
+  var video_time_offset = 20
+  //player.src=source
+
+  player = video_update_blinking_and_stop('player', target_second, 'label_app', video_time_offset)
+  $("#marker_bar").css("left", (video_time_offset/(video_time_offset+4)*100).toString()+"%")
+  .css("width", (1/(video_time_offset+4)*100).toString()+"%")
+  player.addEventListener('timeupdate', function(){
+    if(player.currentTime > target_second+4){
+      player.currentTime = target_second + 4
+    }
+    var cur_time = player.currentTime;
+    var percentage_time = (cur_time - target_second + video_time_offset) / (video_time_offset+4) * 100
+    $("#play_bar").css("width", percentage_time.toString()+"%")
+  })
+  function play_pause(){
+    if(!player.paused){
+      player.pause()
+    }else{
+      player.play();
+    }
+
+  }
+  function replay(){
+    player.currentTime = target_second-20
+    player.play();
+  }
+
+  data_explanation = "You will be able to proceed once you watch the whole video."
+
+</script>
+{% endblock %}
+
+{% block tutorial %}
+<script>
+  if('{{condition}}'=='study_arousal_valence'){
+  tuto_vue.tuto_img = Array.apply(null, Array(max_tuto+1)).map(function (_, i) {return true;})
+}else if('{{condition}}'=='study_emotion_word'){
+  tuto_vue.tuto_img = Array.apply(null, Array(max_tuto+1)).map(function (_, i) {return false;})
+  tuto_vue.on_load_use = false
+  tuto_vue.tuto_text = [
+    "<p>You will do a labeling task with various interfaces, which differ in degree of freedom in expressing diverse interpretations, and do surveys on them.</p>"+
+    "<p>To let you understand the labeling task, you will be shown a short tutorial before you proceed.</p>"+
+    "<p>Hit 'NEXT' button to proceed.</p>",
+    "<p>In the labeling task, you will choose the perceived emotion for a character in a video, in terms of emotion words.</p>"+
+    "<p>You will be given following 6 emotion categories to express the emotion of a character in the video.</p>"+
+    "<div style='padding-left: 20px'><p><i>Joyful</i></p><p><i>Sad</i></p><p><i>Angry</i></p><p><i>Disgusted</i></p><p><i>Fearful</i></p><p><i>Surprised</i></p><p><i>Neutral</i></p></div>"+
+    "<p>If you are ready to proceed, hit 'TO THE TASK' button to proceed.</p>",
+  ]
+}
+</script>
+{% endblock %}

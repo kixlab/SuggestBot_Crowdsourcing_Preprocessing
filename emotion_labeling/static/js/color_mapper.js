@@ -26,6 +26,11 @@ function mapAColor(p){
             return s;
         }
 
+function alphaColor(p){
+
+  return "rgba(44, 117, 244, "+p+")";
+}
+
 function color_mapper_gradient_color(canvas_id){
   var canvas = document.getElementById(canvas_id)
   var ctx = canvas.getContext("2d")

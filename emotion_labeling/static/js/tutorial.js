@@ -7,16 +7,19 @@ var tuto_vue = new Vue({
     tuto_array: Array.apply(null, Array(max_tuto+1)).map(function (_, i) {return i;}),
     tuto_done: false,
     loaded:true,
+    tuto_img:[],
+    tuto_text:[],
+    on_load_use:true,
   },
   methods:{
     disabled_prev: function(){
-      return (this.cur_tuto==0)||!this.loaded;
+      return (this.cur_tuto==0)||(!this.loaded && this.on_load_use);
     },
     disabled_next: function(){
-      return (this.cur_tuto>=this.max_tuto)||(!this.loaded);
+      return (this.cur_tuto>=this.max_tuto)||(!this.loaded && this.on_load_use);
     },
     disabled_task: function(){
-      return (!this.dismissible())||(!this.loaded);
+      return (!this.dismissible())||(!this.loaded && this.on_load_use);
     },
     dismissible: function(){
       if(this.cur_tuto>=this.max_tuto || this.tuto_done){
@@ -28,6 +31,7 @@ var tuto_vue = new Vue({
     next_step: function(){
       if(this.cur_tuto<this.max_tuto){
         this.cur_tuto++;
+
         this.loaded = false;
       }
     },
@@ -69,9 +73,13 @@ $(document).ready(function(){
   $("#tutorial").modal('open')
 
   console.log(tuto_vue)
-  document.getElementById('tuto_img').onload = function(){
-    tuto_vue.loaded = true;
+  if(document.getElementById('tuto_img')!=undefined){
+    document.getElementById('tuto_img').onload = function(){
+      tuto_vue.loaded = true;
+    }
   }
+
+
   $(".tooltipped").tooltip({html: true, enterDelay: 50,});
 
 })

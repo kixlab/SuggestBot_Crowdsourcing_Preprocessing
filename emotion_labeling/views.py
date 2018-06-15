@@ -13,7 +13,62 @@ from .mturk_task_management import Create_Emotion_Distribution_collection_HIT, d
 from django.db.models import Q
 from .MTURKKEY import *
 from .emotion_distribution_management import *
+from .frame_disambiguation_filter import *
 # Create your views here.
+
+def study_frame_checkbox_confidence(request, data_name):
+    frame = pick_and_get_frame_disambiguation_material(199)
+    to_send = {
+        'frame' : frame,
+    }
+    return render(request, "study_frame_checkbox_confidence.html", to_send)
+
+def interface_study_arousal_valence(request, data_name):
+    study_video = Study_Video.objects.get(video_title = data_name)
+    to_send = {
+        'natural_language_instruction' : "Express how you would interpret the emotion of the character in terms of arousal and valence in natural language.",
+        'subject_data_name' : 'the emotion of the character',
+        'classes' : json.dumps([]),
+        'label_complexity': '2d-scale',
+        'condition': 'study_arousal_valence',
+        'max_tuto': 6,
+        'target_second': study_video.video_prompt_time,
+        'target_img': study_video.video_img,
+        'source': study_video.video_url,
+    }
+    return render(request, "interface_study_video.html", to_send)
+
+def interface_study_emotion_word(request, data_name):
+    to_send = {
+        'source' : "https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/A%20Man%20Like%20You%20%20%20%20A%20Short%20Film%20from%20Harry%E2%80%99s.mp4?alt=media&token=8f79cbc2-ca80-498e-a262",
+        'natural_language_instruction' : "Express how you would interpret the emotion of the character in terms of the emotion word in natural language.",
+        'subject_data_name' : 'the emotion of the character',
+        'classes' : json.dumps(['joyful', 'sad', 'angry', 'disgusted', 'fearful', 'surprised', 'neutral']),
+        'label_complexity': 'multiclass',
+        'condition': 'study_emotion_word',
+        'max_tuto': 1,
+    }
+    return render(request, "interface_study_video.html", to_send)
+
+def interface_study_frame_disambiguation(request, data_name):
+    frame = pick_and_get_frame_disambiguation_material(data_name)
+    to_send = {
+        'natural_language_instruction' : "Express how you would interpret the possible meaning of the word in terms of given frame classes in natural language.",
+        'subject_data_name' : 'the frame of the word',
+        'classes' : json.dumps(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+        'label_complexity': 'multiclass',
+        'frame' : frame,
+    }
+    return render(request, "interface_study_text.html", to_send)
+
+def interface_study_student_engagement(request, data_name):
+    to_send = {
+        'natural_language_instruction' : "Express how you would interpret the possible meaning of the word in terms of given frame classes in natural language.",
+        'subject_data_name' : 'the frame of the word',
+        'classes' : json.dumps(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+        'label_complexity': 'scale',
+    }
+    return render(request, "interface_study_image.html", to_send)
 
 # pick a single point label
 def experiment1_baseline(request, video_title, wid, aid):

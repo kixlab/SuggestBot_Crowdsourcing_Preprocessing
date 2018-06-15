@@ -1,0 +1,66 @@
+{% extends 'interface_study_frame.html' %}
+
+{% load staticfiles %}
+
+{% block data %}
+<script src="{% static 'js/example_module.js' %}"></script>
+<script>
+  var max_tuto = 0
+  horizontal_axis = ['Not engaged', 'engaged']
+  //data source
+
+
+</script>
+
+<div id="image_app">
+  <img style="width: 70%; display: block; margin: auto;" src="https://firebasestorage.googleapis.com/v0/b/suggestbot-preprocessing.appspot.com/o/engagement_image0.png?alt=media&token=24c291b3-f50f-4f2e-8594-278ea8f56d71">
+</div>
+
+<script>
+  data_view_done = true
+  /*var text_app = new Vue({
+    el: "#text_app",
+    delimiters: ['[[', ']]'],
+    data:{
+      definitions: frame['frame_definitions'],
+      examples : examples,
+    },
+    methods: {
+
+    }
+  })*/
+</script>
+{% endblock %}
+
+{% block tutorial %}
+<script>
+  tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+  tuto_vue.on_load_use = false;
+  tuto_vue.tuto_text=[
+    "<p>You will do a labeling task with various interfaces, which differ in degree of freedom in expressing diverse interpretations, and do surveys on them.</p>"+
+    "<p>To let you understand the labeling task, you will be shown a short tutorial before you proceed.</p>"+
+    "<p>Hit 'NEXT' button to proceed.</p>",
+    "<p>The task you are going to do is 'frame disambiguation', which is selecting high level concepts for a word in a sentence.</p>"+
+    "<p>High level concept should represent the meaning of a word.</p>"+
+    "<p>For the task, you will read a sentence with the word and choose the appropriate frame for the word.</p>"+
+    "<p>Before jumping in to the task, you will first be shown 7 frames that you can choose.</p>"+
+    "<p>Hit 'NEXT' button to proceed.</p>",
+
+  ]
+  for (idx in text_app.definitions){
+    var text_input = "<p>Below is the frame that will be given as an option.</p><h5><b>"+idx+"</b></h5>"
+    var definition = text_app.definitions[idx]
+    text_input = text_input + "<p>" + definition.replace(/'(.*?)'/g, "") + "</p>"
+    text_input = text_input + "<h6><b>Examples</b></h6>"+"<ul>"
+    for (example in examples[idx]){
+      text_input = text_input + "<li>-"+ examples[idx][example] +"</li>"
+    }
+    text_input = text_input + "</ul><p>Hit 'NEXT' button to proceed.</p>"
+    tuto_vue.tuto_text.push(text_input)
+  }
+  last_input = "<p>You can read the explanation whenever you want to. It would be positioned below the target sentence.</p>"+
+              "<p>If you are ready, proceed with 'TO THE TASK' button.</p>"
+  tuto_vue.tuto_text.push(last_input)
+//  Object.keys(frame['frame_definitions'])
+</script>
+{% endblock %}

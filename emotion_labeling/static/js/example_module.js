@@ -1,4 +1,4 @@
-function video_update_blinking_and_stop(player_id, target_second, param_to_true=undefined){
+function video_update_blinking_and_stop(player_id, target_second, param_to_true=undefined, offset=5){
   // set video
   video = document.getElementById(player_id)
   video_clone = video.cloneNode(true);
@@ -23,11 +23,13 @@ function video_update_blinking_and_stop(player_id, target_second, param_to_true=
         if(vue_exa_modal.max_visited < vue_exa_modal.cur_ex){
           vue_exa_modal.max_visited = vue_exa_modal.cur_ex;
         }
+      }else if(param_to_true == 'label_app'){
+        label_app.data_view_done = true;
       }
       video.pause()
     }
 
   })
-  video.currentTime = target_second-5;
+  video.currentTime = target_second-offset;
   return video
 }

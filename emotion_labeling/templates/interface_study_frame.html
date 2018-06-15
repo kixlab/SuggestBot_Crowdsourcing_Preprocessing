@@ -1,0 +1,800 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/distribution.css' %}" rel='stylesheet'>
+<script src="{% static 'js/color_mapper.js' %}"></script>
+<!--load all necessary css, and get required variables from django server-->
+<script>
+  var scale = 7;
+  var label_complexity = '{{label_complexity}}' // 2d-scale, scale, multiclass
+  var classes= JSON.parse('{{classes}}'.replace(/&quot;/g,'"'))
+  var natural_language_instruction = '{{natural_language_instruction}}'
+  var subject_data_name = '{{subject_data_name}}'
+  var data_explanation = ""
+  var data_view_done = false;
+  var horizontal_axis = ['Negative', 'Positive']
+  var vertical_axis = ['Excited', 'Calm']
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- data pane - to be extended-->
+<div class="row">
+  <div class="col s6">
+    {% block data %}
+    {% endblock %}
+  </div>
+  <div id="label_app" class="col s6">
+    <div id="label_interface">
+
+      <div id="intro_explanation1" v-if="phase==0">
+        <h5>Testing 5 interfaces for labeling data.</h5>
+        <p>Now, for the data in the left, you are going to do labeling with 5 interfaces, and do surveys for each interfaces.</p>
+        <p>The data can be interpreted in various ways, and interfaces allow expressing diverse interpretations in different degree.</p>
+        <p>First, take a look at the data.</p>
+        <p>[[data_explanation]]</p>
+      </div>
+
+      <div id="natural_language" v-bind:class="{hidden: phase!=1}">
+        <p>Before using interfaces to label, you will try to explain and express how you interpreted the data in <b>natural language.</b></p>
+        <p style="margin:0px;">[[natural_language_instruction]]</p>
+        <p style="margin:0px;"><i> * There can be multiple interpretations, with varying plausibility in each interpretations. Please write all of the possible interpretations.</i></p>
+        <textarea id="natural_language_interpretation" class="materialize-textarea" placeholder="Write your answer here"></textarea>
+
+      </div>
+
+      <div id="intro_explanation1" v-if="phase==2">
+        Now you will test interfaces.
+      </div>
+
+      <div v-bind:class="{hidden: phase<=1}">
+
+        <div id="radio" v-bind:class="{hidden: randomized_order[phase-3]!=0}">
+
+          <div id="radio_explanation" v-bind:class="{hidden: sub_phase!=0}">
+            <p>
+            In the interface you will rightly work on, you are allowed to select <b>a single value or field</b> to best describe the data.
+            Please do the task of selecting the value that best describes what you thought about the data, and proceed to the survey items.
+            </p>
+            <p>to do - put adaptive images?</p>
+          </div>
+
+          <div id="radio_interface" style="margin-top:10px" v-bind:class="{hidden: sub_phase<=0, not_changeable: sub_phase>=2}">
+            <p v-if="sub_phase==1">Describe the data with the interface below so that your thoughts on the data can be best reflected.</p>
+
+            <div class="row" style="display:block; margin:auto" id="r_table_row">
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align:center">[[ vertical_axis[0] ]]</span>
+                  <img v-if="vertical_axis[0]=='Excited'" src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" style="display:block; margin:auto; width:40%"></img>
+                </div>
+              </div>
+
+              <div class="row" style="margin-bottom: 0px">
+                <div class="col s2 offset-s1" style="position: relative;" v-bind:style="{top: row_label_top('r')}">
+                  <div id="r_row_min_label" v-if="label_complexity != 'multiclass'" >
+                    <span style="display:block; margin: auto; text-align:right;">[[ horizontal_axis[0] ]]</span>
+                    <img v-if="horizontal_axis[0]=='Negative'" src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" style="display:block; float:right; width: 40%;"></img>
+                  </div>
+                </div>
+
+                <div id="r_distribution_table" class="col s6" style="position: relative; padding:0;">
+                  <div v-if="label_complexity=='2d-scale'" id="r_horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 0;"></div>
+                  <div v-if="label_complexity=='2d-scale'" id="r_vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 0;"></div>
+                  <table>
+                    <tbody>
+                      <tr v-for="i in row_range">
+                        <!--<td class="table_radios radios_padding"></td>-->
+                        <td v-for="j in column_range" class="table_radios input_case" style="position: relative;">
+
+                            <input name='checkboxes' style="z-index: 2;text-shadow: 0 0 0 black; width:100%; position:absolute;" class="r_distribution_input distribution_input distribution_input_token input_label" type="radio" v-bind:id="'r_r'+(8-i)+'_c'+j"/>
+                            <label v-bind:for="'r_r'+(8-i)+'_c'+j" style="padding-left: 0px;" v-bind:style="{height: cell_height('r_distribution_table'), top: radio_top(), left: radio_left()}"></label>
+                          <!--<div v-bind:id="'c_r'+(8-i)+'_c'+j" class="c_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: cell_height('c_distribution_table')}"></div>-->
+                          <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                        </td>
+                      </tr>
+                      <tr v-if="label_complexity=='multiclass'">
+                        <td v-for="i in column_range" style="font-size: 8pt; text-align: center;">
+                          <div style="padding: 0px 5px;">[[ scale_label[i-1] ]]</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="col s2" style="position: relative;" v-bind:style="{top: row_label_top('r')}">
+                  <div id="r_row_max_label" v-if="label_complexity != 'multiclass'">
+                    <span style="display:block; margin: auto; text-align:left;">[[ horizontal_axis[1] ]]</span>
+                    <img v-if="horizontal_axis[1]=='Positive'" src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" style="width: 40%; display:block; float:left;"></img>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align: center;">[[ vertical_axis[1] ]]</span>
+                  <img v-if="vertical_axis[1]=='Calm'" src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" style="display:block; margin:auto; width: 40%;"></img>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div id="checkbox" v-bind:class="{hidden: randomized_order[phase-3]!=1}">
+
+          <div id="checkbox_explanation" v-bind:class="{hidden: sub_phase!=0}">
+            <p>
+            In the interface you will rightly work on, you are allowed to select <b>multiple values or fields</b> to best describe the data.
+            Please do the task of selecting the value, or values that best describes what you thought about the data, and proceed to the survey items.
+            </p>
+            <p>to do - put adaptive images?</p>
+          </div>
+
+          <div id="checkbox_interface" style="margin-top:10px" v-bind:class="{hidden: sub_phase<=0, not_changeable: sub_phase>=2}">
+            <p v-if="sub_phase==1">Describe the data with the interface below so that your thoughts on the data can be best reflected.</p>
+
+            <div class="row" style="display:block; margin:auto" id="c_table_row">
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align:center">[[ vertical_axis[0] ]]</span>
+                  <img v-if="vertical_axis[0]=='Excited'" src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" style="display:block; margin:auto; width:40%"></img>
+                </div>
+              </div>
+
+              <div class="row" style="margin-bottom: 0px">
+                <div class="col s2 offset-s1" style="position: relative;" v-bind:style="{top: row_label_top('c')}">
+                  <div id="c_row_min_label" v-if="label_complexity != 'multiclass'" >
+                    <span style="display:block; margin: auto; text-align:right;">[[ horizontal_axis[0] ]]</span>
+                    <img v-if="horizontal_axis[0]=='Negative'" src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" style="display:block; float:right; width: 40%;"></img>
+                  </div>
+                </div>
+
+                <div id="c_distribution_table" class="col s6" style="position: relative; padding:0;">
+                  <div v-if="label_complexity=='2d-scale'" id="c_horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 0;"></div>
+                  <div v-if="label_complexity=='2d-scale'" id="c_vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 0;"></div>
+                  <table>
+                    <tbody>
+                      <tr v-for="i in row_range">
+                        <!--<td class="table_radios radios_padding"></td>-->
+                        <td v-for="j in column_range" class="table_radios input_case" style="position: relative;">
+
+                            <input name='checkboxes' style="z-index: 2;text-shadow: 0 0 0 black; width:100%; position:absolute;" class="c_distribution_input distribution_input distribution_input_token input_label" type="checkbox" v-bind:id="'c_r'+(8-i)+'_c'+j"/>
+                            <label v-bind:for="'c_r'+(8-i)+'_c'+j" style="padding-left: 0px;" v-bind:style="{height: cell_height('c_distribution_table'), top: checkbox_top(), left: checkbox_top()}"></label>
+                          <!--<div v-bind:id="'c_r'+(8-i)+'_c'+j" class="c_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: cell_height('c_distribution_table')}"></div>-->
+                          <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                        </td>
+                      </tr>
+                      <tr v-if="label_complexity=='multiclass'">
+                        <td v-for="i in column_range" style="font-size: 8pt; text-align: center;">
+                          <div style="padding: 0px 5px;">[[ scale_label[i-1] ]]</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="col s2" style="position: relative;" v-bind:style="{top: row_label_top('c')}">
+                  <div id="c_row_max_label" v-if="label_complexity != 'multiclass'">
+                    <span style="display:block; margin: auto; text-align:left;">[[ horizontal_axis[1] ]]</span>
+                    <img v-if="horizontal_axis[1]=='Positive'" src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" style="width: 40%; display:block; float:left;"></img>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align: center;">[[ vertical_axis[1] ]]</span>
+                  <img v-if="vertical_axis[1]=='Calm'" src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" style="display:block; margin:auto; width: 40%;"></img>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div id="10tokens" v-bind:class="{hidden: randomized_order[phase-3]!=2}">
+
+          <div id="10tokens_explanation" v-bind:class="{hidden: sub_phase!=0}">
+            <p>
+            In the interface you will rightly work on, you are allowed to <b>assign 10 tokens to values or fields</b> to best describes the data.
+            Here, more tokens in a value or field would mean more plausibility that the data would be interpreted as such a value or a field.
+            Please do the task of assigning tokens to values or fields so that your thoughts about the data is best described, and proceed to the survey items.
+            </p>
+            <p>to do - put adaptive images?</p>
+          </div>
+
+          <div id="10tokens_interface" style="margin-top:10px" v-bind:class="{hidden: sub_phase<=0, not_changeable: sub_phase>=2}">
+            <p v-if="sub_phase==1">Describe the data with the interface below so that your thoughts on the data can be best reflected.</p>
+
+            <div class="row" style="display:block; margin:auto" id="10_table_row">
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align:center">[[ vertical_axis[0] ]]</span>
+                  <img v-if="vertical_axis[0]=='Excited'" src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" style="display:block; margin:auto; width:40%"></img>
+                </div>
+              </div>
+
+              <div class="row" style="margin-bottom: 0px">
+                <div class="col s2 offset-s1" style="position: relative;" v-bind:style="{top: row_label_top('10')}">
+                  <div id="10_row_min_label" v-if="label_complexity != 'multiclass'" >
+                    <span style="display:block; margin: auto; text-align:right;">[[ horizontal_axis[0] ]]</span>
+                    <img v-if="horizontal_axis[0]=='Negative'" src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" style="display:block; float:right; width: 40%;"></img>
+                  </div>
+                </div>
+
+                <div id="10_distribution_table" class="col s6" style="position: relative; padding:0;">
+                  <div v-if="label_complexity=='2d-scale'" id="10_horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 1;"></div>
+                  <div v-if="label_complexity=='2d-scale'" id="10_vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 1;"></div>
+                  <table>
+                    <tbody>
+                      <tr v-for="i in row_range">
+                        <!--<td class="table_radios radios_padding"></td>-->
+                        <td v-for="j in column_range" class="table_radios distribution_input_case" style="position: relative;">
+                          <input style="position:relative; z-index: 2; color: transparent;text-shadow: 0 0 0 black;" class="10_distribution_input distribution_input distribution_input_token" v-bind:style="{height: cell_height('10_distribution_table')}" type="number" v-bind:id="'10_r'+(8-i)+'_c'+j" value="0" min="0" max="10" onkeydown="return false"/>
+                          <div v-bind:id="'10_r'+(8-i)+'_c'+j" class="10_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: cell_height('10_distribution_table')}"></div>
+                          <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                        </td>
+                      </tr>
+                      <tr v-if="label_complexity=='multiclass'">
+                        <td v-for="i in column_range" style="font-size: 8pt; text-align: center;">
+                          <div style="padding: 0px 5px;">[[ scale_label[i-1] ]]</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="col s2" style="position: relative;" v-bind:style="{top: row_label_top('10')}">
+                  <div id="10_row_max_label" v-if="label_complexity != 'multiclass'">
+                    <span style="display:block; margin: auto; text-align:left;">[[ horizontal_axis[1] ]]</span>
+                    <img v-if="horizontal_axis[1]=='Positive'" src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" style="width: 40%; display:block; float:left;"></img>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align: center;">[[ vertical_axis[1] ]]</span>
+                  <img v-if="vertical_axis[1]=='Calm'" src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" style="display:block; margin:auto; width: 40%;"></img>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row" style="display:block; margin:auto; text-align: center;">
+              <p style="margin:2px 0px;">Assigned tokens for distribution : <span  v-bind:style="{'background-color': distribution_token_num_color(10)}" style="padding: 2px; color: white;">[[ current_distribution_token[10] ]]</span>/10</p>
+              <p style="margin: 2px 0px" v-if="10!=current_distribution_token[10]">[[ 10-current_distribution_token[10] ]] more tokens need to be assigned!</p>
+              <p style="margin: 2px 0px" v-if="10==current_distribution_token[10]">All tokens are assigned!</p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div id="50tokens" v-bind:class="{hidden: randomized_order[phase-3]!=3}">
+
+          <div id="50tokens_explanation" v-bind:class="{hidden: sub_phase!=0}">
+            <p>
+            In the interface you will rightly work on, you are allowed to <b>assign 50 tokens to values or fields</b> to best describes the data.
+            Here, more tokens in a value or field would mean more plausibility that the data would be interpreted as such a value or a field.
+            Please do the task of assigning tokens to values or fields so that your thoughts about the data is best described, and proceed to the survey items.
+            </p>
+          </div>
+
+          <div id="50tokens_interface" style="margin-top:10px" v-bind:class="{hidden: sub_phase<=0, not_changeable: sub_phase>=2}">
+            <p v-if="sub_phase==1">Describe the data with the interface below so that your thoughts on the data can be best reflected.</p>
+
+            <div class="row" style="display:block; margin:auto" id="50_table_row">
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align:center">[[ vertical_axis[0] ]]</span>
+                  <img v-if="vertical_axis[0]=='Excited'" src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" style="display:block; margin:auto; width:40%"></img>
+                </div>
+              </div>
+
+              <div class="row" style="margin-bottom: 0px">
+                <div class="col s2 offset-s1" style="position: relative;" v-bind:style="{top: row_label_top('50')}">
+                  <div id="50_row_min_label" v-if="label_complexity != 'multiclass'" >
+                    <span style="display:block; margin: auto; text-align:right;">[[ horizontal_axis[0] ]]</span>
+                    <img v-if="horizontal_axis[0]=='Negative'" src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" style="display:block; float:right; width: 40%;"></img>
+                  </div>
+                </div>
+
+                <div id="50_distribution_table" class="col s6" style="position: relative; padding:0;">
+                  <div v-if="label_complexity=='2d-scale'" id="50_horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 1;"></div>
+                  <div v-if="label_complexity=='2d-scale'" id="50_vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 1;"></div>
+                  <table>
+                    <tbody>
+                      <tr v-for="i in row_range">
+                        <!--<td class="table_radios radios_padding"></td>-->
+                        <td v-for="j in column_range" class="table_radios distribution_input_case" style="position: relative;">
+                          <input style="position:relative; z-index: 2; color: transparent;text-shadow: 0 0 0 black;" class="50_distribution_input distribution_input distribution_input_token" v-bind:style="{height: cell_height('50_distribution_table')}" type="number" v-bind:id="'50_r'+(8-i)+'_c'+j" value="0" min="0" max="50" onkeydown="return false"/>
+                          <div v-bind:id="'50_r'+(8-i)+'_c'+j" class="50_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: cell_height('50_distribution_table')}"></div>
+                          <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                        </td>
+                      </tr>
+                      <tr v-if="label_complexity=='multiclass'">
+                        <td v-for="i in column_range" style="font-size: 8pt; text-align: center;">
+                          <div style="padding: 0px 5px;">[[ scale_label[i-1] ]]</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="col s2" style="position: relative;" v-bind:style="{top: row_label_top('50')}">
+                  <div id="50_row_max_label" v-if="label_complexity != 'multiclass'">
+                    <span style="display:block; margin: auto; text-align:left;">[[ horizontal_axis[1] ]]</span>
+                    <img v-if="horizontal_axis[1]=='Positive'" src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" style="width: 40%; display:block; float:left;"></img>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align: center;">[[ vertical_axis[1] ]]</span>
+                  <img v-if="vertical_axis[1]=='Calm'" src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" style="display:block; margin:auto; width: 40%;"></img>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row" style="display:block; margin:auto; text-align: center;">
+              <p style="margin:2px 0px;">Assigned tokens for distribution : <span  v-bind:style="{'background-color': distribution_token_num_color(50)}" style="padding: 2px; color: white;">[[ current_distribution_token[50] ]]</span>/50</p>
+              <p style="margin: 2px 0px" v-if="50!=current_distribution_token[50]">[[ 50-current_distribution_token[50] ]] more tokens need to be assigned!</p>
+              <p style="margin: 2px 0px" v-if="50==current_distribution_token[50]">All tokens are assigned!</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="paint" v-bind:class="{hidden: randomized_order[phase-3]!=4}">
+
+          <div id="paint_explanation" style="margin-top:10px" v-bind:class="{hidden: sub_phase!=0}">
+            <p>
+            In the interface you will rightly work on, you are allowed to <b>assign any number of tokens to values or fields</b> to best describes the data.
+            Here, more tokens in a value or field would mean more plausibility that the data would be interpreted as such a value or a field.
+            Please do the task of assigning tokens to values or fields so that your thoughts about the data is best described, and proceed to the survey items.
+            </p>
+          </div>
+
+          <div id="paint_interface" v-bind:class="{hidden: sub_phase<=0, not_changeable: sub_phase>=2}">
+            <p v-if="sub_phase==1">Describe the data with the interface below so that your thoughts on the data can be best reflected.</p>
+
+            <div class="row" style="display:block; margin:auto" id="paint_table_row">
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align:center">[[ vertical_axis[0] ]]</span>
+                  <img v-if="vertical_axis[0]=='Excited'" src="{%static 'img/valence_arousal/arousal_5.png'%}" class="guide_img" style="display:block; margin:auto; width:40%"></img>
+                </div>
+              </div>
+
+              <div class="row" style="margin-bottom: 0px">
+                <div class="col s2 offset-s1" style="position: relative;" v-bind:style="{top: row_label_top('paint')}">
+                  <div id="paint_row_min_label" v-if="label_complexity != 'multiclass'" >
+                    <span style="display:block; margin: auto; text-align:right;">[[ horizontal_axis[0] ]]</span>
+                    <img v-if="horizontal_axis[0]=='Negative'" src="{%static 'img/valence_arousal/valence_1.png'%}" class="guide_img" style="display:block; float:right; width: 40%;"></img>
+                  </div>
+                </div>
+
+                <div id="paint_distribution_table" class="col s6" style="position: relative; padding:0;">
+                  <div v-if="label_complexity=='2d-scale'" id="paint_horizontal_axis" style="width: 100%; height:2px; position: absolute; background-color: #555555; top: 50%; z-index: 1;"></div>
+                  <div v-if="label_complexity=='2d-scale'" id="paint_vertical_axis" style="height: 100%; width:2px; position: absolute; background-color: #555555; right: 50%; z-index: 1;"></div>
+                  <table>
+                    <tbody>
+                      <tr v-for="i in row_range">
+                        <!--<td class="table_radios radios_padding"></td>-->
+                        <td v-for="j in column_range" class="table_radios distribution_input_case" style="position: relative;">
+                          <input style="position:relative; z-index: 2; color: transparent;text-shadow: 0 0 0 black;" class="paint_distribution_input distribution_input distribution_input_token" v-bind:style="{height: cell_height('paint_distribution_table')}" type="number" v-bind:id="'paint_r'+(8-i)+'_c'+j" value="0" min="0" onkeydown="return false"/>
+                          <div v-bind:id="'paint_r'+(8-i)+'_c'+j" class="paint_combined" style="position:absolute; z-index:5; top:0;" v-bind:style="{height: cell_height('paint_distribution_table')}"></div>
+                          <!--<label v-bind:for="'a'+i+'_v'+j" class="radio_without_label"></label>-->
+                        </td>
+                      </tr>
+                      <tr v-if="label_complexity=='multiclass'">
+                        <td v-for="i in column_range" style="font-size: 8pt; text-align: center;">
+                          <div style="padding: 0px 5px;">[[ scale_label[i-1] ]]</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="col s2" style="position: relative;" v-bind:style="{top: row_label_top('paint')}">
+                  <div id="paint_row_max_label" v-if="label_complexity != 'multiclass'">
+                    <span style="display:block; margin: auto; text-align:left;">[[ horizontal_axis[1] ]]</span>
+                    <img v-if="horizontal_axis[1]=='Positive'" src="{%static 'img/valence_arousal/valence_5.png'%}" class="guide_img" style="width: 40%; display:block; float:left;"></img>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="label_complexity=='2d-scale'" class="row" style="display:block; margin:auto; margin-top: 5px; margin-bottom: 5px;">
+                <div class='col s2 offset-s5'>
+                  <span style="display:block; margin: auto; text-align: center;">[[ vertical_axis[1] ]]</span>
+                  <img v-if="vertical_axis[1]=='Calm'" src="{%static 'img/valence_arousal/arousal_1.png'%}" class="guide_img" style="display:block; margin:auto; width: 40%;"></img>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+    <div id="interface_survey">
+      <div v-for="i, index in randomized_order" v-bind:class="{hidden: survey_hidden(index)}">
+        <div v-for="question, index2 in survey_questions" v-bind:class="{hidden: sub_phase-2!=index2}">
+          <p> Question [[index2+1]] among [[survey_questions.length]] questions</p>
+          <p style="margin:0"><b>[[ question['question'] ]]</b></p>
+          <div style="margin: auto; margin:0; padding:0;" class="row">
+            <div class="col s2" style="display:inline; position: relative">
+              [[ question['lval'] ]]
+            </div>
+            <div style="display:inline">
+              <span class="col s1" v-for="j in column_range">
+                <input type="radio" v-bind:id="'interface'+i+'_'+index2+'_'+j" v-bind:name="'interface'+i+'_'+index2" v-bind:class="'survey'+i" class="survey_input"></input>
+                <label v-bind:for="'interface'+i+'_'+index2+'_'+j"></label>
+              </span>
+            </div>
+            <div class="col s2" style="display:inline; position: relative;">
+              [[ question['rval'] ]]
+            </div>
+          </div>
+          <div v-if="question['reason']">
+            <p style="margin:0">Why?</p>
+            <textarea v-bind:id="'interface'+i+'_'+index2+'_reason'" class="materialize-textarea survey_reason" placeholder="Write your answer here" style="padding:0" v-bind:class="'survey_reason'+i"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="outro_survey" v-bind:class="{hidden: phase!=8}">
+      <p>Outro Survey</p>
+    </div>
+    <span v-if="phase>2" style="float: right">[[phase-3]] interfaces done among 5 interfaces</span>
+    <div id="label_buttons">
+      <span class="btn" v-bind:class="{disabled: phase==0}" v-on:click="prev()">Prev</span>
+      <span class="btn" v-on:click="next()" v-bind:class="{disabled: !nextable(), hidden:phase==8}">Next</span>
+      <span class="btn" v-bind:class="{disabled: !nextable(), hidden:phase!=8}">Submit</span>
+    </div>
+  </div>
+</div>
+
+<!--tutorial modal-->
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+    <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+    </div>
+    <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+    <img v-if="tuto_img[cur_tuto]" id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+    <div v-if="tuto_text[cur_tuto]" v-html="tuto_text[cur_tuto]">
+    </div>
+  </div>
+  <div class='modal-footer'>
+    <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
+    <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+  </div>
+</div>
+
+<script src="{% static 'js/tutorial.js' %}"></script>
+<script>
+
+</script>
+{% block tutorial%}
+{% endblock %}
+
+<script>
+  var label_app = new Vue({
+    el: "#label_app",
+    delimiters: ['[[', ']]'],
+    data:{
+      phase:0,
+      sub_phase: 0,
+      randomized_order: [0,1,2,3,4],
+      scale: scale,
+      column_range: Array.apply(null, Array(scale)).map(function (_, i) {return i+1;}),
+      row_range: Array.apply(null, Array(scale)).map(function (_, i) {return i+1;}),
+      label_complexity: label_complexity,
+      scale_label: classes,
+      old_input_value: -1,
+      current_distribution_token:{
+        10: 0,
+        50: 0,
+      },
+      natural_language_instruction: natural_language_instruction,
+      subject_data_name: subject_data_name,
+      survey_questions: [
+        {'title': 'mental_demand', 'question': 'How mentally demanding was the task?', 'lval':'Very Low', 'rval':'Very High', 'reason': true},
+        {'title': 'physical_demand', 'question': 'How physically demanding was the task?', 'lval':'Very Low', 'rval':'Very High', 'reason': true},
+        {'title': 'temporal_demand', 'question': 'How hurried or rushed was the pace of the task?', 'lval':'Very Low', 'rval':'Very High', 'reason': true},
+        {'title': 'performance_demand', 'question': 'How successful were you in accomplishing what you were asked to do?', 'lval':'Perfect', 'rval':'Failure', 'reason': true},
+        {'title': 'effort', 'question': 'How hard did you have to work to accomplish your level of performance?', 'lval':'Very Low', 'rval':'Very High', 'reason': true},
+        {'title': 'frustraction', 'question': 'How insecure, discouraged, irritated, stressed, and annoyed were you?', 'lval':'Very Low', 'rval':'Very High', 'reason': true},
+        {'title': 'confidence_coverage', 'question': 'If you thought _subject_ can be interpreted in many ways, are you confident that what you expressed in the interface reflects what you thought?', 'lval':'Not at all', 'rval':'Definitely', 'reason': true},
+        {'title': 'confidence_weight', 'question': 'If you thought _subject_ can be interpreted in many ways but with different weights for each, are you confident that what you expressed in the interface reflects what you thought?', 'lval':'Not at all', 'rval':'Definitely', 'reason': true},
+      ],
+      natural_language_interpretation_done: false,
+      data_view_done: data_view_done,
+      data_explanation: data_explanation,
+      horizontal_axis: horizontal_axis,
+      vertical_axis: vertical_axis,
+    },
+    methods:{
+      cell_height: function(table_id){
+        return (Math.round($("#label_interface").width()/2/this.scale)).toString()+"px";
+      },
+      row_label_top: function(label_id){
+        return ((Math.round($("#label_interface").width()/2/this.scale)*this.row_range.length/2-28)).toString()+"px";
+      },
+      checkbox_top: function(){
+        if(this.label_complexity=="multiclass"){
+          return 0;
+        }
+        return (Math.round($("#label_interface").width()/2/this.scale)/2-9).toString()+"px";
+      },
+      radio_top: function(){
+        return (Math.round($("#label_interface").width()/2/this.scale)/2-8).toString()+"px";
+      },
+      radio_left: function(){
+        if(this.label_complexity=="multiclass"){
+          return 0;
+        }
+        return (Math.round($("#label_interface").width()/2/this.scale)/2-13).toString()+"px";
+      },
+      survey_hidden: function(index){
+        return !(index==this.phase-3 && this.sub_phase>=2)
+      },
+      next: function(){
+        if(this.phase>=3 && this.phase <=7){
+          if(this.sub_phase==this.survey_questions.length+1){
+            this.sub_phase = 0;
+            this.phase++;
+          }else{
+            this.sub_phase++;
+          }
+        }else{
+          this.phase++;
+          this.sub_phase = 0;
+        }
+      },
+      prev: function(){
+        if(this.phase>=3 && this.phase<=7){
+          if(this.sub_phase==0){
+            this.sub_phase = 1+this.survey_questions.length;
+            this.phase--;
+          }else{
+            this.sub_phase--;
+          }
+        }else{
+          this.phase--;
+          this.sub_phase = 2;
+        }
+      },
+      nextable: function(){
+        if(this.phase>2){
+          //when doing labeling
+          if(this.sub_phase==1){
+            if(this.randomized_order[this.phase-3]==0){
+              if(this.radio_input_exist()){
+                return true;
+              }else{
+                return false;
+              }
+            }else if(this.randomized_order[this.phase-3]==1){
+              if(this.checkbox_input_exist()>0){
+                return true;
+              }else{
+                return false;
+              }
+            }else if(this.randomized_order[this.phase-3]==2){
+              //10 tokens
+              if(this.current_distribution_token[10]==10){
+                return true;
+              }else{
+                return false;
+              }
+            }else if(this.randomized_order[this.phase-3]==3){
+              //50 tokens
+              if(this.current_distribution_token[50]==50){
+                return true;
+              }else{
+                return false;
+              }
+            }else if(this.randomized_order[this.phase-3]==4){
+              //if(this.)
+              if(this.calculate_paint_token()>0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+          }else if(this.sub_phase>=2){
+            var num = this.randomized_order[this.phase-3];
+            var qnum = this.sub_phase-2
+            var clicked=0
+              if($("input[name=interface"+num.toString()+"_"+qnum.toString()+"]").is(':checked')){
+                clicked++;
+              }
+            var pass=true;
+            var reason = $("#interface"+num.toString()+"_"+qnum.toString()+"_reason").val()
+            if(reason!=undefined){
+              if(reason.length<5){
+                pass=false;
+              }
+            }else{
+              pass=false
+            }
+
+            if(clicked==1 && pass){
+              return true
+            }else{
+              return false;
+            }
+
+          }else{
+            return true;
+          }
+        }else{
+          if(this.phase==1){
+            return this.natural_language_interpretation_done;
+          }else if(this.phase==0){
+            return this.data_view_done;
+          }
+          return true;
+        }
+      },
+      distribution_token_num_color(total_distribution_token){
+        if(this.current_distribution_token[total_distribution_token] == total_distribution_token){
+          return 'green'
+        }else{
+          return 'red'
+        }
+      },
+      calculate_current_distribution_token: function(total_distribution_token){
+        var addition =0
+        $("."+total_distribution_token.toString()+"_distribution_input").map(function(_, e){
+          addition += parseInt($(this).val())
+        })
+        if(addition<=total_distribution_token){
+          $("."+total_distribution_token.toString()+"_distribution_input").map(function(_, e){
+            var th_=this
+            $(this).parent().css('background-color', alphaColor($(th_).val()/total_distribution_token))
+          })
+        }
+        console.log(addition)
+        if(addition<=total_distribution_token){
+          this.current_distribution_token[total_distribution_token] = addition;
+          return true;
+        }else{
+          return false;
+        }
+
+      },
+      calculate_paint_token: function(){
+        var addition =0
+        $(".paint_distribution_input").map(function(_, e){
+          addition += parseInt($(this).val())
+        })
+        console.log(addition)
+        if(addition==0){
+          $(".paint_distribution_input").parent().css('background-color', 'transparent')
+        }else{
+          $(".paint_distribution_input").map(function(_, e){
+            var th_=this
+            $(this).parent().css('background-color', alphaColor($(th_).val()/addition))
+          })
+        }
+
+        return addition;
+
+      },
+      checkbox_input_exist: function(){
+        var addition = 0;
+        $(".c_distribution_input").map(function(_, e){
+          if($(this).prop("checked")){
+            addition++
+          }
+        })
+        return addition;
+      },
+      radio_input_exist: function(){
+        var pass=false;
+        $(".r_distribution_input").map(function(_, e){
+          if($(this).prop("checked")){
+            pass=true;
+          }
+        })
+        return pass;
+      },
+
+
+    },
+  })
+  if(label_complexity!="2d-scale"){
+    label_app.row_range = [1]
+  }
+  for(index in label_app.survey_questions){
+    label_app.survey_questions[index]['question'] = label_app.survey_questions[index]['question'].replace("_subject_", subject_data_name);
+  }
+
+  $(document).ready(function(){
+    $("#natural_language_interpretation").on('input', function(){
+      if($(this).val()==undefined){
+        label_app.natural_language_interpretation_done = false;
+      }else if($(this).val().length <5){
+        label_app.natural_language_interpretation_done = false;
+      }else{
+        label_app.natural_language_interpretation_done = true;
+      }
+    })
+
+    $(".survey_input").on('input', function(){
+      label_app.$forceUpdate();
+    })
+    $(".survey_reason").on('input', function(){
+      console.log("lol")
+      label_app.$forceUpdate();
+    })
+
+
+    $(".distribution_input_token").on('focusin', function(){
+      label_app.old_input_value = $(this).val()
+    })
+
+    $(".paint_distribution_input").on('input', function(){
+      label_app.$forceUpdate();
+    })
+
+    $(".10_distribution_input").on('input', function(){
+      if(label_app.calculate_current_distribution_token(10)){
+        label_app.old_input_value = $(this).val()
+      }else{
+        $(this).val(label_app.old_input_value);
+      }
+    })
+
+    $(".50_distribution_input").on('input', function(){
+      if(label_app.calculate_current_distribution_token(50)){
+        label_app.old_input_value = $(this).val()
+      }else{
+        $(this).val(label_app.old_input_value);
+      }
+    })
+
+    $(".c_distribution_input").on('input', function(){
+      label_app.$forceUpdate();
+      if($(this).prop('checked')){
+        $(this).parent().css("background-color", alphaColor(0.3))
+      }else{
+        $(this).parent().css("background-color", alphaColor(0))
+      }
+    })
+
+    $(".r_distribution_input").on('input', function(){
+      label_app.$forceUpdate();
+      if($(this).prop('checked')){
+        $(".r_distribution_input").parent().css("background-color", "transparent")
+        $(this).parent().css("background-color", alphaColor(0.3))
+      }
+    })
+
+  })
+</script>
+{% endblock %}
