@@ -14,11 +14,46 @@ from django.db.models import Q
 from .MTURKKEY import *
 from .emotion_distribution_management import *
 from .frame_disambiguation_filter import *
+import datetime
 # Create your views here.
 
-def study_frame_checkbox_confidence(request, data_name):
-    frame = pick_and_get_frame_disambiguation_material(199)
+def study_frame_checkbox_confidence(request, wid, aid, task_num):
+    print(wid)
+    #initialize_frame_sentences()
+    #TODO delete deprecated task items - all the tasks by none-paid workers should be deleted!
+    ft_to_deletes = Frame_Task.objects.filter(start_time__gte = F('end_time'), start_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
+    for ft_to_delete in ft_to_deletes:
+        Frame_Task.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
+
+    if request.method=="POST":
+        #TODOdone...? save items
+        #TODOdone...? update Frame Task
+        form = FrameStudyResult(request.POST)
+        frame_task = Frame_Task.objects.get(task_sub_id = int(task_num) ,wid=wid, aid=aid)
+        frame_task.end_time = datetime.datetime.now()
+        print(form)
+        print(type(form.cleaned_data['frame_confidences']))
+        frame_task.frame_confidences = form.cleaned_data['frame_confidences']
+        frame_task.no_field_reasoning = form.cleaned_data['no_field_reasoning']
+        frame_task.save()
+        if int(task_num)!=TOTAL_SUB_TASK_NUM-1:
+            return redirect('/emotion_labeling/study_frame_checkbox_confidence/'+wid+'/'+aid+'/'+str(int(task_num)+1))
+        else:
+            token = {'token': 'test_token'}
+            return render(request, "token_return.html", token)
+    if int(task_num) == 0:
+        #TODOdone...? generate 6 Frame_Task items including sanity check
+        taskable = frame_checkbox_initialize_worker(wid, aid)
+        frame = get_frame_from_database(INITIAL_TASK_SENTENCE)
+        if not taskable:
+            return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
+    else:
+        #TODOdone..? get the frame sentence number from previously generated taks
+        target_sentence = Frame_Task.objects.filter(wid=wid, aid=aid, task_sub_id=int(task_num))[0].frame_sentence.sentence_id
+        frame = get_frame_from_database(target_sentence)
+
     to_send = {
+        'task_num' :task_num,
         'frame' : frame,
     }
     return render(request, "study_frame_checkbox_confidence.html", to_send)

@@ -10,3 +10,7 @@ class DistributionResult(forms.Form):
 class TaskDeployResult(forms.Form):
     to_return = forms.CharField()
     hit_num = forms.IntegerField()
+
+class FrameStudyResult(forms.Form):
+    frame_confidences = forms.CharField()
+    no_field_reasoning = forms.CharField()

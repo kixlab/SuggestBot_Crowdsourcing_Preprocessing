@@ -1,6 +1,30 @@
 from django.db import models
 import datetime
 # Create your models here.
+
+class Frame_Sentence(models.Model):
+    sentence_id = models.IntegerField(default = -1)
+    def __str__(self):
+        return str(self.sentence_id)
+
+class Frame_Task(models.Model):
+    frame_sentence = models.ForeignKey('Frame_Sentence', on_delete=models.CASCADE)
+    end_time = models.DateTimeField(default = datetime.datetime.now)
+    start_time = models.DateTimeField(default = datetime.datetime.now)
+    frame_confidences = models.CharField(max_length=20000, default = "")
+    no_field_reasoning = models.CharField(max_length = 20000, default = "")
+    wid = models.CharField(max_length=2000, default="")
+    aid = models.CharField(max_length=2000, default="")
+    task_sub_id = models.IntegerField(default = "-1")
+    def __str__(self):
+        return self.wid + str(self.frame_sentence.sentence_id)
+
+class Frame(models.Model):
+    frame_name = models.CharField(max_length=200, default="")
+    frame_definition = models.CharField(max_length=20000, default="")
+    def __str__(self):
+        return self.frame_name
+
 class Video_Before_Processing(models.Model):
     video_title = models.CharField(max_length = 200, default = "")
     video_url = models.CharField(max_length = 2000, default = "")

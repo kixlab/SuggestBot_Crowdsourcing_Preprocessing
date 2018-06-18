@@ -3,7 +3,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^study_frame_checkbox_confidence/(?P<data_name>[\w\-]+)/$', views.study_frame_checkbox_confidence),
+    url(r'^study_frame_checkbox_confidence/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.study_frame_checkbox_confidence),
     url(r'^interface_study_arousal_valence/(?P<data_name>[\w\-]+)/$', views.interface_study_arousal_valence),
     url(r'^interface_study_emotion_word/(?P<data_name>[\w\-]+)/$', views.interface_study_emotion_word),
     url(r'^interface_study_frame_disambiguation/(?P<data_name>[\w\-]+)/$', views.interface_study_frame_disambiguation),
