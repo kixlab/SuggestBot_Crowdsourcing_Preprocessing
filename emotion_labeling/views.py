@@ -20,7 +20,7 @@ import datetime
 #def study_frame(request, wid, aid):
 
 def study_frame_prev(request, wid, aid):
-    #initialize_frame_sentences()
+   # initialize_frame_sentences()
     #TODO delete deprecated task items - all the tasks by none-paid workers should be deleted!
     for frame_task_model in [Frame_Task_Radio, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence]:
         ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))

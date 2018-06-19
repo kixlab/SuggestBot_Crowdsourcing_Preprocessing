@@ -12,15 +12,22 @@ import xmltodict
 from .models import *
 from django.db.models import Count, Min
 
-INITIAL_TASK_SENTENCE = 146
+INITIAL_TASK_SENTENCE = 7
 TOTAL_SUB_TASK_NUM = 6
-TARGET_TASK_NUM = 2
-TASK_TIME_LIMIT = 1
+TARGET_TASK_NUM = 20
+TASK_TIME_LIMIT = 60
 
 SQS_df = pd.read_csv('emotion_labeling/static/frame_disambiguation/aggregated_SQS.csv')
 exclude_list =[1, 4, 12, 14, 35, 38, 44, 47, 55, 80,
     100, 121, 126, 164, 211, 234, 239, 242, 244, 245, 270,
     293, 323, 341, 347, 361, 372, 383, 400]
+
+frame_test_list = [7,
+    13,16,21,22,28,34,49,50,67,76,87,89,
+    91,98,103,122,124,125,127,131,136,137,165,179,
+    199,202,216,238,247,254,260,276,282,291,297,301,
+    303,304,305,310,312,315,316,317,322,327,329,331,
+    334,336,342,353,360,368,384,387,390,395,405,408]
 
 #below for filling up backend with frames
 def pick_and_save_frame():
@@ -47,12 +54,12 @@ def pick_and_save_frame():
 
 def initialize_frame_sentences():
     Frame_Sentence.objects.all().delete()
-    for index, row in enumerate(SQS_df.iterrows()):
+    for index in frame_test_list:
         if index not in exclude_list:
             fs = Frame_Sentence(sentence_id = index)
             fs.save()
-            if Frame_Sentence.objects.all().count() == 200:
-                break
+            #if Frame_Sentence.objects.all().count() == 16:
+            #    break
 
 #to generate frame tasks when a worker comes in initially
 def frame_initialize_worker(wid, aid, frame_task):
