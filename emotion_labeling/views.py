@@ -21,7 +21,7 @@ import datetime
 
 def study_frame_prev(request, wid, aid):
    # initialize_frame_sentences()
-    #TODO delete deprecated task items - all the tasks by none-paid workers should be deleted!
+    #TODOdone...? delete deprecated task items - all the tasks by none-paid workers should be deleted!
     for frame_task_model in [Frame_Task_Radio, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence]:
         ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
         for ft_to_delete in ft_to_deletes:
@@ -99,7 +99,7 @@ def nasa_tlx(request, condition, wid, aid, task_num):
             frame_task_model.objects.filter(wid=wid, aid=aid).update(token = token_string)
             token = {'token':token_string}
             return render(request, "token_return.html", token)
-    return render(request, "nasa_tlx.html", {})
+    return render(request, "nasa_tlx.html", {'task_num': task_num})
 
 def interface_study_arousal_valence(request, data_name):
     study_video = Study_Video.objects.get(video_title = data_name)

@@ -4,7 +4,9 @@
 {% load staticfiles %}
 
 {% block content %}
-
+<script>
+var task_num = {{task_num}}
+</script>
 <div id= "study_app" style="width: 70%; display: block; margin: auto;">
   <h3>NASA Task Load Index</h3>
   <p>Hart and Staveland's NASA Task Load Index(TLX) method assesses work load on five 7-point scales. Increments of high, medium and low estimates for each point result in 21 gradations on the scales.
@@ -36,7 +38,7 @@
     <form method="POST">
       {% csrf_token %}
       <input type="text" style="display: none" name="survey_result" id="survey_result"></input>
-      <input type='submit' class="btn" :disabled="!submittable()" v-on:click="return_items()"></input>
+      <input type='submit' class="btn" :disabled="!submittable()" v-on:click="return_items()" v-bind:value="submit_message()"></input>
     </form>
   </div>
 </div>
@@ -101,7 +103,14 @@
           dict[key] = parseInt($("input[name='"+key+"']:checked").attr('val'))
         }
         $("#survey_result").val(JSON.stringify(dict))
-      }
+      },
+      submit_message: function(){
+        if(task_num !=5){
+          return "To next subtask"
+        }else{
+          return "Submit"
+        }
+      },
     }
   })
 
