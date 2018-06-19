@@ -8,14 +8,35 @@ class Frame_Sentence(models.Model):
         return str(self.sentence_id)
 
 class Frame_Task(models.Model):
-    frame_sentence = models.ForeignKey('Frame_Sentence', on_delete=models.CASCADE)
+    frame_sentence = models.ForeignKey('Frame_Sentence', default=None, on_delete=models.CASCADE)
     end_time = models.DateTimeField(default = datetime.datetime.now)
     start_time = models.DateTimeField(default = datetime.datetime.now)
+    gen_time = models.DateTimeField(default = datetime.datetime.now)
     frame_confidences = models.CharField(max_length=20000, default = "")
     no_field_reasoning = models.CharField(max_length = 20000, default = "")
     wid = models.CharField(max_length=2000, default="")
     aid = models.CharField(max_length=2000, default="")
     task_sub_id = models.IntegerField(default = "-1")
+    token = models.CharField(max_length=200, default="")
+    survey_result = models.CharField(max_length = 20000, default="")
+    class Meta:
+        abstract = True
+
+class Frame_Task_Radio(Frame_Task):
+    def model_name():
+        return 'frame_task_radio'
+    def __str__(self):
+        return self.wid + str(self.frame_sentence.sentence_id)
+
+class Frame_Task_Checkbox(Frame_Task):
+    def model_name():
+        return 'frame_task_checkbox'
+    def __str__(self):
+        return self.wid + str(self.frame_sentence.sentence_id)
+
+class Frame_Task_Checkbox_Confidence(Frame_Task):
+    def model_name():
+        return 'frame_task_checkbox_confidence'
     def __str__(self):
         return self.wid + str(self.frame_sentence.sentence_id)
 

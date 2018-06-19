@@ -12,7 +12,7 @@ import xmltodict
 from .models import *
 from django.db.models import Count, Min
 
-INITIAL_TASK_SENTENCE = 2
+INITIAL_TASK_SENTENCE = 146
 TOTAL_SUB_TASK_NUM = 6
 TARGET_TASK_NUM = 2
 TASK_TIME_LIMIT = 1
@@ -51,27 +51,27 @@ def initialize_frame_sentences():
         if index not in exclude_list:
             fs = Frame_Sentence(sentence_id = index)
             fs.save()
-            if Frame_Sentence.objects.all().count() == 11:
+            if Frame_Sentence.objects.all().count() == 200:
                 break
 
 #to generate frame tasks when a worker comes in initially
-def frame_checkbox_initialize_worker(wid, aid):
+def frame_initialize_worker(wid, aid, frame_task):
     init_sentence = Frame_Sentence.objects.get(sentence_id = INITIAL_TASK_SENTENCE)
-    ft = Frame_Task(frame_sentence = init_sentence, wid=wid, aid=aid, task_sub_id=0)
+    ft = frame_task(frame_sentence = init_sentence, wid=wid, aid=aid, task_sub_id=0)
     ft.save()
     for i in range(1, TOTAL_SUB_TASK_NUM):
-        excludable = Frame_Task.objects.filter(wid=wid)
-        taskable_sentence = Frame_Sentence.objects.exclude(frame_task__in = excludable)
-        taskable_sentence = taskable_sentence.annotate(num_task=Count('frame_task')).filter(num_task__lt=TARGET_TASK_NUM)
+        excludable = frame_task.objects.filter(wid=wid)
+        #taskable_sentence = Frame_Sentence.objects.exclude(frame_task__in = excludable)
+        taskable_sentence = Frame_Sentence.objects.annotate(num_task=Count(frame_task.model_name())).filter(num_task__lt=TARGET_TASK_NUM)
         min_ = taskable_sentence.aggregate(min_num_task=Min('num_task'))
         min_num_task = min_['min_num_task']
         print(min_)
         taskable_sentence = taskable_sentence.filter(num_task = min_num_task)
         if taskable_sentence.count()==0:
-            Frame_Task.objects.filter(wid=wid, aid=aid).delete()
+            frame_task.objects.filter(wid=wid, aid=aid).delete()
             return False
         sentence = taskable_sentence[random.randint(0, taskable_sentence.count()-1)]
-        ft = Frame_Task(frame_sentence = sentence, wid=wid, aid=aid, task_sub_id=i)
+        ft = frame_task(frame_sentence = sentence, wid=wid, aid=aid, task_sub_id=i)
         ft.save()
     return True
 

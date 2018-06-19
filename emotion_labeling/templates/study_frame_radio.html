@@ -55,7 +55,7 @@ t{
         <label for="textarea1">Write the Reason Here</label>
       </li>
       <li class="collection-item" v-for="definition, key in definitions" v-bind:class="{hidden: !field_being_shown(key)}">
-        <input type="checkbox" name="frame" v-bind:id="key+'_checkbox'" v-on:click="input_change(key)" :disabled="phase==1"></input>
+        <input type="radio" name="frame" v-bind:id="key+'_checkbox'" v-on:click="input_change(key)" :disabled="phase==1"></input>
         <label style="color: black" v-bind:for="key+'_checkbox'" v-html="'<b>'+[[key]]+' : </b>'+[[definition]]">
         </label>
 
@@ -80,13 +80,18 @@ t{
     </ul>
   </div>
   <div style="float: right">
-    <span v-if="phase==0" class="btn" v-on:click="phase++">Next</span>
-    <span v-if="phase==1" class="btn" v-on:click="phase--">Prev</span>
     <form style="display:inline" method="POST">
       {% csrf_token %}
       <input style="display:none" name="frame_confidences" id="frame_confidences" type="text"></input>
       <input style="display:none" name="no_field_reasoning" id="no_field_reasoning" type="text"></input>
-      <input type="submit" name="submit" id="submit" v-if="phase==1" class="btn" v-on:click="return_items()" :disabled="!submittable()" v-bind:value="submit_message()"></input>
+      <span v-if="phase==0">
+        <span v-if="!checked_exist()" class="btn" v-on:click="phase++">Next</span>
+        <input v-if="checked_exist()" type="submit" name="submit" id="submit" class="btn" v-on:click="return_items()" :disabled="!checked_exist()" v-bind:value="submit_message()"></input>
+      </span>
+      <span v-if="phase==1">
+        <span v-if="phase==1" class="btn" v-on:click="phase--">Prev</span>
+        <input type="submit" name="submit" id="submit" class="btn" v-on:click="return_items()" :disabled="!submittable()" v-bind:value="submit_message()"></input>
+      </span>
     </form>
   </div>
 </div>
@@ -193,7 +198,7 @@ t{
           dict = {}
           for(key in this.checked){
             if(this.checked[key]){
-              dict[key] = parseInt($("input[name='"+key+"_confidence']:checked").attr('val'))
+              dict[key] = 1
             }else{
               dict[key] = 0
             }
@@ -227,11 +232,7 @@ t{
     tuto_vue.tuto_text=[
       "<p>The task you are going to do is 'frame disambiguation', which is selecting frame, or high level concepts for a target word in a target sentence.</p>"+
       "<p>A frame, or a high level concept should represent the meaning of a word.</p>"+
-      "<p style='margin-bottom: 0'>Remember: There can be <b>multiple frames</b> that can be applied to a single word.</p>"+
-      "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox.png'/>"+
-      "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>If you selected a, or some fields, we are also going to ask you how much you are confident with your selections of frames.</p>"+
-      "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox_confidence.png'/>"+
+      "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_radio.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
       "<p>If you selected no field, we are also going to ask the reason why you thought so. The reason should make sense.</p>"+
       "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_no_field.png'/>"+
@@ -254,7 +255,7 @@ t{
     tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
   }
 
-  /*for (idx in study_app.definitions){
+/*  for (idx in study_app.definitions){
     var text_input = "<p>Below is the frame that will be given as an option.</p><h5><b>"+idx+"</b></h5>"
     var definition = study_app.definitions[idx]
     text_input = text_input + "<p>" + definition.replace(/\<ex\>(.*?)\<\/ex\>/g, "") + "</p>"
@@ -265,7 +266,6 @@ t{
     text_input = text_input + "</ul><p>Hit 'NEXT' button to proceed.</p>"
     tuto_vue.tuto_text.push(text_input)
   }*/
-
   tuto_vue.max_tuto = tuto_vue.tuto_text.length-1
   tuto_vue.$forceUpdate()
 </script>

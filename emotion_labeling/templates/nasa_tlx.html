@@ -1,0 +1,112 @@
+
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+<div id= "study_app" style="width: 70%; display: block; margin: auto;">
+  <h3>NASA Task Load Index</h3>
+  <p>Hart and Staveland's NASA Task Load Index(TLX) method assesses work load on five 7-point scales. Increments of high, medium and low estimates for each point result in 21 gradations on the scales.
+  Please do this survey based on the subtask you rightly finished.</p>
+  <div style="display: block" v-for='question, key in questions'>
+    <hr>
+    <h5>[[question['name'] ]] <span style="max-width: 70%; text-align: right; display: inline; float: right; font-size: 14pt;">[[question['question'] ]]</span></h5>
+    <div style="display: block; width: 90%; margin: auto;">
+      <table>
+        <tbody>
+        <tr>
+          <td v-for="i in 21" style="padding: 0 5px;">
+            <input v-bind:name="key" type="radio" v-bind:id="key+'_'+i" v-bind:val="i"></input>
+            <label v-bind:for="key+'_'+i" style="padding: 0"></label>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <!--<div style="position: relative; top:-35px; height: 2px; width: 100%; background-color: black"></div>-->
+      <div style="display: block">
+        <span style="display: inline">[[question['low_end'] ]]</span>
+        <span style="float: right; display: inline">[[question['high_end'] ]]</span>
+      </div>
+    </div>
+
+  </div>
+  <hr>
+  <div style="float: right; margin-bottom : 10px;">
+    <form method="POST">
+      {% csrf_token %}
+      <input type="text" style="display: none" name="survey_result" id="survey_result"></input>
+      <input type='submit' class="btn" :disabled="!submittable()" v-on:click="return_items()"></input>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  var study_app = new Vue({
+    el: '#study_app',
+    delimiters: ['[[', ']]'],
+    data: {
+      questions: {
+        'mental_demand': {
+          'name' : 'Mental Demand',
+          'question' : "How mentally demanding was the task?",
+          'low_end' : 'Very Low',
+          'high_end' : 'Very High'
+        },
+        'physical_demand': {
+          'name' : 'Physical Demand',
+          'question' : "How physically demanding was the task?",
+          'low_end' : 'Very Low',
+          'high_end' : 'Very High'
+        },
+        'temporal_demand': {
+          'name' : 'Temporal Demand',
+          'question' : "How hurried or rushed was the pace of the task?",
+          'low_end' : 'Very Low',
+          'high_end' : 'Very High'
+        },
+        'performance': {
+          'name' : 'Performance',
+          'question' : "How successful were you in accomplishing what you were asked to do?",
+          'low_end' : 'Perfect',
+          'high_end' : 'Failure'
+        },
+        'effort': {
+          'name' : 'Effort',
+          'question' : "How hard did you have to work to accomplish your level of performance?",
+          'low_end' : 'Very Low',
+          'high_end' : 'Very High'
+        },
+        'frustration': {
+          'name' : 'Frustration',
+          'question' : "How insecure, discouraged, irritated, stressed, and annoyed were you?",
+          'low_end' : 'Very Low',
+          'high_end' : 'Very High'
+        }
+      },
+    },
+    methods: {
+      submittable: function(){
+        for(key in this.questions){
+          if(!$("input[name='"+key+"']").is(':checked')){
+            return false;
+          }
+        }
+        return true;
+      },
+      return_items: function(){
+        dict = {}
+        for(key in this.questions){
+          dict[key] = parseInt($("input[name='"+key+"']:checked").attr('val'))
+        }
+        $("#survey_result").val(JSON.stringify(dict))
+      }
+    }
+  })
+
+  $("input").on('input' ,function(){
+    study_app.$forceUpdate()
+  })
+</script>
+{% endblock %}

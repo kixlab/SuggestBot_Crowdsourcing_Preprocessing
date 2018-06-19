@@ -3,7 +3,9 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^study_frame_checkbox_confidence/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.study_frame_checkbox_confidence),
+    url(r'^study_frame_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_frame_prev),
+    url(r'^study_frame/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.study_frame),
+    url(r'^nasa_tlx/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.nasa_tlx),
     url(r'^interface_study_arousal_valence/(?P<data_name>[\w\-]+)/$', views.interface_study_arousal_valence),
     url(r'^interface_study_emotion_word/(?P<data_name>[\w\-]+)/$', views.interface_study_emotion_word),
     url(r'^interface_study_frame_disambiguation/(?P<data_name>[\w\-]+)/$', views.interface_study_frame_disambiguation),

@@ -14,3 +14,6 @@ class TaskDeployResult(forms.Form):
 class FrameStudyResult(forms.Form):
     frame_confidences = forms.CharField()
     no_field_reasoning = forms.CharField()
+
+class SurveyResult(forms.Form):
+    survey_result = forms.CharField()

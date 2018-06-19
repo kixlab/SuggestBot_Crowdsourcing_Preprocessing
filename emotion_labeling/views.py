@@ -17,46 +17,89 @@ from .frame_disambiguation_filter import *
 import datetime
 # Create your views here.
 
-def study_frame_checkbox_confidence(request, wid, aid, task_num):
-    print(wid)
+#def study_frame(request, wid, aid):
+
+def study_frame_prev(request, wid, aid):
     #initialize_frame_sentences()
     #TODO delete deprecated task items - all the tasks by none-paid workers should be deleted!
-    ft_to_deletes = Frame_Task.objects.filter(start_time__gte = F('end_time'), start_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
-    for ft_to_delete in ft_to_deletes:
-        Frame_Task.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
+    for frame_task_model in [Frame_Task_Radio, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence]:
+        ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
+        for ft_to_delete in ft_to_deletes:
+            frame_task_model.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
+    count_dic = {}
+    count_dic['Radio'] = Frame_Task_Radio.objects.all().count()
+    count_dic['Checkbox'] = Frame_Task_Checkbox.objects.all().count()
+    count_dic['Checkbox_Confidence']=Frame_Task_Checkbox_Confidence.objects.all().count()
+    min_key = min(count_dic, key=count_dic.get)
+    return redirect('/emotion_labeling/study_frame/'+min_key+'/'+wid+'/'+aid+'/0')
 
+
+def study_frame(request, condition, wid, aid, task_num):
+    print(wid)
+    if condition == "Radio":
+        frame_task_model = Frame_Task_Radio
+    elif condition == "Checkbox":
+        frame_task_model = Frame_Task_Checkbox
+    elif condition == "Checkbox_Confidence":
+        frame_task_model = Frame_Task_Checkbox_Confidence
+    #initialize_frame_sentences()
     if request.method=="POST":
         #TODOdone...? save items
         #TODOdone...? update Frame Task
         form = FrameStudyResult(request.POST)
-        frame_task = Frame_Task.objects.get(task_sub_id = int(task_num) ,wid=wid, aid=aid)
+        frame_task = frame_task_model.objects.get(task_sub_id = int(task_num) ,wid=wid, aid=aid)
         frame_task.end_time = datetime.datetime.now()
         print(form)
-        print(type(form.cleaned_data['frame_confidences']))
         frame_task.frame_confidences = form.cleaned_data['frame_confidences']
         frame_task.no_field_reasoning = form.cleaned_data['no_field_reasoning']
         frame_task.save()
-        if int(task_num)!=TOTAL_SUB_TASK_NUM-1:
-            return redirect('/emotion_labeling/study_frame_checkbox_confidence/'+wid+'/'+aid+'/'+str(int(task_num)+1))
-        else:
-            token = {'token': 'test_token'}
-            return render(request, "token_return.html", token)
+        return redirect("/emotion_labeling/nasa_tlx/"+condition+'/'+wid+'/'+aid+'/'+str(int(task_num)))
+
     if int(task_num) == 0:
         #TODOdone...? generate 6 Frame_Task items including sanity check
-        taskable = frame_checkbox_initialize_worker(wid, aid)
+        taskable = frame_initialize_worker(wid, aid, frame_task_model)
         frame = get_frame_from_database(INITIAL_TASK_SENTENCE)
         if not taskable:
             return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
     else:
         #TODOdone..? get the frame sentence number from previously generated taks
-        target_sentence = Frame_Task.objects.filter(wid=wid, aid=aid, task_sub_id=int(task_num))[0].frame_sentence.sentence_id
+        target_task = frame_task_model.objects.filter(wid=wid, aid=aid, task_sub_id=int(task_num))[0]
+        target_task.start_time = datetime.datetime.now()
+        target_task.save()
+        target_sentence = target_task.frame_sentence.sentence_id
         frame = get_frame_from_database(target_sentence)
-
+    #frame = get_frame_from_database()
     to_send = {
         'task_num' :task_num,
         'frame' : frame,
     }
-    return render(request, "study_frame_checkbox_confidence.html", to_send)
+    return render(request, "study_frame_"+condition.lower()+".html", to_send)
+
+def nasa_tlx(request, condition, wid, aid, task_num):
+    if request.method=="POST":
+        if condition == "Radio":
+            frame_task_model = Frame_Task_Radio
+        elif condition == "Checkbox":
+            frame_task_model = Frame_Task_Checkbox
+        elif condition == "Checkbox_Confidence":
+            frame_task_model = Frame_Task_Checkbox_Confidence
+        #TODO save nasa tlx result
+        form = SurveyResult(request.POST)
+        print(form)
+        frame_task = frame_task_model.objects.filter(wid=wid, aid=aid, task_sub_id = task_num)[0]
+        frame_task.survey_result = form.cleaned_data['survey_result']
+        frame_task.save()
+
+        if int(task_num)!=TOTAL_SUB_TASK_NUM-1:
+            return redirect('/emotion_labeling/study_frame/'+condition+'/'+wid+'/'+aid+'/'+str(int(task_num)+1))
+        else:
+            #TODOdone...? save token infos
+            token_string = str(uuid.uuid4().hex.upper()[0:6])
+
+            frame_task_model.objects.filter(wid=wid, aid=aid).update(token = token_string)
+            token = {'token':token_string}
+            return render(request, "token_return.html", token)
+    return render(request, "nasa_tlx.html", {})
 
 def interface_study_arousal_valence(request, data_name):
     study_video = Study_Video.objects.get(video_title = data_name)
