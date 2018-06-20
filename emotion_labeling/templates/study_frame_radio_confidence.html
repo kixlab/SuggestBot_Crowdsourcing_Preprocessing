@@ -44,7 +44,7 @@ t{
   <div>
     <ul class="collection">
       <li class="collection-item">
-        <b v-if="phase==0" style="font-size:18pt">What are the best meaning of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
+        <b v-if="phase==0" style="font-size:18pt">What is the best meaning of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
         <b v-if="phase==1">
           <span v-if="checked_exist()">Rate how much you are confident for the frame.</span>
           <span v-if="!checked_exist()">Write why you think no frame can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
@@ -55,8 +55,8 @@ t{
         <label for="textarea1">Write the Reason Here</label>
       </li>
       <li class="collection-item" v-for="definition, key in definitions" v-bind:class="{hidden: !field_being_shown(key)}">
-        <input type="radio" name="frame" v-bind:id="key+'_checkbox'" v-on:click="input_change(key)" :disabled="phase==1"></input>
-        <label style="color: black" v-bind:for="key+'_checkbox'" v-html="'<b>'+[[key]]+' : </b>'+[[definition]]">
+        <input type="radio" name="frame" v-bind:id="key+'_radio'" v-on:click="input_change(key)" :disabled="phase==1"></input>
+        <label style="color: black" v-bind:for="key+'_radio'" v-html="'<b>'+[[key]]+' : </b>'+[[definition]]">
         </label>
 
           <div class="btn ex_btn" v-if="!examples_shown[key]" v-on:click="examples_shown[key]=true">Click to see examples of <b>[[key]]</b></div>
@@ -83,18 +83,13 @@ t{
     <a v-if="task_num==0" class='btn modal-trigger' style="background-color:#888888" href="#tutorial">Tutorial</a>
   </div>
   <div style="float: right">
+    <span v-if="phase==0" class="btn" v-on:click="phase++">Next</span>
+    <span v-if="phase==1" class="btn" v-on:click="phase--">Prev</span>
     <form style="display:inline" method="POST">
       {% csrf_token %}
       <input style="display:none" name="frame_confidences" id="frame_confidences" type="text"></input>
       <input style="display:none" name="no_field_reasoning" id="no_field_reasoning" type="text"></input>
-      <span v-if="phase==0">
-        <span v-if="!checked_exist()" class="btn" v-on:click="phase++">Next</span>
-        <input v-if="checked_exist()" type="submit" name="submit" id="submit" class="btn" v-on:click="return_items()" :disabled="!checked_exist()" v-bind:value="submit_message()"></input>
-      </span>
-      <span v-if="phase==1">
-        <span v-if="phase==1" class="btn" v-on:click="phase--">Prev</span>
-        <input type="submit" name="submit" id="submit" class="btn" v-on:click="return_items()" :disabled="!submittable()" v-bind:value="submit_message()"></input>
-      </span>
+      <input type="submit" name="submit" id="submit" v-if="phase==1" class="btn" v-on:click="return_items()" :disabled="!submittable()" v-bind:value="submit_message()"></input>
     </form>
   </div>
 </div>
@@ -148,14 +143,16 @@ t{
         if(this.phase==0){
           return true
         }else{
-          return checked[key]
+          return this.checked[key]
         }
       },
       input_change: function(key){
-        if($("#"+key+"_checkbox").prop('checked')){
-          checked[key] = true
-        }else{
-          checked[key] = false
+        for(k in this.checked){
+          if(k==key){
+            this.checked[key] = true
+          }else{
+            this.checked[k] = false
+          }
         }
 
       },
@@ -201,7 +198,7 @@ t{
           dict = {}
           for(key in this.checked){
             if(this.checked[key]){
-              dict[key] = 1
+              dict[key] = parseInt($("input[name='"+key+"_confidence']:checked").attr('val'))
             }else{
               dict[key] = 0
             }
@@ -233,6 +230,9 @@ t{
       "<p>A ‘frame’ is a high level concept that represents the meaning of a word.</p>"+
       "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_radio.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
+      "<p>After you are finished selecting the best frame, you should answer how much confident you are with your selections.</p>"+
+      "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox_confidence.png'/>"+
+      "<p>Hit 'NEXT' button to proceed.</p>",
       "<p>If you select ‘No Frame’, you should provide a valid reason why you thought so.</p>"+
       "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_no_field.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
@@ -253,7 +253,7 @@ t{
     tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
   }
 
-/*  for (idx in study_app.definitions){
+  /*for (idx in study_app.definitions){
     var text_input = "<p>Below is the frame that will be given as an option.</p><h5><b>"+idx+"</b></h5>"
     var definition = study_app.definitions[idx]
     text_input = text_input + "<p>" + definition.replace(/\<ex\>(.*?)\<\/ex\>/g, "") + "</p>"
@@ -264,6 +264,7 @@ t{
     text_input = text_input + "</ul><p>Hit 'NEXT' button to proceed.</p>"
     tuto_vue.tuto_text.push(text_input)
   }*/
+
   tuto_vue.max_tuto = tuto_vue.tuto_text.length-1
   tuto_vue.$forceUpdate()
 </script>

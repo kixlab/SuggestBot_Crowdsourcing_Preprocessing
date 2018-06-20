@@ -28,6 +28,12 @@ class Frame_Task_Radio(Frame_Task):
     def __str__(self):
         return self.wid + str(self.frame_sentence.sentence_id)
 
+class Frame_Task_Radio_Confidence(Frame_Task):
+    def model_name():
+        return 'frame_task_radio_confidence'
+    def __str__(self):
+        return self.wid + str(self.frame_sentence.sentence_id)
+
 class Frame_Task_Checkbox(Frame_Task):
     def model_name():
         return 'frame_task_checkbox'

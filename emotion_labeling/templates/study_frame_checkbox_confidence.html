@@ -46,8 +46,8 @@ t{
       <li class="collection-item">
         <b v-if="phase==0" style="font-size:18pt">What are the possible meaning(s) of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
         <b v-if="phase==1">
-          <span v-if="checked_exist()">Rate how much you are confident for each fields.</span>
-          <span v-if="!checked_exist()">Write why you think no field can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
+          <span v-if="checked_exist()">Rate how much you are confident for each frame.</span>
+          <span v-if="!checked_exist()">Write why you think no frame can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
         </b>
       </li>
       <li v-bind:class="{hidden:!reason_text_area_show()}" class="collection-item">
@@ -62,7 +62,7 @@ t{
           <div class="btn ex_btn" v-if="!examples_shown[key]" v-on:click="examples_shown[key]=true">Click to see examples of <b>[[key]]</b></div>
           <div class="btn ex_btn" v-if="examples_shown[key]" v-on:click="examples_shown[key]=false">Click to hide examples of <b>[[key]]</b></div>
           <span v-bind:class="{hidden: phase==0, confidence_block: phase==1}">
-            <span>Please specify how much you are confident with this field :</span>
+            <span>Please specify how much you are confident with this frame :</span>
             <span><b>Not Confident</b></span>
             <span v-for="i in 7">
               <input class="confidence" type="radio" v-bind:name="key+'_confidence'" v-bind:id="key+'_confidence'+i" v-bind:val="i"></input>
@@ -232,14 +232,14 @@ t{
       "<p>After you are finished selecting the possible frame(s), you should answer how much confident you are with your selections.</p>"+
       "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox_confidence.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>If you selected no field, we are also going to ask the reason why you thought so. The reason should make sense.</p>"+
+      "<p>If you select ‘No Frame’, you should provide a valid reason why you thought so.</p>"+
       "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_no_field.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>You are going to do the explained subtask for 6 times for this HIT.</p>"+
-      "<p>For each word, applicable frame options will be different. Therefore, keep in mind to take a look at definitions before doing the subtask.</p>"+
+      "<p>You are going to do the explained task for 6 sentences for this HIT.</p>"+
+      "<p>For each new sentence, please take a look at the provided definition of each frame before you do continue.</p>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>After each subtask, you will be asked to do a survey on the task load.</p>"+
-      "<p>Please keep in mind that each survey is for the task that you rightly finished.</p>"+
+      "<p>After each sentence, you will be asked to do a survey on the task load.</p>"+
+      "<p>Please keep in mind that each survey should only reflect the task that you just finished.</p>"+
       "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_nasatlx.png'/>"+
       "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
     ]

@@ -22,15 +22,28 @@ import datetime
 def study_frame_prev(request, wid, aid):
    # initialize_frame_sentences()
     #TODOdone...? delete deprecated task items - all the tasks by none-paid workers should be deleted!
-    for frame_task_model in [Frame_Task_Radio, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence]:
+    for frame_task_model in [Frame_Task_Radio,  Frame_Task_Radio_Confidence, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence,]:
         ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
         for ft_to_delete in ft_to_deletes:
             frame_task_model.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
-    count_dic = {}
-    count_dic['Radio'] = Frame_Task_Radio.objects.all().count()
-    count_dic['Checkbox'] = Frame_Task_Checkbox.objects.all().count()
-    count_dic['Checkbox_Confidence']=Frame_Task_Checkbox_Confidence.objects.all().count()
-    min_key = min(count_dic, key=count_dic.get)
+    min_key = None
+    for frame_task_model in [Frame_Task_Radio,  Frame_Task_Radio_Confidence, Frame_Task_Checkbox, Frame_Task_Checkbox_Confidence,]:
+        if frame_task_model.objects.filter(wid=wid).count() > 0:
+            if frame_task_model == Frame_Task_Radio:
+                min_key = 'Radio'
+            elif frame_task_model == Frame_Task_Radio_Confidence:
+                min_key = 'Radio_Confidence'
+            elif frame_task_model == Frame_Task_Checkbox:
+                min_key = 'Checkbox'
+            elif frame_task_model == Frame_Task_Checkbox_Confidence:
+                min_key = 'Checkbox_Confidence'
+    if min_key == None:
+        count_dic = {}
+        count_dic['Radio'] = Frame_Task_Radio.objects.all().count()
+        count_dic['Radio_Confidence'] = Frame_Task_Radio_Confidence.objects.all().count()
+        count_dic['Checkbox'] = Frame_Task_Checkbox.objects.all().count()
+        count_dic['Checkbox_Confidence']=Frame_Task_Checkbox_Confidence.objects.all().count()
+        min_key = min(count_dic, key=count_dic.get)
     return redirect('/emotion_labeling/study_frame/'+min_key+'/'+wid+'/'+aid+'/0')
 
 
@@ -38,10 +51,13 @@ def study_frame(request, condition, wid, aid, task_num):
     print(wid)
     if condition == "Radio":
         frame_task_model = Frame_Task_Radio
+    elif condition == "Radio_Confidence":
+        frame_task_model = Frame_Task_Radio_Confidence
     elif condition == "Checkbox":
         frame_task_model = Frame_Task_Checkbox
     elif condition == "Checkbox_Confidence":
         frame_task_model = Frame_Task_Checkbox_Confidence
+
     #initialize_frame_sentences()
     if request.method=="POST":
         #TODOdone...? save items
@@ -79,6 +95,8 @@ def nasa_tlx(request, condition, wid, aid, task_num):
     if request.method=="POST":
         if condition == "Radio":
             frame_task_model = Frame_Task_Radio
+        elif condition == "Radio_Confidence":
+            frame_task_model = Frame_Task_Radio_Confidence
         elif condition == "Checkbox":
             frame_task_model = Frame_Task_Checkbox
         elif condition == "Checkbox_Confidence":
