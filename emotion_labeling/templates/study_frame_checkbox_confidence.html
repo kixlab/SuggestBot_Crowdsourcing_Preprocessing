@@ -61,6 +61,10 @@ t{
 
           <div class="btn ex_btn" v-if="!examples_shown[key]" v-on:click="examples_shown[key]=true">Click to see examples of <b>[[key]]</b></div>
           <div class="btn ex_btn" v-if="examples_shown[key]" v-on:click="examples_shown[key]=false">Click to hide examples of <b>[[key]]</b></div>
+          <ul class="collection" v-if="examples_shown[key]">
+            <!--<li class="collection-item" v-html="'<b>definition :</b> '+[[definition]]" style="background-color: #eeeeee"></li>-->
+            <li class="collection-item" v-for="example in examples[key]" v-html="example"></li>
+          </ul>
           <span v-bind:class="{hidden: phase==0, confidence_block: phase==1}">
             <span>Please specify how much you are confident with this frame :</span>
             <span><b>Not Confident</b></span>
@@ -70,10 +74,7 @@ t{
             </span>
             <span><b>Confident</b></span>
           </span>
-          <ul class="collection" v-if="examples_shown[key]">
-            <!--<li class="collection-item" v-html="'<b>definition :</b> '+[[definition]]" style="background-color: #eeeeee"></li>-->
-            <li class="collection-item" v-for="example in examples[key]" v-html="example"></li>
-          </ul>
+
 
 
       </li>
