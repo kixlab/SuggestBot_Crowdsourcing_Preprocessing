@@ -44,7 +44,7 @@ t{
   <div>
     <ul class="collection">
       <li class="collection-item">
-        <b v-if="phase==0">What are the possible meaning(s) of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
+        <b v-if="phase==0" style="font-size:18pt">What are the best meaning of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
         <b v-if="phase==1">
           <span v-if="checked_exist()">Rate how much you are confident for each fields.</span>
           <span v-if="!checked_exist()">Write why you think no field can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
@@ -78,6 +78,9 @@ t{
 
       </li>
     </ul>
+  </div>
+  <div style="float:left">
+    <a v-if="task_num==0" class='btn modal-trigger' style="background-color:#888888" href="#tutorial">Tutorial</a>
   </div>
   <div style="float: right">
     <form style="display:inline" method="POST">
@@ -208,11 +211,7 @@ t{
         }
       },
       submit_message: function(){
-        if(task_num !=5){
-          return "To next subtask"
-        }else{
-          return "To the Survey"
-        }
+        return "To the Survey"
       },
     }
   })
@@ -230,26 +229,25 @@ t{
   tuto_vue.tuto_text=[]
   if(task_num == 0){
     tuto_vue.tuto_text=[
-      "<p>The task you are going to do is 'frame disambiguation', which is selecting frame, or high level concepts for a target word in a target sentence.</p>"+
-      "<p>A frame, or a high level concept should represent the meaning of a word.</p>"+
+      "<p>The task you are going to do is to select the best ‘frame’ that represents a Target Word in the context of a given Target Sentence.</p>"+
+      "<p>A ‘frame’ is a high level concept that represents the meaning of a word.</p>"+
       "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_radio.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>If you selected no field, we are also going to ask the reason why you thought so. The reason should make sense.</p>"+
+      "<p>If you select ‘No Field’, you should provide a valid reason why you thought so.</p>"+
       "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_no_field.png'/>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>You are going to do the explained subtask for 6 times for this HIT.</p>"+
-      "<p>For each word, applicable frame options will be different. Therefore, keep in mind to take a look at definitions before doing the subtask.</p>"+
+      "<p>You are going to do the explained task for 6 sentences for this HIT.</p>"+
+      "<p>For each new sentence, please take a look at the provided definition of each frame before you do continue.</p>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>After each subtask, you will be asked to do a survey on the task load.</p>"+
-      "<p>Please keep in mind that each survey is for the task that you rightly finished.</p>"+
+      "<p>After each sentence, you will be asked to do a survey on the task load.</p>"+
+      "<p>Please keep in mind that each survey should only reflect the task that you just finished.</p>"+
       "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_nasatlx.png'/>"+
       "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
     ]
     tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
   }else{
     tuto_vue.tuto_text=[
-      "<p>Now you are going to do subtask"+(task_num+1).toString()+", among 6 subtasks.</p>"+
-      "<p>The subtask will be on a different sentence.</p>"+
+      "<p>Now you are going to do a task for sentence "+(task_num+1).toString()+", among 6 sentences.</p>"+
       "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
     ]
     tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
