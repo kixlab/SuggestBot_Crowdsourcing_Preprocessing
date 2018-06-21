@@ -71,7 +71,7 @@ def study_frame(request, condition, wid, aid, task_num):
         frame_task.save()
         return redirect("/emotion_labeling/nasa_tlx/"+condition+'/'+wid+'/'+aid+'/'+str(int(task_num)))
 
-    if int(task_num) == 0:
+    if int(task_num) == 0 and frame_task_model.objects.filter(wid=wid, aid=aid).count() == 0:
         #TODOdone...? generate 6 Frame_Task items including sanity check
         taskable = frame_initialize_worker(wid, aid, frame_task_model)
         frame = get_frame_from_database(INITIAL_TASK_SENTENCE)

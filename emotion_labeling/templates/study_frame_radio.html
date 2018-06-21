@@ -152,10 +152,12 @@ t{
         }
       },
       input_change: function(key){
-        if($("#"+key+"_checkbox").prop('checked')){
-          checked[key] = true
-        }else{
-          checked[key] = false
+        for(k in this.checked){
+          if(k==key){
+            this.checked[key] = true
+          }else{
+            this.checked[k] = false
+          }
         }
 
       },
