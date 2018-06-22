@@ -24,10 +24,10 @@ exclude_list =[1, 4, 12, 14, 35, 38, 44, 47, 55, 80,
 
 frame_test_list = [7,
     13,16,21,22,28,34,49,50,67,76,87,89,
-    91,98,103,122,124,125,127,131,136,137,165,179,
-    199,202,216,238,247,254,260,276,282,291,297,301,
+    91,98,103,122,124,126,127,131,136,137,165,179,
+    199,202,216,238,247,254,260,282,291,297,301,
     303,304,305,310,312,315,316,317,322,327,329,331,
-    334,336,342,353,360,368,384,387,390,395,405,408]
+    334,336,342,345,353,360,368,384,387,390,395,405,408]
 
 #below for filling up backend with frames
 def pick_and_save_frame():
@@ -95,6 +95,7 @@ def get_frame_from_database(index):
         fs = fn.frames('(?i)'+frame)
         for f in fs:
             if frame == f.name.lower():
+                print(frame)
                 frame_definitions[frame] = Frame.objects.filter(frame_name = frame)[0].frame_definition#f.definition
     frame = {
         'target_sentence' : row['input.sentence'],

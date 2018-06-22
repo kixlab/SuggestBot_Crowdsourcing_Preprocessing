@@ -44,7 +44,7 @@ t{
   <div>
     <ul class="collection">
       <li class="collection-item">
-        <b v-if="phase==0" style="font-size:18pt">What is the best meaning of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
+        <b v-if="phase==0" style="font-size:18pt">What is the best meaning of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check the best one.</b>
         <b v-if="phase==1">
           <span v-if="checked_exist()">Rate how much you are confident for the frame.</span>
           <span v-if="!checked_exist()">Write why you think no frame can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
@@ -217,7 +217,7 @@ t{
   $("#no_field_reason").on('input', function(){
     study_app.$forceUpdate()
   })
-  $(".confidence").on('input', function(){
+  $(".confidence").on('click', function(){
     study_app.$forceUpdate()
   })
 </script>

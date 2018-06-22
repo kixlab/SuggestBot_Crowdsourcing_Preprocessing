@@ -19,6 +19,15 @@ import datetime
 
 #def study_frame(request, wid, aid):
 
+def open_sentence(request, num):
+    frame = get_frame_from_database(int(num))
+    #frame = get_frame_from_database()
+    to_send = {
+        'task_num' :0,
+        'frame' : frame,
+    }
+    return render(request, "study_frame_radio.html", to_send)
+
 def study_frame_prev(request, wid, aid):
    # initialize_frame_sentences()
     #TODOdone...? delete deprecated task items - all the tasks by none-paid workers should be deleted!
@@ -168,6 +177,7 @@ def interface_study_student_engagement(request, data_name):
 
 # pick a single point label
 def experiment1_baseline(request, video_title, wid, aid):
+    pick_and_save_frame()
     exp_video = Experiment_Video.objects.filter(video_title = video_title)[0]
     if request.method=="POST":
         form = EmotionResult(request.POST)

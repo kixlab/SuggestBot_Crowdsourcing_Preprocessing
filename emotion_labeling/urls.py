@@ -3,6 +3,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^open_sentence/(?P<num>[\w\-]+)/$', views.open_sentence),
     url(r'^study_frame_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_frame_prev),
     url(r'^study_frame/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.study_frame),
     url(r'^nasa_tlx/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.nasa_tlx),
