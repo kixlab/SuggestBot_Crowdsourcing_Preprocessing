@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<script>
+  var frame = {{frame|safe}}
+  var target_sentence = frame['target_sentence']
+  var task_num = {{task_num}}
+  target_sentence = target_sentence.replace(frame['target_word'],"<b style='color:#cc0000'>"+frame['target_word']+"</b>")
+  max_tuto = 2
+
+</script>
+<style>
+t{
+  font-weight: bold;
+  color: #cc0000;
+}
+.ex_btn{
+  display: block;
+  height: 24px;
+  max-width: 70%;
+  line-height:25px;
+
+}
+.hidden{
+  display: none;
+}
+.confidence_block{
+  display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="study_app" style="margin:20px; display:block">
+  <div style="margin-bottom: 10px;">
+    <ul class="collection">
+      <li class="collection-item" style="font-size: 10pt; background-color: #eeeeee">The sentence:</li>
+      <li class="collection-item" v-html="target_sentence" style="font-size: 14pt; color: #0000cc"></li>
+    </ul>
+  </div>
+
+  <div>
+    <ul class="collection">
+      <li class="collection-item">
+        <b v-if="phase==0" style="font-size:18pt">What are the possible meaning(s) of <b style="color: #cc0000">[[target_word]]</b> in the context of the sentence above? Check ALL that apply.</b>
+        <b v-if="phase==1">
+          <span v-if="checked_exist()">Rate how much you are confident for each frame.</span>
+          <span v-if="!checked_exist()">Write why you think no frame can explain the meaning of <b style="color: #cc0000">[[target_word]]</b>.</span>
+        </b>
+      </li>
+      <li v-bind:class="{hidden:!reason_text_area_show()}" class="collection-item">
+        <textarea name="no_field_reason" class="materialize-textarea" id="no_field_reason"></textarea>
+        <label for="textarea1">Write the Reason Here</label>
+      </li>
+      <li class="collection-item" v-for="definition, key in definitions" v-bind:class="{hidden: !field_being_shown(key)}">
+        <input type="checkbox" name="frame" v-bind:id="key+'_checkbox'" v-on:click="input_change(key)" :disabled="phase==1"></input>
+        <label style="color: black" v-bind:for="key+'_checkbox'" v-html="'<b>'+[[key]]+' : </b>'+[[definition]]">
+        </label>
+
+          <div class="btn ex_btn" v-if="!examples_shown[key]" v-on:click="examples_shown[key]=true">Click to see examples of <b>[[key]]</b></div>
+          <div class="btn ex_btn" v-if="examples_shown[key]" v-on:click="examples_shown[key]=false">Click to hide examples of <b>[[key]]</b></div>
+          <ul class="collection" v-if="examples_shown[key]">
+            <!--<li class="collection-item" v-html="'<b>definition :</b> '+[[definition]]" style="background-color: #eeeeee"></li>-->
+            <li class="collection-item" v-for="example in examples[key]" v-html="example"></li>
+          </ul>
+          <span v-bind:class="{hidden: phase==0, confidence_block: phase==1}">
+            <span>Please specify how much you are confident with this frame :</span>
+            <span><b>Not Confident</b></span>
+            <span v-for="i in 7">
+              <input class="confidence" type="radio" v-bind:name="key+'_confidence'" v-bind:id="key+'_confidence'+i" v-bind:val="i"></input>
+              <label style="top:7px;" v-bind:for="key+'_confidence'+i"></label>
+            </span>
+            <span><b>Confident</b></span>
+          </span>
+
+
+
+      </li>
+    </ul>
+  </div>
+  <div style="float:left">
+    <a v-if="task_num==0" class='btn modal-trigger' style="background-color:#888888" href="#tutorial">Tutorial</a>
+  </div>
+  <div style="float: right">
+    <span v-if="phase==0" class="btn" v-on:click="phase++">Next</span>
+    <span v-if="phase==1" class="btn" v-on:click="phase--">Prev</span>
+    <form style="display:inline" method="POST">
+      {% csrf_token %}
+      <input style="display:none" name="frame_confidences" id="frame_confidences" type="text"></input>
+      <input style="display:none" name="no_field_reasoning" id="no_field_reasoning" type="text"></input>
+      <input type="submit" name="submit" id="submit" v-if="phase==1" class="btn" v-on:click="return_items()" :disabled="!submittable()" v-bind:value="submit_message()"></input>
+    </form>
+  </div>
+</div>
+
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+    <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+    </div>
+    <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+    <div style="height:90%; overflow-y: scroll;" v-if="tuto_text[cur_tuto]" v-html="tuto_text[cur_tuto]">
+    </div>
+
+  </div>
+  <div class='modal-footer'>
+    <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
+    <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+    <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+    <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+  </div>
+</div>
+<script>
+  definitions={}
+  examples = {}
+  examples_shown ={}
+  checked = {}
+  for (i in frame['frame_definitions']){
+    console.log()
+    definitions[i] = frame['frame_definitions'][i].replace(/<ex>(.|\n)*?<\/ex>/g, "")
+    examples[i] = frame['frame_definitions'][i].match(/<ex>(.|\n)*?<\/ex>/g) || []
+    examples_shown[i] = false
+    checked[i] = false
+  }
+
+
+  var study_app = new Vue({
+    el: '#study_app',
+    delimiters: ['[[', ']]'],
+    data:{
+      target_sentence: target_sentence,
+      target_word: frame['target_word'],
+      definitions: definitions,
+      examples: examples,
+      examples_shown: examples_shown,
+      checked: checked,
+      phase:0,
+      task_num: task_num,
+    },
+    methods:{
+      field_being_shown: function(key){
+        if(this.phase==0){
+          return true
+        }else{
+          return checked[key]
+        }
+      },
+      input_change: function(key){
+        if($("#"+key+"_checkbox").prop('checked')){
+          checked[key] = true
+        }else{
+          checked[key] = false
+        }
+
+      },
+      checked_exist: function(){
+        c=false
+        for(key in this.checked){
+          if(this.checked[key]==true){
+            c=true
+          }
+        }
+        return c
+      },
+      reason_text_area_show: function(){
+        return this.phase==1 && !this.checked_exist();
+      },
+      submittable:function(){
+        if(this.checked_exist()){
+          for(key in this.checked){
+            if(this.checked[key]){
+              if(!$("input[name='"+key+"_confidence']").is(':checked')){
+                console.log(key)
+                return false
+              }
+            }
+          }
+          console.log("all passed")
+          return true
+        }else{
+          if($("#no_field_reason").val().length>10){
+            return true
+          }else{
+            return false
+          }
+
+        }
+      },
+      return_items: function(){
+        if(!this.checked_exist()){
+          $("#frame_confidences").val("Nothing selected")
+          $("#no_field_reasoning").val($("#no_field_reason").val())
+        }else{
+          $("#no_field_reasoning").val("Frame selected")
+          dict = {}
+          for(key in this.checked){
+            if(this.checked[key]){
+              dict[key] = parseInt($("input[name='"+key+"_confidence']:checked").attr('val'))
+            }else{
+              dict[key] = 0
+            }
+          }
+          console.log(dict)
+          $("#frame_confidences").val(JSON.stringify(dict))
+        }
+      },
+      submit_message: function(){
+        if(task_num !=5){
+          return "To next sentence"
+        }else{
+          return "Submit"
+        }
+      },
+    }
+  })
+
+  $("#no_field_reason").on('input', function(){
+    study_app.$forceUpdate()
+  })
+  $(".confidence").on('click', function(){
+    study_app.$forceUpdate()
+  })
+</script>
+<script src="{% static 'js/tutorial.js' %}"></script>
+<script>
+  tuto_vue.on_load_use = false;
+  tuto_vue.tuto_text=[]
+  if(task_num == 0){
+    tuto_vue.tuto_text=[
+      "<p>In this task, you will select the possible ‘frame(s)’ that represent a Target Word in the context of a given Target Sentence.</p>"+
+      "<p>A ‘frame’ is a high level concept that represents the meaning of a word.</p>"+
+      "<p style='margin-bottom: 0'>Remember: A word can have <b>multiple frames</b>.</p>"+
+      "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox.png'/>"+
+      "<p>Hit 'NEXT' button to proceed.</p>",
+      "<p>After selecting the possible frame(s), you should answer how much confident you are with your selections.</p>"+
+      "<p>The value of the confidence will <b><span style='color:red'>not</span> affect the approvement of your work</b>.</p>"+
+      "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_checkbox_confidence.png'/>"+
+      "<p>Hit 'NEXT' button to proceed.</p>",
+      "<p>If you <b>do not select a frame</b>, you should provide a valid reason why you thought so.</p>"+
+      "<img style='max-width:100%; max-height:50%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_no_field.png'/>"+
+      "<p>Hit 'NEXT' button to proceed.</p>",
+      "<p>You are going to do the explained task for 6 sentences for this HIT.</p>"+
+      "<p>For each new sentence, please take a look at the provided definition of each frame before you do continue.</p>"+
+      "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
+    ]
+    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+  }else{
+    tuto_vue.tuto_text=[
+      "<p>Now you are going to do a task for sentence "+(task_num+1).toString()+", among 6 sentences.</p>"+
+      "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
+    ]
+    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+  }
+
+  /*for (idx in study_app.definitions){
+    var text_input = "<p>Below is the frame that will be given as an option.</p><h5><b>"+idx+"</b></h5>"
+    var definition = study_app.definitions[idx]
+    text_input = text_input + "<p>" + definition.replace(/\<ex\>(.*?)\<\/ex\>/g, "") + "</p>"
+    text_input = text_input + "<h6><b>Examples</b></h6>"+"<ul>"
+    for (example in examples[idx]){
+      text_input = text_input + "<li>-"+ examples[idx][example] +"</li>"
+    }
+    text_input = text_input + "</ul><p>Hit 'NEXT' button to proceed.</p>"
+    tuto_vue.tuto_text.push(text_input)
+  }*/
+
+  tuto_vue.max_tuto = tuto_vue.tuto_text.length-1
+  tuto_vue.$forceUpdate()
+</script>
+
+{%  endblock %}

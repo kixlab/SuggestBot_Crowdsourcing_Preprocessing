@@ -7,6 +7,11 @@ class Frame_Sentence(models.Model):
     def __str__(self):
         return str(self.sentence_id)
 
+class Frame_Sentence_GT(models.Model):
+    sentence_id = models.IntegerField(default = -1)
+    def __str__(self):
+        return str(self.sentence_id)
+
 class Frame_Task(models.Model):
     frame_sentence = models.ForeignKey('Frame_Sentence', default=None, on_delete=models.CASCADE)
     end_time = models.DateTimeField(default = datetime.datetime.now)
@@ -45,6 +50,33 @@ class Frame_Task_Checkbox_Confidence(Frame_Task):
         return 'frame_task_checkbox_confidence'
     def __str__(self):
         return self.wid + str(self.frame_sentence.sentence_id)
+
+
+class Frame_Gold_Data(models.Model):
+    frame_sentence = models.ForeignKey('Frame_Sentence_GT', default=None, on_delete=models.CASCADE)
+    end_time = models.DateTimeField(default = datetime.datetime.now)
+    start_time = models.DateTimeField(default = datetime.datetime.now)
+    gen_time = models.DateTimeField(default = datetime.datetime.now)
+    frame_confidences = models.CharField(max_length=20000, default = "")
+    no_field_reasoning = models.CharField(max_length = 20000, default = "")
+    wid = models.CharField(max_length=2000, default="")
+    aid = models.CharField(max_length=2000, default="")
+    task_sub_id = models.IntegerField(default = "-1")
+    token = models.CharField(max_length=200, default="")
+    class Meta:
+        abstract = True
+
+class Frame_Gold_Data_Checkbox(Frame_Gold_Data):
+    def model_name():
+        return 'frame_gold_data_checkbox'
+    def __str__(self):
+        return self.wid+ str(self.frame_sentence.sentence_id)
+
+class Frame_Gold_Data_Checkbox_Confidence(Frame_Gold_Data):
+    def model_name():
+        return 'frame_gold_data_checkbox_confidence'
+    def __str__(self):
+        return self.wid+ str(self.frame_sentence.sentence_id)
 
 class Frame(models.Model):
     frame_name = models.CharField(max_length=200, default="")

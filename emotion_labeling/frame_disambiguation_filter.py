@@ -62,8 +62,8 @@ def initialize_frame_sentences():
             #    break
 
 #to generate frame tasks when a worker comes in initially
-def frame_initialize_worker(wid, aid, frame_task):
-    init_sentence = Frame_Sentence.objects.get(sentence_id = INITIAL_TASK_SENTENCE)
+def frame_initialize_worker(wid, aid, frame_task, f_sentence, t_task_num):
+    init_sentence = f_sentence.objects.get(sentence_id = INITIAL_TASK_SENTENCE)
     ft = frame_task(frame_sentence = init_sentence, wid=wid, aid=aid, task_sub_id=0)
     ft.save()
     for i in range(1, TOTAL_SUB_TASK_NUM):
@@ -71,8 +71,8 @@ def frame_initialize_worker(wid, aid, frame_task):
         kwargs = {
             frame_task.model_name()+"__in" : excludable,
         }
-        taskable_sentence = Frame_Sentence.objects.exclude(**kwargs)
-        taskable_sentence = taskable_sentence.annotate(num_task=Count(frame_task.model_name())).filter(num_task__lt=TARGET_TASK_NUM)
+        taskable_sentence = f_sentence.objects.exclude(**kwargs)
+        taskable_sentence = taskable_sentence.annotate(num_task=Count(frame_task.model_name())).filter(num_task__lt=t_task_num)
         min_ = taskable_sentence.aggregate(min_num_task=Min('num_task'))
         min_num_task = min_['min_num_task']
         print(min_)

@@ -28,6 +28,53 @@ def open_sentence(request, num):
     }
     return render(request, "study_frame_radio.html", to_send)
 
+def gold_data_gather_frame(request, condition, wid, aid, task_num):
+    print(wid)
+    if condition == "Checkbox":
+        frame_task_model = Frame_Gold_Data_Checkbox
+    elif condition == "Checkbox_Confidence":
+        frame_task_model = Frame_Gold_Data_Checkbox_Confidence
+
+    #initialize_frame_sentences()
+    if request.method=="POST":
+        #TODOdone...? save items
+        #TODOdone...? update Frame Task
+        form = FrameStudyResult(request.POST)
+        frame_task = frame_task_model.objects.get(task_sub_id = int(task_num) ,wid=wid, aid=aid)
+        frame_task.end_time = datetime.datetime.now()
+        print(form)
+        frame_task.frame_confidences = form.cleaned_data['frame_confidences']
+        frame_task.no_field_reasoning = form.cleaned_data['no_field_reasoning']
+        frame_task.save()
+        if int(task_num) != 5:
+            return redirect("/emotion_labeling/gold_data_gather_frame/"+condition+'/'+wid+'/'+aid+'/'+str(int(task_num)+1))
+        else:
+            token_string = str(uuid.uuid4().hex.upper()[0:6])
+            frame_task_model.objects.filter(wid=wid, aid=aid).update(token = token_string)
+            token = {'token':token_string}
+            return render(request, "token_return.html", token)
+
+    if int(task_num) == 0 and frame_task_model.objects.filter(wid=wid, aid=aid).count() == 0:
+        #TODOdone...? generate 6 Frame_Task items including sanity check
+        taskable = frame_initialize_worker(wid, aid, frame_task_model, Frame_Sentence_GT, 50)
+        frame = get_frame_from_database(INITIAL_TASK_SENTENCE)
+        if not taskable:
+            return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
+    else:
+        #TODOdone..? get the frame sentence number from previously generated taks
+        target_task = frame_task_model.objects.filter(wid=wid, aid=aid, task_sub_id=int(task_num))[0]
+        target_task.start_time = datetime.datetime.now()
+        target_task.save()
+        target_sentence = target_task.frame_sentence.sentence_id
+        frame = get_frame_from_database(target_sentence)
+    #frame = get_frame_from_database()
+    to_send = {
+        'task_num' :task_num,
+        'frame' : frame,
+    }
+    return render(request, "frame_gt_"+condition.lower()+".html", to_send)
+
+
 def study_frame_prev(request, wid, aid):
    # initialize_frame_sentences()
     #TODOdone...? delete deprecated task items - all the tasks by none-paid workers should be deleted!
@@ -82,7 +129,7 @@ def study_frame(request, condition, wid, aid, task_num):
 
     if int(task_num) == 0 and frame_task_model.objects.filter(wid=wid, aid=aid).count() == 0:
         #TODOdone...? generate 6 Frame_Task items including sanity check
-        taskable = frame_initialize_worker(wid, aid, frame_task_model)
+        taskable = frame_initialize_worker(wid, aid, frame_task_model, Frame_Sentence, TARGET_TASK_NUM)
         frame = get_frame_from_database(INITIAL_TASK_SENTENCE)
         if not taskable:
             return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
