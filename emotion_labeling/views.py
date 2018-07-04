@@ -29,6 +29,10 @@ def open_sentence(request, num):
     return render(request, "study_frame_radio.html", to_send)
 
 def gold_data_gather_frame(request, condition, wid, aid, task_num):
+    for frame_task_model in [Frame_Gold_Data_Checkbox,  Frame_Gold_Data_Checkbox_Confidence,]:
+        ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=2))
+        for ft_to_delete in ft_to_deletes:
+            frame_task_model.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
     print(wid)
     if condition == "Checkbox":
         frame_task_model = Frame_Gold_Data_Checkbox
@@ -174,6 +178,8 @@ def nasa_tlx(request, condition, wid, aid, task_num):
             token = {'token':token_string}
             return render(request, "token_return.html", token)
     return render(request, "nasa_tlx.html", {'task_num': task_num})
+
+
 
 def interface_study_arousal_valence(request, data_name):
     study_video = Study_Video.objects.get(video_title = data_name)
