@@ -15,9 +15,104 @@ from .MTURKKEY import *
 from .emotion_distribution_management import *
 from .frame_disambiguation_filter import *
 import datetime
+from dateutil import tz
 # Create your views here.
+TIME_ZONE_LOCAL = tz.tzlocal()
+TIME_ZONE_UTC = tz.gettz('UTC')
 
-#def study_frame(request, wid, aid):
+def study_emotion_prev(request, wid, aid):
+   # initialize_frame_sentences()
+    #TODO delete deprecated task items - all the tasks by none-paid workers should be deleted!
+    for emotion_task_model in [Emotion_Task_Radio, Emotion_Task_Radio_Confidence, Emotion_Task_Checkbox, Emotion_Task_Checkbox_Confidence,]:
+        et_to_deletes = emotion_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=TASK_TIME_LIMIT))
+        for et_to_delete in et_to_deletes:
+            emotion_task_model.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
+    min_key = None
+    for emotion_task_model in [Emotion_Task_Radio,  Emotion_Task_Radio_Confidence, Emotion_Task_Checkbox, Emotion_Task_Checkbox_Confidence,]:
+        if emotion_task_model.objects.filter(wid=wid).count() > 0:
+            if emotion_task_model == Emotion_Task_Radio:
+                min_key = 'Radio'
+            elif emotion_task_model == Emotion_Task_Radio_Confidence:
+                min_key = 'Radio_Confidence'
+            elif emotion_task_model == Emotion_Task_Checkbox:
+                min_key = 'Checkbox'
+            elif emotion_task_model == Emotion_Task_Checkbox_Confidence:
+                min_key = 'Checkbox_Confidence'
+    if min_key == None:
+        count_dic = {}
+        count_dic['Radio'] = Emotion_Task_Radio.objects.all().count()
+        count_dic['Radio_Confidence'] = Emotion_Task_Radio_Confidence.objects.all().count()
+        count_dic['Checkbox'] = Emotion_Task_Checkbox.objects.all().count()
+        count_dic['Checkbox_Confidence']=Emotion_Task_Checkbox_Confidence.objects.all().count()
+        min_key = min(count_dic, key=count_dic.get)
+    return redirect('/emotion_labeling/study_emotion/'+min_key+'/'+wid+'/'+aid)
+
+def study_emotion(request, condition, wid, aid):
+    print(wid)
+    if condition == "Radio":
+        emotion_task_model = Emotion_Task_Radio
+    elif condition == "Radio_Confidence":
+        emotion_task_model = Emotion_Task_Radio_Confidence
+    elif condition == "Checkbox":
+        emotion_task_model = Emotion_Task_Checkbox
+    elif condition == "Checkbox_Confidence":
+        emotion_task_model = Emotion_Task_Checkbox_Confidence
+
+    #initialize_frame_sentences()
+    if request.method=="POST":
+        #TODO save items
+        #TODO update Frame Task
+        form = EmotionResult(request.POST)
+        print(form)
+        to_return = json.loads(form.cleaned_data['to_return'])
+        if emotion_task_model.objects.filter(wid=wid, aid=aid).count()==0:
+            return HttpResponse("You were late in completing the task, so your task is expired.")
+        token_string = str(uuid.uuid4().hex.upper()[0:6])
+        for key in to_return:
+            task_obj = emotion_task_model.objects.filter(wid=wid, aid=aid, task_time=int(key))[0]
+            task_obj.emotion_confidences = json.dumps(to_return[key]['emotion_confidence'])
+            task_obj.survey_result = json.dumps(to_return[key]['survey_result'])
+            s_time = datetime.datetime.strptime(to_return[key]['start_time'], "%a, %d %b %Y %H:%M:%S %Z")
+            s_time = s_time.replace(tzinfo = TIME_ZONE_UTC)
+            task_obj.start_time = s_time.astimezone(TIME_ZONE_LOCAL)
+            e_time = datetime.datetime.strptime(to_return[key]['end_time'], "%a, %d %b %Y %H:%M:%S %Z")
+            e_time = e_time.replace(tzinfo = TIME_ZONE_UTC)
+            task_obj.end_time = e_time.astimezone(TIME_ZONE_LOCAL)
+            task_obj.token = token_string
+            if 'other' in to_return[key]:
+                task_obj.other = to_return[key]['other']
+            task_obj.save()
+
+
+        token = {'token':token_string}
+        return render(request, "token_return.html", token)
+
+    if emotion_task_model.objects.filter(wid=wid, aid=aid).count() == 0:
+        #TODO generate 6 Emotion_Task items including sanity check
+        taskable_video = Emotion_Video.objects.annotate(num_task=Count(emotion_task_model.model_name())).filter(num_task__lt=TARGET_TASK_NUM)
+        min_ = taskable_video.aggregate(min_num_task=Min('num_task'))
+        min_num_task = min_['min_num_task']
+        taskable_video = taskable_video.filter(num_task = min_num_task)
+        if taskable_video.count()==0:
+            return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
+        else:
+            e_video = taskable_video[random.randint(0, taskable_video.count()-1)]
+            video_prompt_times = json.loads(e_video.video_prompt_time)
+            for video_prompt_time in video_prompt_times:
+                video_task = emotion_task_model(emotion_video = e_video, wid = wid, aid = aid, task_time=int(video_prompt_time))
+                video_task.save()
+    else:
+        e_video = emotion_task_model.objects.filter(wid=wid, aid=aid)[0].emotion_video
+
+    #frame = get_frame_from_database()
+    print(e_video)
+    to_send = {
+        'prompt_time': e_video.video_prompt_time,
+        'video_img': e_video.video_img,
+        'video_url': e_video.video_url,
+    }
+    return render(request, "study_emotion_"+condition.lower()+".html", to_send)
+
 
 def open_sentence(request, num):
     frame = get_frame_from_database(int(num))

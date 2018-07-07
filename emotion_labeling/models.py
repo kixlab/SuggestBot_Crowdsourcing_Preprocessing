@@ -2,6 +2,54 @@ from django.db import models
 import datetime
 # Create your models here.
 
+class Emotion_Video(models.Model):
+    video_title = models.CharField(max_length = 200, default = "")
+    video_url = models.CharField(max_length = 2000, default = "")
+    video_img = models.CharField(max_length = 200, default = "")
+    video_prompt_time = models.CharField(max_length=10000, default = "")
+    def __str__(self):
+        return self.video_title
+
+class Emotion_Task(models.Model):
+    emotion_video = models.ForeignKey('Emotion_Video', default=None, on_delete=models.CASCADE)
+    end_time = models.DateTimeField(default = datetime.datetime.now)
+    start_time = models.DateTimeField(default = datetime.datetime.now)
+    gen_time = models.DateTimeField(default = datetime.datetime.now)
+    emotion_confidences = models.CharField(max_length=20000, default = "")
+    other = models.CharField(max_length=20000, default = "")
+    wid = models.CharField(max_length=2000, default="")
+    aid = models.CharField(max_length=2000, default="")
+    task_time = models.IntegerField(default = "-1")
+    token = models.CharField(max_length=200, default="")
+    survey_result = models.CharField(max_length = 20000, default="")
+    class Meta:
+        abstract = True
+
+class Emotion_Task_Radio(Emotion_Task):
+    def model_name():
+        return 'emotion_task_radio'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+class Emotion_Task_Radio_Confidence(Emotion_Task):
+    def model_name():
+        return 'emotion_task_radio_confidence'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+class Emotion_Task_Checkbox(Emotion_Task):
+    def model_name():
+        return 'emotion_task_checkbox'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+class Emotion_Task_Checkbox_Confidence(Emotion_Task):
+    def model_name():
+        return 'emotion_task_checkbox_confidence'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+
 class Frame_Sentence(models.Model):
     sentence_id = models.IntegerField(default = -1)
     def __str__(self):
@@ -11,7 +59,6 @@ class Frame_Sentence_GT(models.Model):
     sentence_id = models.IntegerField(default = -1)
     def __str__(self):
         return str(self.sentence_id)
-
 class Frame_Task(models.Model):
     frame_sentence = models.ForeignKey('Frame_Sentence', default=None, on_delete=models.CASCADE)
     end_time = models.DateTimeField(default = datetime.datetime.now)
