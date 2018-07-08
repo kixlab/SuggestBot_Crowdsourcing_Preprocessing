@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     url(r'^study_emotion_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_emotion_prev),
     url(r'^study_emotion/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_emotion),
+    url(r'^gold_data_gather_frame_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.gold_data_gather_frame_prev),
     url(r'^gold_data_gather_frame/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/(?P<task_num>[\w\-]+)/$', views.gold_data_gather_frame),
     url(r'^open_sentence/(?P<num>[\w\-]+)/$', views.open_sentence),
     url(r'^study_frame_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_frame_prev),
