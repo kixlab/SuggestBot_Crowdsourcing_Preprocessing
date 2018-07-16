@@ -71,40 +71,18 @@ var video_img = "{{video_img}}"
       <div v-bind:class="{hidden: tagging_phase != 0}" id="emotion_labeler">
         <!-- Descriptions for valence and arousal labeling -->
         <div>
-          <h6 style="margin-bottom: 0px;">Decide the best emotion of the character.</h6>
+          <h6 style="margin-bottom: 0px;">Decide the possible emotion(s) of the character. Check ALL that apply.</h6>
         </div>
         <div class="row" style="margin-bottom: 0;">
             <div v-for="emotion_category in emotion_categories" style="display: inline-block; vertical-align:top; padding-right: 10px; border-right: solid 1px #eeeeee">
-              <input v-bind:id="emotion_category" type="radio" name="emotion_category" v-on:click="input_change(emotion_category)"></input>
+              <input v-bind:id="emotion_category" type="checkbox" name="emotion_category" v-on:click="input_change(emotion_category)"></input>
               <label v-bind:for="emotion_category">[[emotion_category]]</label>
               <input v-if="emotion_category == 'other'" type="text" id="other_text"></input>
             </div>
         </div>
-        <div class="btn darken-1" id="next" style="float:right" v-on:click="phase_change(1)" :disabled="!Radio_Checked_Exists()">Next</div>
+        <!--<div class="btn darken-1" id="next" style="float:right" v-on:click="Task_end()" :disabled="!Radio_Checked_Exists()">Next</div>-->
       </div>
-      <div v-bind:class="{hidden: tagging_phase != 1}" id="emotion_labeler">
-        <!-- Descriptions for valence and arousal labeling -->
-        <div>
-          <h6 style="margin-bottom: 0px;">Decide how much you are confident on selected emotion(s).</h6>
-        </div>
-        <div class="row" style="margin-bottom: 0;">
-            <hr>
-            <div v-for="emotion_category in emotion_categories" v-bind:class="{hidden: !emo_checked[emotion_category]}">
-              <div style="font-weight: bold">[[emotion_category]] <span v-if="emotion_category=='other'">[[cur_other]]</span></div>
-              <span><b>Not Confident</b></span>
-              <span v-for="i in 7">
-                <input class="confidence" type="radio" v-bind:name="emotion_category+'_confidence'" v-bind:id="emotion_category+'_confidence'+i" v-bind:val="i"></input>
-                <label style="top:7px;" v-bind:for="emotion_category+'_confidence'+i"></label>
-              </span>
-              <span><b>Confident</b></span>
-              </div>
-        </div>
-        <div style="float: right">
-          <div class="btn darken-1" id="next" v-on:click="phase_change(-1)" >Prev</div>
-          <div class="btn darken-1" id="next" v-on:click="Task_end()" :disabled="!Confidence_Done()">Next</div>
-        </div>
-      </div>
-      <div  v-bind:class="{hidden: tagging_phase != final_phase}" id="NASTLX">
+      <div class="hidden" id="NASTLX">
         <div>
           <h6 style="margin-bottom: 0px;">NASA Task Load Index.</h6>
           <p>Hart and Staveland's NASA Task Load Index(TLX) method assesses work load on five 7-point scales. Increments of high, medium and low estimates for each point result in 21 gradations on the scales.</p>
@@ -140,7 +118,7 @@ var video_img = "{{video_img}}"
         </div>
         <div class="btn darken-1" id="prev" style="float:left" v-on:click="phase_change(-1)">Prev</div>
       </div>
-      <div v-if="tagging_phase==final_phase" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data" :disabled="!NASA_TLX_Done()">[[proceed_action]] Label and Proceed</div>
+      <div v-if="tagging_phase==final_phase" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data" :disabled="!Radio_Checked_Exists()">[[proceed_action]] Label and Proceed</div>
 
 
 
@@ -189,7 +167,7 @@ var video_img = "{{video_img}}"
 
   </script>
   <script>
-  var max_tuto = 10
+  var max_tuto = 0
   var likert_scale = 7;
   var additive_vue_app = {}
   var video_url;
@@ -198,10 +176,10 @@ var video_img = "{{video_img}}"
   </script>
   {% block max_tuto_assign %}
   {% endblock %}
-  <link href="{% static 'js/study_emotion_radio_confidence.js' %}" rel="preload" as="script">
+  <link href="{% static 'js/emotion_gt_checkbox.js' %}" rel="preload" as="script">
   <link href="{% static 'js/tutorial.js' %}" rel="preload" as="script">
   <!-- Below block is to extend to tutorial-like example condition-->
-  <script src="{% static 'js/study_emotion_radio_confidence.js' %}"></script>
+  <script src="{% static 'js/emotion_gt_checkbox.js' %}"></script>
   <script src="{% static 'js/tutorial.js' %}"></script>
     {% block example_modal %}
     {% endblock %}

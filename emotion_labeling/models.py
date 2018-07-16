@@ -10,6 +10,33 @@ class Emotion_Video(models.Model):
     def __str__(self):
         return self.video_title
 
+class Emotion_Gold_Data(models.Model):
+    emotion_video = models.ForeignKey('Emotion_Video', default=None, on_delete=models.CASCADE)
+    end_time = models.DateTimeField(default = datetime.datetime.now)
+    start_time = models.DateTimeField(default = datetime.datetime.now)
+    gen_time = models.DateTimeField(default = datetime.datetime.now)
+    emotion_confidences = models.CharField(max_length=20000, default = "")
+    other = models.CharField(max_length=20000, default = "")
+    wid = models.CharField(max_length=2000, default="")
+    aid = models.CharField(max_length=2000, default="")
+    task_time = models.IntegerField(default = "-1")
+    token = models.CharField(max_length=200, default="")
+    class Meta:
+        abstract = True
+
+class Emotion_Gold_Data_Checkbox(Emotion_Gold_Data):
+    def model_name():
+        return 'emotion_gold_data_checkbox'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+class Emotion_Gold_Data_Checkbox_Confidence(Emotion_Gold_Data):
+    def model_name():
+        return 'emotion_gold_data_checkbox_confidence'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
+
 class Emotion_Task(models.Model):
     emotion_video = models.ForeignKey('Emotion_Video', default=None, on_delete=models.CASCADE)
     end_time = models.DateTimeField(default = datetime.datetime.now)

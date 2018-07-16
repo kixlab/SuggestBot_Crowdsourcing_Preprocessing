@@ -3,6 +3,8 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^gold_data_gather_emotion_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.gold_data_gather_emotion_prev),
+    url(r'^gold_data_gather_emotion/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.gold_data_gather_emotion),
     url(r'^study_emotion_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_emotion_prev),
     url(r'^study_emotion/(?P<condition>[\w\-]+)/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.study_emotion),
     url(r'^gold_data_gather_frame_prev/(?P<wid>[\w\-]+)/(?P<aid>[\w\-]+)/$', views.gold_data_gather_frame_prev),
