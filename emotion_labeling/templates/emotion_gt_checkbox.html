@@ -77,7 +77,7 @@ var video_img = "{{video_img}}"
             <div v-for="emotion_category in emotion_categories" style="display: inline-block; vertical-align:top; padding-right: 10px; border-right: solid 1px #eeeeee">
               <input v-bind:id="emotion_category" type="checkbox" name="emotion_category" v-on:click="input_change(emotion_category)"></input>
               <label v-bind:for="emotion_category">[[emotion_category]]</label>
-              <input v-if="emotion_category == 'other'" type="text" id="other_text"></input>
+              <input v-if="emotion_category == 'other'" type="text" id="other_text" placeholder="Type in 'other emotion' here"></input>
             </div>
         </div>
         <!--<div class="btn darken-1" id="next" style="float:right" v-on:click="Task_end()" :disabled="!Radio_Checked_Exists()">Next</div>-->
