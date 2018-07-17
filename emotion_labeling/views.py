@@ -77,7 +77,7 @@ def gold_data_gather_emotion(request, condition, wid, aid):
 
     if emotion_task_model.objects.filter(wid=wid, aid=aid).count() == 0:
         #TODO generate 6 Emotion_Task items including sanity check
-        taskable_video = Emotion_Video.objects.annotate(num_task=Count(emotion_task_model.model_name())).filter(num_task__lt=TARGET_TASK_NUM)
+        taskable_video = Emotion_Video.objects.annotate(num_task=Count(emotion_task_model.model_name())).filter(num_task__lt=300)
         min_ = taskable_video.aggregate(min_num_task=Min('num_task'))
         min_num_task = min_['min_num_task']
         taskable_video = taskable_video.filter(num_task = min_num_task)
@@ -175,6 +175,7 @@ def study_emotion(request, condition, wid, aid):
         taskable_video = Emotion_Video.objects.annotate(num_task=Count(emotion_task_model.model_name())).filter(num_task__lt=TARGET_TASK_NUM)
         min_ = taskable_video.aggregate(min_num_task=Min('num_task'))
         min_num_task = min_['min_num_task']
+        print(min_num_task)
         taskable_video = taskable_video.filter(num_task = min_num_task)
         if taskable_video.count()==0:
             return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
