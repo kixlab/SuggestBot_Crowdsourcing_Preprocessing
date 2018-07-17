@@ -96,12 +96,12 @@ var vue_app = new Vue({
       // add data into data structure
       this.collected_data[this.current_marker] = {}
       vue_app.task_end_time = new Date();
-      nasa_dict = {}
+      /*nasa_dict = {}
       for(key in this.NASA_questions){
         nasa_dict[key] = parseInt($("input[name='"+key+"']:checked").attr('val'))
       }
       this.collected_data[this.current_marker]['survey_result'] = nasa_dict
-
+      */
       emo_dict = {}
       for(key in emo_checked){
         if(key=='other' && this.emo_checked[key]){
