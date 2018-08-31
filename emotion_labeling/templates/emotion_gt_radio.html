@@ -80,9 +80,9 @@ var video_img = "{{video_img}}"
               <input v-if="emotion_category == 'other'" type="text" id="other_text" placeholder="Type in 'other emotion' here"></input>
             </div>
         </div>
-        <div class="btn darken-1" id="next" style="float:right" v-on:click="Task_end()" :disabled="!Radio_Checked_Exists()">Next</div>
+        <!--<div class="btn darken-1" id="next" style="float:right" v-on:click="Task_end()" :disabled="!Radio_Checked_Exists()">Next</div>-->
       </div>
-      <div  v-bind:class="{hidden: tagging_phase != final_phase}" id="NASTLX">
+      <div class="hidden" id="NASTLX">
         <div>
           <h6 style="margin-bottom: 0px;">NASA Task Load Index.</h6>
           <p>Hart and Staveland's NASA Task Load Index(TLX) method assesses work load on five 7-point scales. Increments of high, medium and low estimates for each point result in 21 gradations on the scales.</p>
@@ -118,7 +118,7 @@ var video_img = "{{video_img}}"
         </div>
         <div class="btn darken-1" id="prev" style="float:left" v-on:click="phase_change(-1)">Prev</div>
       </div>
-      <div v-if="tagging_phase==final_phase" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data" :disabled="!NASA_TLX_Done()">[[proceed_action]] Label and Proceed</div>
+      <div v-if="tagging_phase==final_phase" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data" :disabled="!Radio_Checked_Exists()">[[proceed_action]] Label and Proceed</div>
 
 
 
