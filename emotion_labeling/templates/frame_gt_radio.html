@@ -213,7 +213,11 @@ t{
         }
       },
       submit_message: function(){
-        return "To the Survey"
+        if(task_num !=5){
+          return "To next sentence"
+        }else{
+          return "Submit"
+        }
       },
     }
   })
@@ -241,19 +245,14 @@ t{
       "<p>You are going to do the explained task for 6 sentences for this HIT.</p>"+
       "<p>For each new sentence, please take a look at the provided definition of each frame before you do continue.</p>"+
       "<p>Hit 'NEXT' button to proceed.</p>",
-      "<p>After each sentence, you will be asked to do a survey on the task load.</p>"+
-      "<p>Please keep in mind that each survey should only reflect the task that you just finished.</p>"+
-      "<p>Also, the survey result will <b><span style='color:red'>not</span> affect the approvement of your work</b>. Please report as you felt!</p>"+
-      "<img style='max-width:100%; max-height:70%; display: block; margin: auto;' src='{% static 'img/tutorial/' %}frame_nasatlx.png'/>"+
-      "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
     ]
-    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, ]
   }else{
     tuto_vue.tuto_text=[
       "<p>Now you are going to do a task for sentence "+(task_num+1).toString()+", among 6 sentences.</p>"+
       "<p>If you are ready, proceed with 'TO THE TASK' button.</p>",
     ]
-    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, false,]
+    tuto_vue.tuto_img=[false, false, false, false, false, false, false, false, ]
   }
 
 /*  for (idx in study_app.definitions){
