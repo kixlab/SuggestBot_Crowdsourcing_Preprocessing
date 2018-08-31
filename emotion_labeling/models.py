@@ -36,6 +36,12 @@ class Emotion_Gold_Data_Checkbox_Confidence(Emotion_Gold_Data):
     def __str__(self):
         return self.wid + str(self.emotion_video.video_title)
 
+class Emotion_Gold_Data_Radio(Emotion_Gold_Data):
+    def model_name():
+        return 'emotion_gold_data_radio'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
+
 
 class Emotion_Task(models.Model):
     emotion_video = models.ForeignKey('Emotion_Video', default=None, on_delete=models.CASCADE)
@@ -149,6 +155,12 @@ class Frame_Gold_Data_Checkbox(Frame_Gold_Data):
 class Frame_Gold_Data_Checkbox_Confidence(Frame_Gold_Data):
     def model_name():
         return 'frame_gold_data_checkbox_confidence'
+    def __str__(self):
+        return self.wid+ str(self.frame_sentence.sentence_id)
+
+class Frame_Gold_Data_Radio(Frame_Gold_Data):
+    def model_name():
+        return 'frame_gold_data_radio'
     def __str__(self):
         return self.wid+ str(self.frame_sentence.sentence_id)
 

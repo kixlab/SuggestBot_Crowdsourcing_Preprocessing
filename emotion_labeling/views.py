@@ -21,23 +21,26 @@ TIME_ZONE_LOCAL = tz.tzlocal()
 TIME_ZONE_UTC = tz.gettz('UTC')
 
 def gold_data_gather_emotion_prev(request, wid, aid):
-    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence,]:
+    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence, Emotion_Gold_Data_Radio,]:
         et_to_deletes = emotion_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=120))
         et_to_deletes.delete()
     for emotion_task_model in [Emotion_Task_Radio,  Emotion_Task_Radio_Confidence, Emotion_Task_Checkbox, Emotion_Task_Checkbox_Confidence,]:
         if emotion_task_model.objects.filter(wid=wid).count() > 0:
             return HttpResponse("Sorry, you participated in our task previously and we want new people to participate in this. Sorry for the inconvenience.")
     min_key = None
-    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence,]:
+    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence, Emotion_Gold_Data_Radio, ]:
         if emotion_task_model.objects.filter(wid=wid).count() > 0:
             if emotion_task_model == Emotion_Gold_Data_Checkbox:
                 min_key = 'Checkbox'
             elif frame_task_model == Emotion_Gold_Data_Checkbox_Confidence:
                 min_key = 'Checkbox_Confidence'
+            elif frame_task_model == Emotion_Gold_Data_Radio:
+                min_key = 'Radio'
     if min_key == None:
         count_dic = {}
         count_dic['Checkbox'] = Emotion_Gold_Data_Checkbox.objects.all().count()
         count_dic['Checkbox_Confidence']=Emotion_Gold_Data_Checkbox_Confidence.objects.all().count()
+        count_dic['Radio']=Emotion_Gold_Data_Radio.objects.all().count()
         min_key = min(count_dic, key=count_dic.get)
     return redirect('/emotion_labeling/gold_data_gather_emotion/'+min_key+'/'+wid+'/'+aid)
 
@@ -48,6 +51,8 @@ def gold_data_gather_emotion(request, condition, wid, aid):
         emotion_task_model = Emotion_Gold_Data_Checkbox
     elif condition == "Checkbox_Confidence":
         emotion_task_model = Emotion_Gold_Data_Checkbox_Confidence
+    elif condition == "Radio":
+        emotion_task_model = Emotion_Gold_Data_Radio
 
     #initialize_frame_sentences()
     if request.method=="POST":
@@ -209,7 +214,7 @@ def open_sentence(request, num):
     return render(request, "study_frame_radio.html", to_send)
 
 def gold_data_gather_frame_prev(request, wid, aid):
-    for frame_task_model in [Frame_Gold_Data_Checkbox,  Frame_Gold_Data_Checkbox_Confidence,]:
+    for frame_task_model in [Frame_Gold_Data_Checkbox,  Frame_Gold_Data_Checkbox_Confidence, Frame_Gold_Data_Radio]:
         ft_to_deletes = frame_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=120))
         for ft_to_delete in ft_to_deletes:
             frame_task_model.objects.filter(wid = ft_to_delete.wid, aid = ft_to_delete.aid).delete()
@@ -218,16 +223,19 @@ def gold_data_gather_frame_prev(request, wid, aid):
         if frame_task_model.objects.filter(wid=wid).count() > 0:
             return HttpResponse("Sorry, you participated in our task previously and we want new people to participate in this. Sorry for the inconvenience.")
     min_key = None
-    for frame_task_model in [Frame_Gold_Data_Checkbox,  Frame_Gold_Data_Checkbox_Confidence,]:
+    for frame_task_model in [Frame_Gold_Data_Checkbox,  Frame_Gold_Data_Checkbox_Confidence, Frame_Gold_Data_Radio]:
         if frame_task_model.objects.filter(wid=wid).count() > 0:
             if frame_task_model == Frame_Gold_Data_Checkbox:
                 min_key = 'Checkbox'
             elif frame_task_model == Frame_Gold_Data_Checkbox_Confidence:
                 min_key = 'Checkbox_Confidence'
+            elif frame_task_model == Frame_Gold_Data_Radio:
+                min_key = 'Radio'
     if min_key == None:
         count_dic = {}
         count_dic['Checkbox'] = Frame_Gold_Data_Checkbox.objects.all().count()
         count_dic['Checkbox_Confidence']=Frame_Gold_Data_Checkbox_Confidence.objects.all().count()
+        count_dic['Radio']=Frame_Gold_Data_Radio.objects.all().count()
         min_key = min(count_dic, key=count_dic.get)
     return redirect('/emotion_labeling/gold_data_gather_frame/'+min_key+'/'+wid+'/'+aid+'/0')
 
@@ -238,6 +246,8 @@ def gold_data_gather_frame(request, condition, wid, aid, task_num):
         frame_task_model = Frame_Gold_Data_Checkbox
     elif condition == "Checkbox_Confidence":
         frame_task_model = Frame_Gold_Data_Checkbox_Confidence
+    elif condition == "Radio":
+        frame_task_model = Frame_Gold_Data_Radio
 
     #initialize_frame_sentences()
     if request.method=="POST":
