@@ -21,7 +21,7 @@ TIME_ZONE_LOCAL = tz.tzlocal()
 TIME_ZONE_UTC = tz.gettz('UTC')
 
 def gold_data_gather_emotion_prev(request, wid, aid):
-    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence, Emotion_Gold_Data_Radio,]:
+    for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence, Emotion_Gold_Data_Radio, Emotion_Gold_Data_Distribution]:
         et_to_deletes = emotion_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=120))
         et_to_deletes.delete()
     for emotion_task_model in [Emotion_Task_Radio,  Emotion_Task_Radio_Confidence, Emotion_Task_Checkbox, Emotion_Task_Checkbox_Confidence,]:
@@ -36,11 +36,15 @@ def gold_data_gather_emotion_prev(request, wid, aid):
                 min_key = 'Checkbox_Confidence'
             elif frame_task_model == Emotion_Gold_Data_Radio:
                 min_key = 'Radio'
+            elif condition == Emotion_Gold_Data_Distribution:
+                min_key = 'Distribution'
+        
     if min_key == None:
         count_dic = {}
         count_dic['Checkbox'] = Emotion_Gold_Data_Checkbox.objects.all().count()
         count_dic['Checkbox_Confidence']=Emotion_Gold_Data_Checkbox_Confidence.objects.all().count()
         count_dic['Radio']=Emotion_Gold_Data_Radio.objects.all().count()
+        count_dic['Distribution']=Emotion_Gold_Data_Distribution.objects.all().count()
         min_key = min(count_dic, key=count_dic.get)
     return redirect('/emotion_labeling/gold_data_gather_emotion/'+min_key+'/'+wid+'/'+aid)
 
@@ -53,6 +57,8 @@ def gold_data_gather_emotion(request, condition, wid, aid):
         emotion_task_model = Emotion_Gold_Data_Checkbox_Confidence
     elif condition == "Radio":
         emotion_task_model = Emotion_Gold_Data_Radio
+    elif condition == "Distribution":
+        emotion_task_model = Emotion_Gold_Data_Distribution
 
     #initialize_frame_sentences()
     if request.method=="POST":

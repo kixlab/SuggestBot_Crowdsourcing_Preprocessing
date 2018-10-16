@@ -52,6 +52,10 @@ html{
   opacity: 0.3;
   pointer-events: none;
 }
+.disabled_button{
+  opacity: 0.3;
+  pointer-events: none;
+}
 .HiddenMarker{
   width: 1px !important;
   background-color: #80deea !important;

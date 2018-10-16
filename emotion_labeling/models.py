@@ -42,6 +42,11 @@ class Emotion_Gold_Data_Radio(Emotion_Gold_Data):
     def __str__(self):
         return self.wid + str(self.emotion_video.video_title)
 
+class Emotion_Gold_Data_Distribution(Emotion_Gold_Data):
+    def model_name():
+        return 'emotion_gold_data_distribution'
+    def __str__(self):
+        return self.wid + str(self.emotion_video.video_title)
 
 class Emotion_Task(models.Model):
     emotion_video = models.ForeignKey('Emotion_Video', default=None, on_delete=models.CASCADE)

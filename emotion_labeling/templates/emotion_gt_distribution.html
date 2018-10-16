@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="preload" as="style">
+<link href="{%static 'css/videojs.markers.css' %}" rel="preload" as="style">
+<link href="{%static 'css/emotion_distribution.css'%}" rel="preload" as="style">
+<link href="{%static 'css/emotion_labeling_task.css'%}" rel="stylesheet">
+<link href="{%static 'css/videojs.markers.css' %}" rel='stylesheet'>
+<link href="{%static 'css/emotion_distribution.css' %}" rel='stylesheet'>
+<link href="{% static 'js/videojs-markers.js' %}" rel="preload" as="script">
+<script src="{% static 'js/videojs-markers.js' %}"></script>
+<script>
+//prompt time should be dictionary, key with time and value with whether the task is done on the time or not
+var prompt_time = '{{prompt_time}}'
+prompt_time = JSON.parse(prompt_time.replace(/&quot;/g,'"'))
+var primitive_video_url = "{{video_url}}"
+var video_img = "{{video_img}}"
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="vue_app" class="row" style="visibility: hidden; margin-bottom: 0px;">
+  <div class="row" style="margin-bottom: 0px">
+    <!-- Video Viewer -->
+    <div class="col s6">
+      <div class="row">
+        <div class="col s2">
+          <img src="{% static 'img/figures/experiment/' %}{{video_img}}.png" style="width:100%; margin-top:20px">
+        </div>
+        <div class="col s10" id="instruction">
+          <div>
+            <div v-if="state!='tagging'">
+              <p>Please watch the video. Concentrate when the the video is blinking.</p>
+              <p v-if="!video_started" style="font-size:12px">If the video player does not work when beginning the task, please try clicking <a href="#" onclick="reinitialize_main_video()">here</a> and playing again.</p>
+              <p v-if="!video_started" style="font-size:12px">If the video still does not work, try reloading.</p>
+            </div>
+            <div v-else>
+              <p style="margin-bottom:0">
+                Please answer the distribution of emotion of the character.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span v-if="revision_description_enabled()=='proceed'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to next time point, please click REVISE LABEL AND PROCEED button.</span>
+      <span v-if="revision_description_enabled()=='submit'" style="position:relative; z-index:1; font-size:13px; padding: 0px 5px; line-height:20px; height:40px; float:left; background-color: black; color: yellow;">You are in the Revision mode. To revise other time points, or to proceed to SUBMIT, please click REVISE LABEL AND PROCEED button.</span>
+      <div id="main_video_container">
+        <span id="micro_browser" v-if="state=='tagging'" class='btn btn-small' v-on:click="jump_to_exact_frame" style="position:relative; z-index:2; font-size:13px; padding: 0px 5px; line-height:20px; height:20px; float:right;">Micro Browse the Target Moment</span>
+        <!-- source is decided in the javascript file-->
+        <video id="main_video" class="video-js"
+        data-setup='{ "width": 560, "height": 315, "controls": true, "preload": "auto","inactivityTimeout": 0, "controlBar":{"volumePanel":{"inline":false}} }'
+        style="margin:auto;">
+        </video>
+    </div>
+  </div>
+
+  <!-- labeling interface -->
+  <div class="col s6">
+    <div>
+      <div style="margin-top: 10px; padding-top:10px; display: inline-block; font-size:20px;">[[state_string]]</div>
+      <a v-if="state!='enforced_replay'" class='btn blue-grey darken-2 modal-trigger' href="#tutorial" style="display:inline-block; float:right; margin: 10px 0% 0px 0; width: 30%;" onclick="player.pause();">Tutorial</a>
+      {% block example_button %}
+      {% endblock %}
+    </div>
+    <div v-bind:class="{disabled_task : state!='tagging'}">
+
+      <div v-bind:class="{hidden: tagging_phase != 0}" id="emotion_labeler">
+        <!-- Descriptions for valence and arousal labeling -->
+        <div>
+          <h6 style="margin-bottom: 0px;">Rank the emotion category based on how many people would select each emotion as a category that best explains the emotion of the character.</h6>
+        </div>
+        <div class="row" style="margin-bottom: 0;">
+          <div v-if="rank_queue.length>0" style="padding: 0px 10px; border: solid 1px black;">
+            <p>Current ranking you gave: </p>
+            <ol>
+                <li v-for="emotion_category in rank_queue" style="margin-bottom:5px;">
+                    [[emotion_category]]
+                </li>
+            </ol>
+            <span class="btn btn-danger" style="background-color:crimson; margin-bottom:5px; font-size:8pt; display: block;" v-on:click="pop_rank()">Remove last item from the rank list</span>
+          </div>
+            
+            <div v-if="rank_check(emotion_category)" v-for="emotion_category in emotion_categories">
+                <input v-bind:id="'unranked_'+emotion_category" type="radio" name="'unranked_'+emotion_category" v-on:click="add_rank(emotion_category)"></input>
+                <label v-bind:for="'unranked_'+emotion_category"  style="padding-left:25px">[[emotion_category]]</label>
+            </div>
+            <!--<div v-for="emotion_category in emotion_categories" style="display: inline-block; vertical-align:top; padding-right: 10px; margin-right:5px; border-right: solid 1px #eeeeee">
+              <input v-bind:id="emotion_category" type="radio" name="emotion_category" v-on:click="input_change(emotion_category)"></input>
+              <label v-bind:for="emotion_category"  style="padding-left:25px">[[emotion_category]]</label>
+              <input v-if="emotion_category == 'other'" type="text" id="other_text" placeholder="Type in 'other emotion' here"></input>
+            </div>-->
+        </div>
+        <div class="btn darken-1" style="float:right" v-on:click="to_next_phase" :disabled="!All_Rank_Added()">Next</div>
+      </div>
+      <div v-bind:class="{hidden: tagging_phase != 1}" style="margin-top: 15px;">
+        <div id="weight_viz" style="border: solid 1px black; padding: 10px;">
+          <ol>
+            <li v-for="weight, emotion in rank_weight">
+                <div style="display: inline-block; width: 12.5%;">[[emotion]]</div>
+                <div v-for="i in weight" style="width:10%; display:inline-block; height:11px; background-color:dodgerblue"></div>
+            </li>
+          </ol>
+        </div>
+        <div v-if="tagging_phase == 1" id="weight_assign">
+          <div v-if="rank_indicator<rank_queue.length">
+            <p style="line-height: 1.3">Compared to the category <b>[[ rank_queue[0] ]]</b> that you thought most workers would select, how many workers will select <b>[[ rank_queue[rank_indicator] ]]</b>?
+              Click the radio button to annotate your estimation.
+              </p>
+              <table style='table-layout: fixed;'>
+                <tr>
+                  <th style='text-align: center;'>No workers</th>
+                  <th style='text-align: center;'>-</th>
+                  <th style='text-align: center;'>-</th>
+                  <th style='text-align: center;'>About half amount of workers as [[ rank_queue[0] ]]</th>
+                  <th style='text-align: center;'>-</th>
+                  <th style='text-align: center;'>-</th>
+                  <th style='text-align: center;'>About same amount of workers as [[ rank_queue[0] ]]</th>
+                </tr>
+                <tr>
+                  <td v-for="i in 7" style='text-align: center;'>
+                      <input v-bind:id="'weight_'+(i-1)" type="radio" name="weight" v-on:click="add_weight(i-1)" v-bind:class="{disabled_button:i>rank_weight[rank_queue[rank_indicator-1]]}"></input>
+                      <label v-bind:for="'weight_'+(i-1)"  style="padding-left:25px" v-bind:class="{disabled_button:i-1>rank_weight[rank_queue[rank_indicator-1]]}"></label>
+                  </td>
+                </tr>
+              </table>
+          </div>
+            <div v-if="rank_indicator>1" class='btn' style="display: block; background-color:crimson;" v-on:click="undo_weight()">Undo</div>
+        </div>
+        <div class="btn darken-1" style="float:left" v-on:click="to_prev_phase">
+          Prev 
+          <span style="font-size:7pt">(Your progress in this stage will be lost)</span>
+        </div>
+      </div>
+
+      <div v-if="tagging_phase==final_phase" class="btn light-blue darken-1" id="add" style="float:right" v-on:click="add_data" :disabled="rank_indicator<rank_queue.length">[[proceed_action]] Label and Proceed</div>
+
+
+
+    </div>
+
+  </div>
+</div>
+<hr>
+<form method="POST">
+  {% csrf_token %}
+  <input type="datetime-local" name="start_time" id="start_time" style="display:none"/>
+  <input type="text" name="to_return" id="to_return" style="display:none"/>
+  <input class="btn" type="submit" name="submit" id="submit" style="display:block; margin: auto; margin-bottom: 0px;" v-on:click="return_data" :disabled="!is_submittable()"/>
+</form>
+</div>
+
+<div id="tutorial" class='modal' style="top:2.5%; width:95%; height:100%; max-height:95%">
+  <link v-for="item in tuto_array" v-bind:href="'{% static 'img/tutorial/' %}{{condition}}_'+item+'.png'" rel='prefetch' as='image'>
+  <div class='modal-content' style="padding:5px; height:90%; width: 100%; padding-bottom:0px;">
+    <div style="display:inline-block"><h5 v-if="!disabled_next()">Tutorial - hit 'NEXT' to proceed the tutorial</h5>
+      <h5 v-if="this.cur_tuto==this.max_tuto">Tutorial - hit 'TO THE TASK' to proceed the tutorial</h5>
+      <h5 v-if="!loaded">Tutorial - image is being loaded...</h5></div>
+      <span :disabled="disabled_task()" class='btn red darken-1 modal-action modal-close' style="float:right; padding:0px 10px" v-on:click="tuto_close('#vue_app')">X</span>
+      <img id="tuto_img" v-bind:src="'{% static 'img/tutorial/' %}{{condition}}_'+[[cur_tuto]]+'.png'" style="max-height:90%; max-width:100%; display:block; margin: auto;" v-bind:class="{hidden_item:!loaded}"/>
+    </div>
+    <div class='modal-footer'>
+      <span style="float:left; margin-left:49%;"> [[cur_tuto+1]]/[[max_tuto+1]] </span>
+      <span :disabled="disabled_prev()" class='btn red darken-1' v-on:click="previous_step">Prev</span>
+      <span :disabled="disabled_next()" class='btn blue darken-1' v-on:click="next_step">Next</span>
+      <span :disabled="disabled_task()" class='btn modal-action modal-close blue darken-2' v-on:click="tuto_close('#vue_app')">To the task</span>
+    </div>
+  </div>
+  <script>
+  Number.prototype.AddZero= function(b,c){
+          var  l= (String(b|| 10).length - String(this).length)+1;
+          return l> 0? new Array(l).join(c|| '0')+this : this;
+       }//to add zero to less than 10,
+
+
+         var d = new Date()
+         localDateTime= [d.getFullYear(),(d.getMonth()+1).AddZero(),
+                  d.getDate().AddZero(),
+                ].join('-') +'T'+
+                 [d.getHours().AddZero(),
+                  d.getMinutes().AddZero()].join(':');
+
+  </script>
+  <script>
+  var max_tuto = 0
+  var likert_scale = 7;
+  var additive_vue_app = {}
+  var video_url;
+  video_url = $.parseHTML(primitive_video_url)[0].textContent;//media/uniform/"+primitive_video_url+".mp4?raw=true"
+
+  </script>
+  {% block max_tuto_assign %}
+  {% endblock %}
+  <link href="{% static 'js/emotion_gt_distribution.js' %}" rel="preload" as="script">
+  <link href="{% static 'js/tutorial.js' %}" rel="preload" as="script">
+  <!-- Below block is to extend to tutorial-like example condition-->
+  <script src="{% static 'js/emotion_gt_distribution.js' %}"></script>
+  <script src="{% static 'js/tutorial.js' %}"></script>
+    {% block example_modal %}
+    {% endblock %}
+    {% block script %}
+    {% endblock %}
+
+
+  {% endblock %}
