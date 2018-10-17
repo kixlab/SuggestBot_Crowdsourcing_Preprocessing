@@ -72,6 +72,7 @@ var video_img = "{{video_img}}"
         <!-- Descriptions for valence and arousal labeling -->
         <div>
           <h6 style="margin-bottom: 0px;">Rank the emotion category based on how many people would select each emotion as a category that best explains the emotion of the character.</h6>
+          <h6>Try to click categories that are thought to be more selected by other people before clicking those thought to be selected by fewer workers.</h6>
         </div>
         <div class="row" style="margin-bottom: 0;">
           <div v-if="rank_queue.length>0" style="padding: 0px 10px; border: solid 1px black;">
@@ -81,7 +82,7 @@ var video_img = "{{video_img}}"
                     [[emotion_category]]
                 </li>
             </ol>
-            <span class="btn btn-danger" style="background-color:crimson; margin-bottom:5px; font-size:8pt; display: block;" v-on:click="pop_rank()">Remove last item from the rank list</span>
+            <span class="btn btn-danger" style="background-color:crimson; margin-bottom:5px; font-size:8pt; display: block;" v-on:click="pop_rank()">Remove the last category from the rank list</span>
           </div>
             
             <div v-if="rank_check(emotion_category)" v-for="emotion_category in emotion_categories">
@@ -101,6 +102,7 @@ var video_img = "{{video_img}}"
           <ol>
             <li v-for="weight, emotion in rank_weight">
                 <div style="display: inline-block; width: 12.5%;">[[emotion]]</div>
+                <div v-if="weight==0" style="width:1px; display:inline-block; height:11px; background-color:dodgerblue"></div>
                 <div v-for="i in weight" style="width:10%; display:inline-block; height:11px; background-color:dodgerblue"></div>
             </li>
           </ol>
@@ -112,7 +114,7 @@ var video_img = "{{video_img}}"
               </p>
               <table style='table-layout: fixed;'>
                 <tr>
-                  <th style='text-align: center;'>No workers</th>
+                  <th style='text-align: center;'>No worker</th>
                   <th style='text-align: center;'>-</th>
                   <th style='text-align: center;'>-</th>
                   <th style='text-align: center;'>About half amount of workers as [[ rank_queue[0] ]]</th>
@@ -128,7 +130,7 @@ var video_img = "{{video_img}}"
                 </tr>
               </table>
           </div>
-            <div v-if="rank_indicator>1" class='btn' style="display: block; background-color:crimson;" v-on:click="undo_weight()">Undo</div>
+            <div v-if="rank_indicator>1" class='btn' style="display: block; background-color:crimson;" v-on:click="undo_weight()">Undo the last action</div>
         </div>
         <div class="btn darken-1" style="float:left" v-on:click="to_prev_phase">
           Prev 
