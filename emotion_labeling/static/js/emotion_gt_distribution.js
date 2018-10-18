@@ -106,11 +106,11 @@ var vue_app = new Vue({
       return this.unranked.indexOf(emotion)>=0
     },
     All_Rank_Added: function(){
-      return this.unranked.length == 0
+      return this.unranked.length < this.emotion_categories.length/2+1
     },
     to_next_phase: function(){
       if(Object.keys(vue_app.rank_weight).length == 0){
-        this.rank_weight[this.rank_queue[0]] = 6
+        this.rank_weight[this.rank_queue[0]] = 10
         this.rank_indicator=1
       }
       this.tagging_phase++;
@@ -153,6 +153,11 @@ var vue_app = new Vue({
       // add data into data structure
       this.collected_data[this.current_marker] = {}
       vue_app.task_end_time = new Date();
+      for (emotion in this.emotion_categories){
+        if (!(this.emotion_categories[emotion] in this.rank_weight)){
+          this.rank_weight[this.emotion_categories[emotion]] = 0
+        }
+      }
       this.collected_data[this.current_marker]['emotion_confidence'] = $.extend({}, this.rank_weight)
 
       this.collected_data[this.current_marker]['start_time'] = this.task_start_time.toUTCString()
@@ -469,7 +474,7 @@ function load_markers(){
           var stopper_percentage = (1-vue_app.tagging_max_time/player.duration())*100
           $("#maxBar").css("width", stopper_percentage.toString()+"%")
 
-          alert("Now You will rewatch the part of the video where you need to label on, and after that you will begin labeling.")
+          alert("Now You will rewatch the part of the video where you need to label the emotion on, and after that you will begin labeling.")
           vue_app.replay_start_time = vue_app.current_marker-replay_padding
           prompt_time[vue_app.current_marker] = true;
 
