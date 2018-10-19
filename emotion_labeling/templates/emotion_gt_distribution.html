@@ -72,13 +72,15 @@ var video_img = "{{video_img}}"
       <div v-bind:class="{hidden: tagging_phase != 0}" id="emotion_labeler">
         <!-- Descriptions for valence and arousal labeling -->
         <div>
-          <h6 style="margin-bottom: 0px;">What do you think would be the most selected emotion that best explains the emotion of the character, if <b>other people</b> were watching this video? Can you rank all the possible emotions that would have been selected by other people?</h6>
-          <h6>If you think most would select ‘happy’ as the character’s emotion, some would select ‘excited’, and a few would select ‘surprised’, rank 1. happy, 2. excited, 3. surprised by clicking on them in the order. Rank as many emotions as possible.</h6>
-          <h6>You need to rank at least 5 emotion categories that are thought to be most selected by other people.</h6>
+          <h6 style="margin-bottom: 0px;">
+            How would <b>other people</b> choose the emotion of the character if they were watching this video? <br/>
+            Estimate which emotion would be chosen most, and try to rank the order of it. </h6>
+          <h6>For example, if you think most would select ‘happy’ as the character’s emotion, some would select ‘excited’, and a few would select ‘surprised’, rank 1. happy, 2. excited, 3. surprised by clicking on them in the order.<h6/>
+          <h6>Rank as many emotions as possible, and you need to rank at least 5 emotions in order to proceed.</h6>
         </div>
         <div class="row" style="margin-bottom: 0;">
           <div v-if="rank_queue.length>0" style="padding: 0px 10px; border: solid 1px black;">
-            <p>Current ranking you gave: </p>
+            <p>Current ranking you gave, in terms of selected by more people: </p>
             <ol>
                 <li v-for="emotion_category in rank_queue" style="margin-bottom:5px;">
                     [[emotion_category]]
