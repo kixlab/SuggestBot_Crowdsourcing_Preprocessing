@@ -20,6 +20,9 @@ from dateutil import tz
 TIME_ZONE_LOCAL = tz.tzlocal()
 TIME_ZONE_UTC = tz.gettz('UTC')
 
+def test(request):
+    return redirect('/emotion_labeling/gold_data_gather_emotion/Distribution/'+uuid.uuid4().hex.upper()[0:6]+'/'+uuid.uuid4().hex.upper()[0:6])
+
 def gold_data_gather_emotion_prev(request, wid, aid):
     for emotion_task_model in [Emotion_Gold_Data_Checkbox,  Emotion_Gold_Data_Checkbox_Confidence, Emotion_Gold_Data_Radio, Emotion_Gold_Data_Distribution]:
         et_to_deletes = emotion_task_model.objects.filter(gen_time__gte = F('end_time'), gen_time__lte = datetime.datetime.now()-datetime.timedelta(minutes=120))
@@ -95,7 +98,10 @@ def gold_data_gather_emotion(request, condition, wid, aid):
         if taskable_video.count()==0:
             return HttpResponse("Sorry, you have done all the task you can do, or there is no more of available task.")
         else:
-            e_video = taskable_video[random.randint(0, taskable_video.count()-1)]
+                #below for testing
+            e_video = taskable_video[0]
+                #below for random assingment(real deployment)
+            #e_video = taskable_video[random.randint(0, taskable_video.count()-1)]
             video_prompt_times = json.loads(e_video.video_prompt_time)
             for video_prompt_time in video_prompt_times:
                 video_task = emotion_task_model(emotion_video = e_video, wid = wid, aid = aid, task_time=int(video_prompt_time))
